@@ -124,3 +124,134 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ---------- Animaciones de scroll y micro-interacciones ---------- */
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 1s linear infinite;
+}
+
+/* Elemento que aparece con un fade + subida al entrar en pantalla.
+   El estado inicial vive acá; <Reveal> solo agrega "is-visible" cuando el
+   IntersectionObserver dispara, así que sin JS el contenido queda visible
+   igual (progressive enhancement, no hay contenido que "nunca aparece"). */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Igual que .reveal, pero escalona a los hijos directos (grillas de cartas). */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out;
+}
+.stagger.is-visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+.stagger.is-visible > *:nth-child(1) {
+  transition-delay: 0ms;
+}
+.stagger.is-visible > *:nth-child(2) {
+  transition-delay: 40ms;
+}
+.stagger.is-visible > *:nth-child(3) {
+  transition-delay: 80ms;
+}
+.stagger.is-visible > *:nth-child(4) {
+  transition-delay: 120ms;
+}
+.stagger.is-visible > *:nth-child(5) {
+  transition-delay: 160ms;
+}
+.stagger.is-visible > *:nth-child(n + 6) {
+  transition-delay: 200ms;
+}
+
+/* Brillo diagonal para cartas foil: queda pausado en reposo (una grilla
+   entera brillando a la vez sería molesta) y solo se mueve al pasar el
+   mouse sobre esa carta puntual. */
+@keyframes foil-sweep {
+  from {
+    background-position: -150% -150%;
+  }
+  to {
+    background-position: 150% 150%;
+  }
+}
+
+.foil-shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.75) 45%,
+    rgba(196, 145, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.75) 55%,
+    transparent 70%
+  );
+  background-size: 300% 300%;
+  mix-blend-mode: overlay;
+  animation: foil-sweep 2.8s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.group:hover .foil-shimmer {
+  animation-play-state: running;
+}
+
+/* Para la foto grande de la ficha de producto, que no está dentro de un
+   .group hoverable: se anima sola, sin depender del mouse. */
+.foil-shimmer-auto {
+  animation-play-state: running;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .foil-shimmer {
+    animation: none;
+  }
+}
+
+.hover-pop {
+  transition: transform 0.15s ease-out;
+}
+.hover-pop:hover {
+  transform: translateY(-1px) scale(1.015);
+}
+.hover-pop:active {
+  transform: scale(0.98);
+}

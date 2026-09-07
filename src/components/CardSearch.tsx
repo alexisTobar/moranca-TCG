@@ -260,7 +260,8 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
           className="w-full rounded-lg border border-ink-700 bg-white px-3 py-2.5 pr-24 text-sm text-ink-200 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
         />
         {loading && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-brand-600">
+          <span className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1.5 text-[11px] font-semibold text-brand-600">
+            <span className="animate-spin-slow h-3 w-3 rounded-full border-2 border-brand-600 border-t-transparent" />
             buscando…
           </span>
         )}

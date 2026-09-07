@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { GAME_LIST, type GameMeta } from "@/lib/games";
 import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
+import { Reveal } from "@/components/Reveal";
 
 export const revalidate = 60;
 
@@ -64,16 +65,23 @@ const STEPS = [
 ];
 
 export default async function HomePage() {
-  const [latest, decks, sealed, sellers, counts] = await Promise.all([
-    safeQuery(
-      () =>
-        prisma.listing.findMany({
-          where: { status: "ACTIVE", stock: { gt: 0 } },
-          select: LISTING_CARD_SELECT,
-          orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-          take: 60,
-        }),
-      [] as ListingCardData[]
+  const [byGame, decks, sealed, sellers, counts] = await Promise.all([
+    // Se pide el top de cada juego por separado — si se pidiera un único top
+    // global, un juego con muchas publicaciones (ej. Magic) desplazaría por
+    // completo a los juegos con pocas, que quedarían sin mostrarse nunca.
+    Promise.all(
+      GAME_LIST.map((g) =>
+        safeQuery(
+          () =>
+            prisma.listing.findMany({
+              where: { status: "ACTIVE", stock: { gt: 0 }, game: g.id },
+              select: LISTING_CARD_SELECT,
+              orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+              take: 6,
+            }),
+          [] as ListingCardData[]
+        )
+      )
     ),
     safeQuery(
       () =>
@@ -134,8 +142,11 @@ export default async function HomePage() {
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-ink-800">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-[-20%] h-[560px] w-[900px] -translate-x-1/2 rounded-full bg-accent-500/10 blur-[130px]" />
-          <div className="absolute right-[-10%] bottom-[-30%] h-[420px] w-[420px] rounded-full bg-brand-500/12 blur-[120px]" />
+          <div className="animate-pulse-slow absolute left-1/2 top-[-20%] h-[560px] w-[900px] -translate-x-1/2 rounded-full bg-accent-500/10 blur-[130px]" />
+          <div
+            className="animate-pulse-slow absolute right-[-10%] bottom-[-30%] h-[420px] w-[420px] rounded-full bg-brand-500/12 blur-[120px]"
+            style={{ animationDelay: "3s" }}
+          />
         </div>
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 lg:grid-cols-[1.05fr_1fr] lg:py-20">
@@ -160,13 +171,13 @@ export default async function HomePage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/cartas"
-                className="rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-paper transition hover:bg-brand-500 hover:shadow-[0_10px_30px_-10px_rgba(217,164,65,0.7)]"
+                className="hover-pop rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-paper transition hover:bg-brand-500 hover:shadow-[0_10px_30px_-10px_rgba(217,164,65,0.7)]"
               >
                 Explorar catálogo
               </Link>
               <Link
                 href="/cartas?type=DECK"
-                className="rounded-xl border border-ink-600 px-6 py-3 text-sm font-semibold text-ink-200 transition hover:border-accent-500/60 hover:text-accent-300"
+                className="hover-pop rounded-xl border border-ink-600 px-6 py-3 text-sm font-semibold text-ink-200 transition hover:border-accent-500/60 hover:text-accent-300"
               >
                 Ver mazos armados
               </Link>
@@ -228,7 +239,7 @@ export default async function HomePage() {
           title="Explora tu TCG favorito"
           subtitle="Cada juego con su catálogo, imágenes y buscador propio"
         />
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal className="stagger mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {GAME_LIST.map((g) => (
             <Link
               key={g.id}
@@ -281,12 +292,12 @@ export default async function HomePage() {
               </div>
             </Link>
           ))}
-        </div>
+        </Reveal>
       </section>
 
       {/* POR JUEGO — cada TCG con su propia fila */}
-      {GAME_LIST.map((g) => {
-        const items = latest.filter((l) => l.game === g.id).slice(0, 6);
+      {GAME_LIST.map((g, i) => {
+        const items = byGame[i];
         if (items.length === 0) return null;
         return (
           <GameShowcase
@@ -325,9 +336,12 @@ export default async function HomePage() {
             title="Comprar en Comarca es simple"
             subtitle="Tres pasos y tus cartas van en camino"
           />
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
+          <Reveal className="stagger mt-8 grid gap-6 md:grid-cols-3">
             {STEPS.map((s, i) => (
-              <div key={s.title} className="relative rounded-2xl card-surface p-6">
+              <div
+                key={s.title}
+                className="hover-pop relative rounded-2xl card-surface p-6"
+              >
                 <span className="absolute right-5 top-4 font-display text-4xl font-bold text-ink-800">
                   0{i + 1}
                 </span>
@@ -336,7 +350,7 @@ export default async function HomePage() {
                 <p className="mt-2 text-[13px] leading-relaxed text-ink-400">{s.body}</p>
               </div>
             ))}
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -348,12 +362,12 @@ export default async function HomePage() {
             subtitle="Tiendas y coleccionistas verificados"
             href="/vendedores"
           />
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Reveal className="stagger mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {sellers.map((s) => (
               <Link
                 key={s.id}
                 href={`/vendedor/${s.slug}`}
-                className="flex items-center gap-3 rounded-xl card-surface p-4 transition hover:border-accent-500/50"
+                className="hover-pop flex items-center gap-3 rounded-xl card-surface p-4 transition hover:border-accent-500/50"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-lg font-bold text-paper">
                   {s.name.charAt(0).toUpperCase()}
@@ -369,7 +383,7 @@ export default async function HomePage() {
                 </span>
               </Link>
             ))}
-          </div>
+          </Reveal>
         </section>
       )}
     </>
@@ -432,11 +446,11 @@ function Showcase({
           </Link>
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <Reveal className="stagger mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {listings.map((l) => (
             <ListingCard key={l.id} listing={l} />
           ))}
-        </div>
+        </Reveal>
       )}
     </section>
   );
@@ -476,11 +490,11 @@ function GameShowcase({
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <Reveal className="stagger grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {listings.map((l) => (
             <ListingCard key={l.id} listing={l} />
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

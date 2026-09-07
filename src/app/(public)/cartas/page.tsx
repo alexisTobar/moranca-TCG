@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { GAME_LIST, CONDITIONS, LANGUAGES, LISTING_TYPES, isGameId } from "@/lib/games";
 import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
+import { Reveal } from "@/components/Reveal";
 
 export const metadata: Metadata = {
   title: "Catálogo de cartas",
@@ -258,11 +259,11 @@ export default async function CatalogPage({
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+            <Reveal className="stagger grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
               {listings.map((l) => (
                 <ListingCard key={l.id} listing={l} />
               ))}
-            </div>
+            </Reveal>
           )}
 
           {pages > 1 && (

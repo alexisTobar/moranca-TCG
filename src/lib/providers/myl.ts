@@ -204,11 +204,13 @@ interface EditionData {
   types: Map<string, string>;
 }
 
-let cache: { at: number; editions: Map<string, EditionData> } | null = null;
+let cache: { at: number; ttl: number; editions: Map<string, EditionData> } | null = null;
 const TTL = 1000 * 60 * 60 * 24;
+/** Si la carga quedó incompleta se reintenta pronto en vez de esperar 24h. */
+const PARTIAL_TTL = 1000 * 60 * 5;
 
 async function loadAll(): Promise<Map<string, EditionData>> {
-  if (cache && Date.now() - cache.at < TTL) return cache.editions;
+  if (cache && Date.now() - cache.at < cache.ttl) return cache.editions;
 
   const editions = new Map<string, EditionData>();
   const LOTE = 6;
@@ -241,10 +243,14 @@ async function loadAll(): Promise<Map<string, EditionData>> {
     }
   }
 
-  // Solo se cachea si cargó una porción razonable, para que un mal momento de
-  // la API no deje media base guardada por 24 horas.
-  if (editions.size >= MYL_EDITIONS.length * 0.7) {
-    cache = { at: Date.now(), editions };
+  // Si cargó todo, se cachea 24h. Si cargó solo una porción razonable (la API
+  // de MyL se cae de a ratos), se cachea poco tiempo para reintentar pronto en
+  // vez de servir un catálogo incompleto durante todo un día. Por debajo del
+  // umbral no se cachea nada, para no repetir un mal momento en cada consulta.
+  if (editions.size === MYL_EDITIONS.length) {
+    cache = { at: Date.now(), ttl: TTL, editions };
+  } else if (editions.size >= MYL_EDITIONS.length * 0.7) {
+    cache = { at: Date.now(), ttl: PARTIAL_TTL, editions };
   }
   return editions;
 }

@@ -123,9 +123,12 @@ export default async function ProductPage({
               </div>
             )}
             {listing.isFoil && (
-              <span className="absolute right-3 top-3 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 px-2.5 py-1 text-[11px] font-bold uppercase text-paper">
-                Foil
-              </span>
+              <>
+                <span className="foil-shimmer foil-shimmer-auto" aria-hidden="true" />
+                <span className="absolute right-3 top-3 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 px-2.5 py-1 text-[11px] font-bold uppercase text-paper">
+                  Foil
+                </span>
+              </>
             )}
           </div>
 

@@ -49,6 +49,8 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
             </div>
           )}
 
+          {listing.isFoil && <span className="foil-shimmer" aria-hidden="true" />}
+
           <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2">
             <span className="rounded-md bg-ink-950/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-400 backdrop-blur">
               {TYPE_LABEL[listing.type] ?? listing.type}
