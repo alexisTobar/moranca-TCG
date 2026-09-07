@@ -12,6 +12,8 @@ export interface GameMeta {
   cardImage: string;
   /** Arte horizontal para banners; si no existe se usa la carta. */
   artImage?: string;
+  /** Logo oficial del juego (fuente pública: Wikimedia Commons / sitio oficial). */
+  logo: string;
   tagline: string;
 }
 
@@ -27,6 +29,7 @@ export const GAMES: Record<GameId, GameMeta> = {
       "https://cards.scryfall.io/normal/front/9/1/91fdb56b-54d5-4272-8319-505ff987fe9b.jpg",
     artImage:
       "https://cards.scryfall.io/art_crop/front/9/1/91fdb56b-54d5-4272-8319-505ff987fe9b.jpg",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/3/3f/Magicthegathering-logo.svg",
     tagline: "Singles, commander y sellados",
   },
   pokemon: {
@@ -37,6 +40,7 @@ export const GAMES: Record<GameId, GameMeta> = {
     gradient: "from-yellow-100 to-sky-50",
     provider: "pokemontcg.io",
     cardImage: "https://assets.tcgdex.net/en/pl/pl4/1/high.webp",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Pok%C3%A9mon_Trading_Card_Game_logo.svg",
     tagline: "Cartas, ETB y booster boxes",
   },
   onepiece: {
@@ -47,6 +51,7 @@ export const GAMES: Record<GameId, GameMeta> = {
     gradient: "from-red-100 to-rose-50",
     provider: "dotGG",
     cardImage: "https://static.dotgg.gg/onepiece/card/OP01-001.webp",
+    logo: "https://upload.wikimedia.org/wikipedia/en/c/c2/One_Piece_Card_Game_logo.webp",
     tagline: "Líderes, mazos y singles",
   },
   myl: {
@@ -57,6 +62,7 @@ export const GAMES: Record<GameId, GameMeta> = {
     gradient: "from-violet-100 to-indigo-50",
     provider: "api.myl.cl",
     cardImage: "https://api.myl.cl/static/cards/44/001.png",
+    logo: "https://static.wikia.nocookie.net/myl-tcg/images/f/f4/Myl-logo1-sf.png/revision/latest?cb=20240717144516&path-prefix=es",
     tagline: "El TCG chileno de siempre",
   },
 };

@@ -218,15 +218,15 @@ body {
   pointer-events: none;
   background: linear-gradient(
     115deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.75) 45%,
-    rgba(196, 145, 255, 0.55) 50%,
-    rgba(255, 255, 255, 0.75) 55%,
-    transparent 70%
+    transparent 38%,
+    rgba(255, 255, 255, 0.32) 47%,
+    rgba(217, 164, 65, 0.22) 50%,
+    rgba(255, 255, 255, 0.32) 53%,
+    transparent 62%
   );
   background-size: 300% 300%;
-  mix-blend-mode: overlay;
-  animation: foil-sweep 2.8s ease-in-out infinite;
+  mix-blend-mode: soft-light;
+  animation: foil-sweep 4s ease-in-out infinite;
   animation-play-state: paused;
 }
 

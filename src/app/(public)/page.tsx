@@ -3,6 +3,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { GAME_LIST, type GameMeta } from "@/lib/games";
 import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
+import { Search, ShieldCheck, PackageCheck, type LucideIcon } from "lucide-react";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { Reveal } from "@/components/Reveal";
 
@@ -46,21 +47,21 @@ const HERO_CARDS = [
   },
 ];
 
-const STEPS = [
+const STEPS: Array<{ title: string; body: string; icon: LucideIcon }> = [
   {
     title: "Elige tus cartas",
     body: "Filtra por juego, estado, idioma y precio. Cada publicación muestra la imagen real desde el catálogo oficial.",
-    icon: "🔎",
+    icon: Search,
   },
   {
     title: "Paga protegido",
     body: "Checkout con Mercado Pago: tarjetas, débito y transferencia. Tu dinero queda resguardado hasta la entrega.",
-    icon: "🔐",
+    icon: ShieldCheck,
   },
   {
     title: "Recibe en casa",
     body: "Despacho a todo Chile con seguimiento, o retiro coordinado con el vendedor.",
-    icon: "📦",
+    icon: PackageCheck,
   },
 ];
 
@@ -277,11 +278,21 @@ export default async function HomePage() {
 
               <div className="p-5 pt-3">
                 <span
-                  className="mb-1 inline-block h-1 w-8 rounded-full"
+                  className="mb-2 inline-block h-1 w-8 rounded-full"
                   style={{ background: g.accent }}
                 />
-                <h3 className="text-lg font-bold text-carbon">{g.short}</h3>
-                <p className="mt-0.5 text-[12px] text-ink-400">{g.tagline}</p>
+                <h3 className="sr-only">{g.short}</h3>
+                <div className="relative h-9 w-full">
+                  <Image
+                    src={g.logo}
+                    alt={g.name}
+                    fill
+                    sizes="180px"
+                    className="object-contain object-left"
+                    unoptimized
+                  />
+                </div>
+                <p className="mt-2 text-[12px] text-ink-400">{g.tagline}</p>
                 <p className="mt-4 text-[11px] uppercase tracking-widest text-ink-400">
                   {countByGame.get(g.id) ?? 0} publicaciones
                 </p>
@@ -337,19 +348,24 @@ export default async function HomePage() {
             subtitle="Tres pasos y tus cartas van en camino"
           />
           <Reveal className="stagger mt-8 grid gap-6 md:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <div
-                key={s.title}
-                className="hover-pop relative rounded-2xl card-surface p-6"
-              >
-                <span className="absolute right-5 top-4 font-display text-4xl font-bold text-ink-800">
-                  0{i + 1}
-                </span>
-                <span className="text-2xl">{s.icon}</span>
-                <h3 className="mt-3 font-semibold text-carbon">{s.title}</h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-ink-400">{s.body}</p>
-              </div>
-            ))}
+            {STEPS.map((s, i) => {
+              const Icon = s.icon;
+              return (
+                <div
+                  key={s.title}
+                  className="hover-pop relative rounded-2xl card-surface p-6"
+                >
+                  <span className="absolute right-5 top-4 font-display text-4xl font-bold text-ink-800">
+                    0{i + 1}
+                  </span>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600/10 text-brand-600">
+                    <Icon className="h-5 w-5" strokeWidth={2} />
+                  </span>
+                  <h3 className="mt-3 font-semibold text-carbon">{s.title}</h3>
+                  <p className="mt-2 text-[13px] leading-relaxed text-ink-400">{s.body}</p>
+                </div>
+              );
+            })}
           </Reveal>
         </div>
       </section>
@@ -475,10 +491,18 @@ function GameShowcase({
             style={{ background: game.accent }}
           />
           <div className="min-w-0 flex-1">
-            <h2 className="text-xl font-bold text-carbon sm:text-2xl">
-              {game.short}
-            </h2>
-            <p className="text-[12px] text-ink-400">
+            <h2 className="sr-only">{game.short}</h2>
+            <div className="relative h-7 w-32 sm:h-8 sm:w-40">
+              <Image
+                src={game.logo}
+                alt={game.name}
+                fill
+                sizes="160px"
+                className="object-contain object-left"
+                unoptimized
+              />
+            </div>
+            <p className="mt-1 text-[12px] text-ink-400">
               {total} {total === 1 ? "publicación" : "publicaciones"} · {game.tagline}
             </p>
           </div>

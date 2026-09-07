@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ImageOff } from "lucide-react";
 import { CardSearch, type CardResult } from "./CardSearch";
 import { ImageUploader } from "./ImageUploader";
 import {
@@ -539,8 +540,8 @@ export function ListingForm({
                   unoptimized
                 />
               ) : (
-                <div className="flex h-full items-center justify-center text-4xl text-ink-700">
-                  🂠
+                <div className="flex h-full items-center justify-center text-ink-700">
+                  <ImageOff className="h-10 w-10" strokeWidth={1.5} />
                 </div>
               )}
             </div>

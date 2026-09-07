@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { clp } from "@/lib/format";
 import {
@@ -37,8 +38,8 @@ export function CheckoutView() {
   if (done) {
     return (
       <div className="mx-auto flex max-w-lg flex-col items-center px-4 py-24 text-center">
-        <span className="flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/10 text-2xl text-emerald-700">
-          ✓
+        <span className="flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/10 text-emerald-700">
+          <CheckCircle2 className="h-7 w-7" strokeWidth={2} />
         </span>
         <h1 className="mt-6 font-display text-3xl font-bold text-carbon">
           Orden #{done.orderId.slice(-6).toUpperCase()} creada

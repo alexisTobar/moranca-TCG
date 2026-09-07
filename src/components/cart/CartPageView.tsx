@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { ShoppingCart } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { clp } from "@/lib/format";
 import { GameChip } from "@/components/GameChip";
@@ -17,7 +18,7 @@ export function CartPageView() {
   if (items.length === 0) {
     return (
       <div className="mx-auto flex max-w-lg flex-col items-center px-4 py-24 text-center">
-        <span className="text-6xl opacity-40">🛒</span>
+        <ShoppingCart className="h-16 w-16 text-ink-600" strokeWidth={1.25} />
         <h1 className="mt-6 font-display text-3xl font-bold text-carbon">
           Tu carrito está vacío
         </h1>

@@ -11,6 +11,8 @@ const config: NextConfig = {
       { protocol: "https", hostname: "assets.tcgdex.net" },
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "upload.wikimedia.org" },
+      { protocol: "https", hostname: "static.wikia.nocookie.net" },
     ],
   },
   poweredByHeader: false,

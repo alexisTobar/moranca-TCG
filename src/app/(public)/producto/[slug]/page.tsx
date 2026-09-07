@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { ImageOff } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { clp, timeAgo } from "@/lib/format";
 import { gameName, CONDITIONS, LANGUAGES } from "@/lib/games";
@@ -118,8 +119,8 @@ export default async function ProductPage({
             unoptimized
           />
             ) : (
-              <div className="flex h-full items-center justify-center text-6xl text-ink-700">
-                🂠
+              <div className="flex h-full items-center justify-center text-ink-700">
+                <ImageOff className="h-14 w-14" strokeWidth={1.5} />
               </div>
             )}
             {listing.isFoil && (
@@ -234,8 +235,8 @@ export default async function ProductPage({
             unoptimized
           />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-2xl text-ink-700">
-                          🂠
+                        <div className="flex h-full items-center justify-center text-ink-700">
+                          <ImageOff className="h-6 w-6" strokeWidth={1.5} />
                         </div>
                       )}
                       {card.quantity > 1 && (

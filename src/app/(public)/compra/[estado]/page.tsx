@@ -1,29 +1,30 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CheckCircle2, Clock, XCircle, type LucideIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 const STATES: Record<
   string,
-  { title: string; body: string; tone: string; icon: string }
+  { title: string; body: string; tone: string; icon: LucideIcon }
 > = {
   exito: {
     title: "¡Pago confirmado!",
     body: "Recibimos tu pago. Te enviamos un correo con el detalle y coordinaremos el despacho a la brevedad.",
     tone: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
-    icon: "✓",
+    icon: CheckCircle2,
   },
   pendiente: {
     title: "Pago pendiente",
     body: "Tu pago está siendo procesado. Cuando Mercado Pago lo confirme, activaremos el despacho automáticamente.",
     tone: "border-amber-500/40 bg-amber-500/10 text-amber-700",
-    icon: "⏳",
+    icon: Clock,
   },
   error: {
     title: "No pudimos procesar el pago",
     body: "El pago fue rechazado o cancelado. Tu reserva sigue guardada: puedes intentarlo nuevamente desde la publicación.",
     tone: "border-rose-500/40 bg-rose-500/10 text-brand-600",
-    icon: "✕",
+    icon: XCircle,
   },
 };
 
@@ -40,13 +41,14 @@ export default async function PurchaseStatePage({
   if (!state) notFound();
 
   const order = typeof sp.order === "string" ? sp.order : undefined;
+  const Icon = state.icon;
 
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center px-4 py-16 text-center">
       <span
-        className={`flex h-16 w-16 items-center justify-center rounded-full border text-2xl ${state.tone}`}
+        className={`flex h-16 w-16 items-center justify-center rounded-full border ${state.tone}`}
       >
-        {state.icon}
+        <Icon className="h-7 w-7" strokeWidth={2} />
       </span>
       <h1 className="mt-6 font-display text-3xl font-bold text-carbon">{state.title}</h1>
       <p className="mt-3 text-[14px] leading-relaxed text-ink-400">{state.body}</p>

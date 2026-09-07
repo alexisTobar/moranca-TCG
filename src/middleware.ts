@@ -7,7 +7,7 @@ const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sdk.mercadopago.com https://http2.mlstatic.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://cards.scryfall.io https://images.pokemontcg.io https://images.scrydex.com https://static.dotgg.gg https://api.myl.cl https://assets.tcgdex.net https://http2.mlstatic.com https://*.supabase.co",
+  "img-src 'self' data: blob: https://cards.scryfall.io https://images.pokemontcg.io https://images.scrydex.com https://static.dotgg.gg https://api.myl.cl https://assets.tcgdex.net https://http2.mlstatic.com https://*.supabase.co https://upload.wikimedia.org https://static.wikia.nocookie.net",
   "font-src 'self' data:",
   "connect-src 'self' https://api.mercadopago.com https://api.scryfall.com https://api.pokemontcg.io https://api.dotgg.gg https://api.myl.cl https://*.supabase.co",
   "frame-src 'self' https://www.mercadopago.cl https://sdk.mercadopago.com",

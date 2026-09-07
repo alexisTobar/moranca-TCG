@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ImageOff } from "lucide-react";
 import { clp } from "@/lib/format";
 import { GameChip } from "./GameChip";
 import { AddToCartMini } from "./cart/AddToCart";
@@ -44,8 +45,8 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
             unoptimized
           />
           ) : (
-            <div className="flex h-full items-center justify-center text-4xl text-ink-600">
-              🂠
+            <div className="flex h-full items-center justify-center text-ink-600">
+              <ImageOff className="h-9 w-9" strokeWidth={1.5} />
             </div>
           )}
 

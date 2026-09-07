@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
+import { ImageOff, Camera, Loader2 } from "lucide-react";
 
 interface Props {
   value: string | null;
@@ -72,8 +73,8 @@ export function ImageUploader({ value, onChange, hint }: Props) {
               unoptimized
             />
           ) : (
-            <span className="flex h-full items-center justify-center text-3xl text-ink-600">
-              🂠
+            <span className="flex h-full items-center justify-center text-ink-600">
+              <ImageOff className="h-8 w-8" strokeWidth={1.5} />
             </span>
           )}
         </div>
@@ -99,7 +100,13 @@ export function ImageUploader({ value, onChange, hint }: Props) {
                 : "border-ink-700 hover:border-brand-500 hover:bg-ink-900"
             }`}
           >
-            <span className="text-2xl">{subiendo ? "⏳" : "📷"}</span>
+            <span className="text-ink-400">
+              {subiendo ? (
+                <Loader2 className="h-6 w-6 animate-spin" strokeWidth={1.75} />
+              ) : (
+                <Camera className="h-6 w-6" strokeWidth={1.75} />
+              )}
+            </span>
             <span className="mt-2 text-[13px] font-semibold text-ink-200">
               {subiendo ? "Subiendo…" : "Arrastra la imagen o haz clic"}
             </span>

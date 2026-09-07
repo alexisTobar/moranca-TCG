@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect } from "react";
+import { ShoppingCart } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { clp } from "@/lib/format";
 
@@ -93,7 +94,7 @@ export function CartDrawer() {
 
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-            <span className="text-5xl opacity-40">🛒</span>
+            <ShoppingCart className="h-14 w-14 text-ink-600" strokeWidth={1.25} />
             <p className="text-sm text-ink-400">Tu carrito está vacío.</p>
             <Link
               href="/cartas"

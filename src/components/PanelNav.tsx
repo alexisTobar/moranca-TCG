@@ -2,13 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LayoutDashboard, PlusCircle, ListChecks, Package, Users } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const ITEMS = [
-  { href: "/panel", label: "Resumen", icon: "▦", exact: true },
-  { href: "/panel/publicar", label: "Publicar", icon: "＋" },
-  { href: "/panel/publicaciones", label: "Publicaciones", icon: "▤" },
-  { href: "/panel/ordenes", label: "Órdenes", icon: "◫" },
-  { href: "/panel/usuarios", label: "Perfiles", icon: "◉", adminOnly: true },
+const ITEMS: Array<{
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  exact?: boolean;
+  adminOnly?: boolean;
+}> = [
+  { href: "/panel", label: "Resumen", icon: LayoutDashboard, exact: true },
+  { href: "/panel/publicar", label: "Publicar", icon: PlusCircle },
+  { href: "/panel/publicaciones", label: "Publicaciones", icon: ListChecks },
+  { href: "/panel/ordenes", label: "Órdenes", icon: Package },
+  { href: "/panel/usuarios", label: "Perfiles", icon: Users, adminOnly: true },
 ];
 
 export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
@@ -21,6 +29,7 @@ export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
           const active = item.exact
             ? pathname === item.href
             : pathname.startsWith(item.href);
+          const Icon = item.icon;
           return (
             <li key={item.href} className="shrink-0">
               <Link
@@ -31,7 +40,7 @@ export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
                     : "border border-transparent text-ink-300 hover:bg-ink-850 hover:text-carbon"
                 }`}
               >
-                <span className="text-[15px]">{item.icon}</span>
+                <Icon className="h-4 w-4" strokeWidth={2} />
                 {item.label}
               </Link>
             </li>
