@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 interface Props {
   value: string | null;
   onChange: (url: string | null) => void;
-  /** Texto de ayuda según el tipo de publicación. */
+  /** Texto de ayuda según el tipo de publicación */
   hint?: string;
 }
 
