@@ -2,23 +2,42 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { clp } from "@/lib/format";
 
 export function CartButton() {
-  const { count, setOpen, ready } = useCart();
+  const { count, setOpen, ready, registerCartIcon } = useCart();
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [bump, setBump] = useState(false);
+  const prevCount = useRef(count);
+
+  useEffect(() => {
+    registerCartIcon(btnRef.current);
+    return () => registerCartIcon(null);
+  }, [registerCartIcon]);
+
+  useEffect(() => {
+    if (count > prevCount.current) {
+      setBump(true);
+      const t = setTimeout(() => setBump(false), 400);
+      prevCount.current = count;
+      return () => clearTimeout(t);
+    }
+    prevCount.current = count;
+  }, [count]);
 
   return (
     <button
+      ref={btnRef}
       onClick={() => setOpen(true)}
       aria-label={`Abrir carrito (${count} productos)`}
       className="relative rounded-lg border border-ink-700 px-3 py-2 text-[13px] font-medium text-ink-200 transition hover:border-accent-500/60 hover:text-accent-300"
     >
       <svg
         viewBox="0 0 24 24"
-        className="h-4 w-4"
+        className={`h-4 w-4 ${bump ? "animate-cart-bump" : ""}`}
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -28,7 +47,9 @@ export function CartButton() {
         <circle cx="18" cy="20" r="1" />
       </svg>
       {ready && count > 0 && (
-        <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-paper">
+        <span
+          className={`absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-paper ${bump ? "animate-cart-bump" : ""}`}
+        >
           {count}
         </span>
       )}

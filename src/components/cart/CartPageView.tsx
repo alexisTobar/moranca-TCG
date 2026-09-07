@@ -6,7 +6,6 @@ import { ShoppingCart } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { clp } from "@/lib/format";
 import { GameChip } from "@/components/GameChip";
-import { FREE_SHIPPING_FROM } from "@/lib/regions";
 
 export function CartPageView() {
   const { items, subtotal, setQuantity, remove, clear, count, ready } = useCart();
@@ -34,8 +33,6 @@ export function CartPageView() {
       </div>
     );
   }
-
-  const missingForFree = Math.max(0, FREE_SHIPPING_FROM - subtotal);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -141,21 +138,14 @@ export function CartPageView() {
             </div>
             <div className="flex justify-between">
               <dt className="text-ink-400">Despacho</dt>
-              <dd className="text-ink-400">Se calcula al pagar</dd>
+              <dd className="text-ink-400">Por pagar al recibir</dd>
             </div>
           </dl>
 
-          {missingForFree > 0 ? (
-            <p className="mt-4 rounded-lg border border-ink-700 bg-ink-950 p-3 text-[12px] text-ink-300">
-              Te faltan{" "}
-              <strong className="text-accent-300">{clp(missingForFree)}</strong> para
-              despacho gratis.
-            </p>
-          ) : (
-            <p className="mt-4 rounded-lg border border-emerald-600/40 bg-emerald-500/10 p-3 text-[12px] text-emerald-700">
-              ¡Tienes despacho gratis a todo Chile!
-            </p>
-          )}
+          <p className="mt-4 rounded-lg border border-ink-700 bg-ink-950 p-3 text-[12px] text-ink-300">
+            El despacho lo cobra el courier directo a quien recibe. Retiro en
+            persona siempre es gratis.
+          </p>
 
           <Link
             href="/checkout"

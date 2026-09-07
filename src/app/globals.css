@@ -153,6 +153,22 @@ body {
   animation: spin-slow 1s linear infinite;
 }
 
+@keyframes cart-bump {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-cart-bump {
+  animation: cart-bump 0.4s ease-out;
+}
+
 /* Elemento que aparece con un fade + subida al entrar en pantalla.
    El estado inicial vive acá; <Reveal> solo agrega "is-visible" cuando el
    IntersectionObserver dispara, así que sin JS el contenido queda visible

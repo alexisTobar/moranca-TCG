@@ -5,7 +5,7 @@ import { safeQuery } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Vendedores",
-  description: "Tiendas y coleccionistas que publican en Comarca TCG.",
+  description: "Tiendas y coleccionistas que publican en Dream Deck TCG.",
 };
 
 export const revalidate = 60;
@@ -41,7 +41,7 @@ export default async function SellersPage() {
     <div className="mx-auto max-w-7xl px-4 py-10">
       <h1 className="font-display text-3xl font-bold text-carbon">Vendedores</h1>
       <p className="mt-1 text-[13px] text-ink-400">
-        Perfiles habilitados para publicar en Comarca TCG.
+        Perfiles habilitados para publicar en Dream Deck TCG.
       </p>
 
       {sellers.length === 0 ? (

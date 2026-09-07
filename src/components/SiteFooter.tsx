@@ -64,7 +64,7 @@ export function SiteFooter() {
 
         <div>
           <h4 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-ink-300">
-            Comarca
+            Dream Deck
           </h4>
           <ul className="space-y-2 text-[13px] text-ink-400">
             <li>
@@ -93,7 +93,7 @@ export function SiteFooter() {
 
       <div className="border-t border-ink-850">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-[11px] text-ink-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Comarca TCG · Hecho en Chile</p>
+          <p>© {new Date().getFullYear()} Dream Deck TCG · Hecho en Chile</p>
           <p className="text-ink-600">
             Imágenes de cartas vía Scryfall, pokemontcg.io, dotGG y api.myl.cl. Marcas
             propiedad de sus respectivos dueños.

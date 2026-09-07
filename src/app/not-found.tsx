@@ -7,7 +7,7 @@ export default function NotFound() {
       <Logo size={44} />
       <p className="mt-10 font-display text-6xl font-bold text-ink-700">404</p>
       <h1 className="mt-2 font-display text-2xl font-bold text-carbon">
-        Esta carta no está en la comarca
+        Esta carta no está en el mazo
       </h1>
       <p className="mt-2 max-w-sm text-[14px] text-ink-400">
         La página que buscas no existe o la publicación ya fue retirada.

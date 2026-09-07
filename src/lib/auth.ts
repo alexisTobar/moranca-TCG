@@ -4,7 +4,7 @@ import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 
-export const SESSION_COOKIE = "comarca_session";
+export const SESSION_COOKIE = "dreamdeck_session";
 const MAX_AGE_SECONDS = 60 * 60 * 8; // 8 horas
 
 export interface SessionPayload {
@@ -36,8 +36,8 @@ export async function createSession(payload: SessionPayload) {
   const token = await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setIssuer("comarca-tcg")
-    .setAudience("comarca-tcg")
+    .setIssuer("dreamdeck-tcg")
+    .setAudience("dreamdeck-tcg")
     .setExpirationTime(`${MAX_AGE_SECONDS}s`)
     .sign(secretKey());
 
@@ -59,8 +59,8 @@ export async function destroySession() {
 export async function verifyToken(token: string): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secretKey(), {
-      issuer: "comarca-tcg",
-      audience: "comarca-tcg",
+      issuer: "dreamdeck-tcg",
+      audience: "dreamdeck-tcg",
     });
     if (!payload.sub || !payload.role) return null;
     return {

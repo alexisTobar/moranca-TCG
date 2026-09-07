@@ -6,7 +6,7 @@ import { LoginForm } from "@/components/LoginForm";
 
 export const metadata: Metadata = {
   title: "Ingresar",
-  description: "Acceso al panel de administración de Comarca TCG.",
+  description: "Acceso al panel de administración de Dream Deck TCG.",
   robots: { index: false, follow: false },
 };
 
@@ -32,7 +32,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-[12px] text-ink-400">
-          ¿Quieres vender en Comarca?{" "}
+          ¿Quieres vender en Dream Deck?{" "}
           <Link href="/ayuda" className="font-semibold text-accent-300 hover:text-accent-400">
             Escríbenos
           </Link>

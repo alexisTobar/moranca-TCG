@@ -83,6 +83,7 @@ export const checkoutSchema = z.object({
   buyerName: z.string().min(2).max(120),
   buyerEmail: z.string().email().max(160),
   buyerPhone: z.string().max(40).optional().nullable(),
+  paymentMethod: z.enum(["TRANSFER", "MERCADOPAGO"]).default("TRANSFER"),
   shipMethod: z.enum(["PICKUP", "SHIPPING"]).default("SHIPPING"),
   shipAddress: z.string().max(200).optional().nullable(),
   shipCity: z.string().max(80).optional().nullable(),

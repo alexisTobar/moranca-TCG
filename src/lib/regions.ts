@@ -475,26 +475,18 @@ export function zoneOf(regionName: string): Region["zone"] | null {
 
 export type ShippingMethod = "PICKUP" | "SHIPPING";
 
-/** Envío gratis desde este monto (CLP). */
-export const FREE_SHIPPING_FROM = 50_000;
-
-const RATES: Record<Region["zone"], number> = {
-  rm: 3_500,
-  centro: 4_900,
-  extremo: 7_900,
-};
-
+/**
+ * No se trabaja con ningún courier propio: todo despacho es "por pagar" (lo
+ * cobra el transportista directo al destinatario al recibir), así que la
+ * tienda nunca cobra flete online. Se mantiene la firma de la función por si
+ * en el futuro se integra una tarifa real por región.
+ */
 export function shippingCost(
-  method: ShippingMethod,
-  regionName: string | null,
-  subtotal: number
+  _method: ShippingMethod,
+  _regionName: string | null,
+  _subtotal: number
 ): number {
-  if (method === "PICKUP") return 0;
-  if (!regionName) return 0;
-  const zone = zoneOf(regionName);
-  if (!zone) return 0;
-  if (subtotal >= FREE_SHIPPING_FROM) return 0;
-  return RATES[zone];
+  return 0;
 }
 
 export const PICKUP_POINT = "Retiro coordinado en Santiago Centro (Metro U. de Chile)";

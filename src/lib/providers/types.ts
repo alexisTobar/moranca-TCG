@@ -27,7 +27,7 @@ export interface CardProvider {
   search(query: string, limit: number): Promise<CardResult[]>;
 }
 
-export const UA = "ComarcaTCG/1.0 (+https://comarcatcg.cl)";
+export const UA = "DreamDeckTCG/1.0 (+https://dreamdecktcg.cl)";
 
 export async function fetchJson<T>(
   url: string,

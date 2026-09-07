@@ -9,43 +9,38 @@ export function Logo({ size = 34 }: { size?: number }) {
         aria-hidden
         className="shrink-0"
       >
-        <defs>
-          <linearGradient id="cgGold" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#d9a441" />
-            <stop offset="55%" stopColor="#a3711f" />
-            <stop offset="100%" stopColor="#7a4f14" />
-          </linearGradient>
-        </defs>
+        {/* Carta de atrás, apenas insinuada: el "deck" */}
         <rect
-          x="9"
-          y="4"
-          width="24"
-          height="34"
-          rx="4"
-          transform="rotate(-12 21 21)"
-          fill="#f5eee1"
-          stroke="#a3711f"
-          strokeWidth="1.5"
-        />
-        <rect
-          x="15"
+          x="6"
           y="9"
-          width="24"
-          height="34"
+          width="22"
+          height="30"
           rx="4"
-          transform="rotate(8 27 26)"
-          fill="#86242d"
-          stroke="url(#cgGold)"
-          strokeWidth="1.8"
+          transform="rotate(-9 17 24)"
+          fill="#eef2ff"
+          stroke="#1d4ed8"
+          strokeWidth="1.4"
+        />
+        {/* Carta de adelante, con la luna y la estrella: el "dream" */}
+        <rect
+          x="18"
+          y="8"
+          width="22"
+          height="30"
+          rx="4"
+          transform="rotate(8 29 23)"
+          fill="#1d4ed8"
         />
         <path
-          d="M27 18.5l2.3 4.9 5.2.7-3.8 3.6.95 5.2-4.65-2.5-4.65 2.5.95-5.2-3.8-3.6 5.2-.7z"
-          fill="url(#cgGold)"
+          transform="translate(21.5 12.5) scale(0.375)"
+          d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z"
+          fill="#eef2ff"
         />
+        <path d="M33 26 34.12 28.88 37 30 34.12 31.12 33 34 31.88 31.12 29 30 31.88 28.88Z" fill="#eef2ff" />
       </svg>
       <span className="leading-none">
-        <span className="block font-semibold tracking-[0.16em] text-[13px] text-ink-200">
-          COMARCA
+        <span className="block font-semibold tracking-[0.14em] text-[13px] text-ink-200">
+          DREAM DECK
         </span>
         <span className="block brand-text font-display text-[15px] font-bold tracking-[0.34em]">
           TCG

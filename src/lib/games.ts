@@ -18,6 +18,28 @@ export interface GameMeta {
 }
 
 export const GAMES: Record<GameId, GameMeta> = {
+  onepiece: {
+    id: "onepiece",
+    name: "One Piece Card Game",
+    short: "One Piece",
+    accent: "#dc2626",
+    gradient: "from-red-100 to-rose-50",
+    provider: "dotGG",
+    cardImage: "https://static.dotgg.gg/onepiece/card/OP01-001.webp",
+    logo: "https://upload.wikimedia.org/wikipedia/en/c/c2/One_Piece_Card_Game_logo.webp",
+    tagline: "Líderes, mazos y singles",
+  },
+  pokemon: {
+    id: "pokemon",
+    name: "Pokémon TCG",
+    short: "Pokémon",
+    accent: "#ca8a04",
+    gradient: "from-yellow-100 to-sky-50",
+    provider: "pokemontcg.io",
+    cardImage: "https://assets.tcgdex.net/en/pl/pl4/1/high.webp",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Pok%C3%A9mon_Trading_Card_Game_logo.svg",
+    tagline: "Cartas, ETB y booster boxes",
+  },
   magic: {
     id: "magic",
     name: "Magic: The Gathering",
@@ -31,28 +53,6 @@ export const GAMES: Record<GameId, GameMeta> = {
       "https://cards.scryfall.io/art_crop/front/9/1/91fdb56b-54d5-4272-8319-505ff987fe9b.jpg",
     logo: "https://upload.wikimedia.org/wikipedia/commons/3/3f/Magicthegathering-logo.svg",
     tagline: "Singles, commander y sellados",
-  },
-  pokemon: {
-    id: "pokemon",
-    name: "Pokémon TCG",
-    short: "Pokémon",
-    accent: "#ca8a04",
-    gradient: "from-yellow-100 to-sky-50",
-    provider: "pokemontcg.io",
-    cardImage: "https://assets.tcgdex.net/en/pl/pl4/1/high.webp",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Pok%C3%A9mon_Trading_Card_Game_logo.svg",
-    tagline: "Cartas, ETB y booster boxes",
-  },
-  onepiece: {
-    id: "onepiece",
-    name: "One Piece Card Game",
-    short: "One Piece",
-    accent: "#dc2626",
-    gradient: "from-red-100 to-rose-50",
-    provider: "dotGG",
-    cardImage: "https://static.dotgg.gg/onepiece/card/OP01-001.webp",
-    logo: "https://upload.wikimedia.org/wikipedia/en/c/c2/One_Piece_Card_Game_logo.webp",
-    tagline: "Líderes, mazos y singles",
   },
   myl: {
     id: "myl",

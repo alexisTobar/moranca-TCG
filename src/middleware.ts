@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const SESSION_COOKIE = "comarca_session";
+const SESSION_COOKIE = "dreamdeck_session";
 
 const CSP = [
   "default-src 'self'",
@@ -40,8 +40,8 @@ async function readSession(token: string | undefined) {
   if (!secret) return null;
   try {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(secret), {
-      issuer: "comarca-tcg",
-      audience: "comarca-tcg",
+      issuer: "dreamdeck-tcg",
+      audience: "dreamdeck-tcg",
     });
     return payload as { sub?: string; role?: string };
   } catch {

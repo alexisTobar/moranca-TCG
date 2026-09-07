@@ -6,8 +6,10 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { FlyToCartLayer, type Flight } from "./FlyToCart";
 
 export interface CartItem {
   listingId: string;
@@ -33,10 +35,14 @@ interface CartContextValue {
   clear: () => void;
   open: boolean;
   setOpen: (open: boolean) => void;
+  /** El botón del carrito en el header se registra acá para saber hacia dónde animar. */
+  registerCartIcon: (el: HTMLElement | null) => void;
+  /** Lanza la animación de "vuela al carrito" desde el elemento clickeado. */
+  flyToCart: (imageUrl: string | null | undefined, fromEl: HTMLElement) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
-const STORAGE_KEY = "comarca_cart_v1";
+const STORAGE_KEY = "dreamdeck_cart_v1";
 
 function readStorage(): CartItem[] {
   try {
@@ -56,6 +62,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const cartIconRef = useRef<HTMLElement | null>(null);
+
+  const registerCartIcon = useCallback((el: HTMLElement | null) => {
+    cartIconRef.current = el;
+  }, []);
+
+  const flyToCart = useCallback(
+    (imageUrl: string | null | undefined, fromEl: HTMLElement) => {
+      const iconEl = cartIconRef.current;
+      if (!iconEl) return;
+      const from = fromEl.getBoundingClientRect();
+      const to = iconEl.getBoundingClientRect();
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      setFlights((prev) => [...prev, { id, imageUrl: imageUrl ?? null, from, to }]);
+      // Se limpia sola: nada depende de este timer más que sacar el nodo del DOM.
+      setTimeout(() => {
+        setFlights((prev) => prev.filter((f) => f.id !== id));
+      }, 700);
+    },
+    []
+  );
 
   useEffect(() => {
     setItems(readStorage());
@@ -86,7 +114,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
         return [...prev, { ...item, quantity: Math.min(item.maxStock, quantity) }];
       });
-      setOpen(true);
     },
     []
   );
@@ -123,10 +150,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       clear,
       open,
       setOpen,
+      registerCartIcon,
+      flyToCart,
     };
-  }, [items, ready, add, setQuantity, remove, clear, open]);
+  }, [items, ready, add, setQuantity, remove, clear, open, registerCartIcon, flyToCart]);
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      <FlyToCartLayer flights={flights} />
+    </CartContext.Provider>
+  );
 }
 
 export function useCart(): CartContextValue {

@@ -618,7 +618,7 @@ export function ListingForm({
               ? "Guardando…"
               : isEdit
                 ? "Guardar cambios"
-                : "Publicar en Comarca"}
+                : "Publicar en Dream Deck"}
           </button>
         </div>
       </div>

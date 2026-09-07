@@ -37,7 +37,7 @@ export default async function UsersPage() {
       <header>
         <h1 className="font-display text-3xl font-bold text-carbon">Perfiles</h1>
         <p className="mt-1 text-[13px] text-ink-400">
-          Crea cuentas para que otras personas publiquen y vendan en Comarca TCG.
+          Crea cuentas para que otras personas publiquen y vendan en Dream Deck TCG.
         </p>
       </header>
 

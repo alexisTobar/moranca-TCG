@@ -112,6 +112,8 @@ model Order {
   shipRegion    String?
   shipMethod    String      @default("SHIPPING")
   shipCost      Int         @default(0)
+  paymentMethod String      @default("MERCADOPAGO")
+  discount      Int         @default(0)
   subtotal      Int         @default(0)
   total         Int
   preferenceId  String?

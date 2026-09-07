@@ -4,23 +4,20 @@ import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Landmark, CreditCard } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { clp } from "@/lib/format";
-import {
-  REGIONS,
-  comunasOf,
-  shippingCost,
-  FREE_SHIPPING_FROM,
-  PICKUP_POINT,
-  type ShippingMethod,
-} from "@/lib/regions";
+import { REGIONS, comunasOf, PICKUP_POINT, type ShippingMethod } from "@/lib/regions";
+import { BANK_TRANSFER, TRANSFER_DISCOUNT_RATE } from "@/lib/bank";
+
+type PaymentMethod = "TRANSFER" | "MERCADOPAGO";
 
 export function CheckoutView() {
   const router = useRouter();
   const { items, subtotal, clear, ready } = useCart();
 
   const [method, setMethod] = useState<ShippingMethod>("SHIPPING");
+  const [payment, setPayment] = useState<PaymentMethod>("TRANSFER");
   const [region, setRegion] = useState("");
   const [comuna, setComuna] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,8 +25,10 @@ export function CheckoutView() {
   const [done, setDone] = useState<{ orderId: string; notice?: string } | null>(null);
 
   const comunas = useMemo(() => comunasOf(region), [region]);
-  const ship = shippingCost(method, region || null, subtotal);
-  const total = subtotal + ship;
+  const ship = 0; // todo despacho es por pagar directo al courier, no se cobra acá
+  const discount =
+    payment === "TRANSFER" ? Math.round(subtotal * TRANSFER_DISCOUNT_RATE) : 0;
+  const total = subtotal - discount + ship;
 
   if (!ready) {
     return <p className="px-4 py-16 text-sm text-ink-400">Cargando…</p>;
@@ -95,6 +94,7 @@ export function CheckoutView() {
           buyerName: form.get("buyerName"),
           buyerEmail: form.get("buyerEmail"),
           buyerPhone: form.get("buyerPhone"),
+          paymentMethod: payment,
           shipMethod: method,
           shipRegion: method === "SHIPPING" ? region : null,
           shipCity: method === "SHIPPING" ? comuna : null,
@@ -135,9 +135,86 @@ export function CheckoutView() {
 
       <form onSubmit={submit} className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-5">
+          {/* PAGO */}
+          <section className="rounded-2xl card-surface p-5">
+            <h2 className="text-sm font-semibold text-carbon">1 · Método de pago</h2>
+
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setPayment("TRANSFER")}
+                className={`relative rounded-xl border p-4 text-left transition ${
+                  payment === "TRANSFER"
+                    ? "border-accent-500/60 bg-accent-500/10"
+                    : "border-ink-700 hover:border-ink-600"
+                }`}
+              >
+                <span className="absolute right-3 top-3 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                  -2% dcto
+                </span>
+                <Landmark
+                  className={`h-4 w-4 ${payment === "TRANSFER" ? "text-accent-400" : "text-ink-400"}`}
+                  strokeWidth={2}
+                />
+                <span
+                  className={`mt-1.5 block text-[13px] font-bold ${
+                    payment === "TRANSFER" ? "text-accent-300" : "text-ink-200"
+                  }`}
+                >
+                  Transferencia bancaria
+                </span>
+                <span className="mt-0.5 block text-[11px] text-ink-400">
+                  Confirmamos el pago con tu comprobante
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPayment("MERCADOPAGO")}
+                className={`rounded-xl border p-4 text-left transition ${
+                  payment === "MERCADOPAGO"
+                    ? "border-accent-500/60 bg-accent-500/10"
+                    : "border-ink-700 hover:border-ink-600"
+                }`}
+              >
+                <CreditCard
+                  className={`h-4 w-4 ${payment === "MERCADOPAGO" ? "text-accent-400" : "text-ink-400"}`}
+                  strokeWidth={2}
+                />
+                <span
+                  className={`mt-1.5 block text-[13px] font-bold ${
+                    payment === "MERCADOPAGO" ? "text-accent-300" : "text-ink-200"
+                  }`}
+                >
+                  Mercado Pago
+                </span>
+                <span className="mt-0.5 block text-[11px] text-ink-400">
+                  Tarjetas, débito y transferencia por Mercado Pago
+                </span>
+              </button>
+            </div>
+
+            {payment === "TRANSFER" && (
+              <div className="mt-4 rounded-xl border border-ink-700 bg-ink-950 p-4 text-[12px] text-ink-300">
+                <p className="font-semibold text-ink-200">Datos para transferir</p>
+                <dl className="mt-2 space-y-1">
+                  <Row label="Banco" value={BANK_TRANSFER.bank} />
+                  <Row label="Cuenta" value={`${BANK_TRANSFER.accountType} N° ${BANK_TRANSFER.accountNumber}`} />
+                  <Row label="RUT" value={BANK_TRANSFER.rut} />
+                  <Row label="Titular" value={BANK_TRANSFER.holderName} />
+                  <Row label="Enviar comprobante a" value={BANK_TRANSFER.email} />
+                </dl>
+                <p className="mt-3 text-[11px] text-ink-400">
+                  Al confirmar, te dejamos estos datos junto con el número de
+                  orden. Despachamos apenas confirmemos tu pago.
+                </p>
+              </div>
+            )}
+          </section>
+
           {/* CONTACTO */}
           <section className="rounded-2xl card-surface p-5">
-            <h2 className="text-sm font-semibold text-carbon">1 · Tus datos</h2>
+            <h2 className="text-sm font-semibold text-carbon">2 · Tus datos</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field name="buyerName" label="Nombre y apellido" required />
               <Field name="buyerEmail" label="Email" type="email" required />
@@ -152,7 +229,7 @@ export function CheckoutView() {
 
           {/* ENTREGA */}
           <section className="rounded-2xl card-surface p-5">
-            <h2 className="text-sm font-semibold text-carbon">2 · Entrega</h2>
+            <h2 className="text-sm font-semibold text-carbon">3 · Entrega</h2>
 
             <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
               <button
@@ -169,10 +246,10 @@ export function CheckoutView() {
                     method === "SHIPPING" ? "text-accent-300" : "text-ink-200"
                   }`}
                 >
-                  Despacho a domicilio
+                  Despacho a domicilio · Por pagar
                 </span>
                 <span className="mt-0.5 block text-[11px] text-ink-400">
-                  Chilexpress / Starken · 1 a 7 días hábiles
+                  El flete lo cobra el courier directo a quien recibe
                 </span>
               </button>
 
@@ -268,7 +345,7 @@ export function CheckoutView() {
 
           {/* COMENTARIO */}
           <section className="rounded-2xl card-surface p-5">
-            <h2 className="text-sm font-semibold text-carbon">3 · Comentario</h2>
+            <h2 className="text-sm font-semibold text-carbon">4 · Comentario</h2>
             <textarea
               name="notes"
               rows={3}
@@ -318,16 +395,18 @@ export function CheckoutView() {
                 <dt className="text-ink-400">Subtotal</dt>
                 <dd className="text-ink-200">{clp(subtotal)}</dd>
               </div>
+              {discount > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-emerald-700">Descuento transferencia (2%)</dt>
+                  <dd className="text-emerald-700">-{clp(discount)}</dd>
+                </div>
+              )}
               <div className="flex justify-between">
                 <dt className="text-ink-400">
                   {method === "PICKUP" ? "Retiro" : "Despacho"}
                 </dt>
-                <dd className={ship === 0 ? "text-emerald-700" : "text-ink-200"}>
-                  {method === "SHIPPING" && !region
-                    ? "—"
-                    : ship === 0
-                      ? "Gratis"
-                      : clp(ship)}
+                <dd className={method === "PICKUP" ? "text-emerald-700" : "text-ink-400"}>
+                  {method === "PICKUP" ? "Gratis" : "Por pagar"}
                 </dd>
               </div>
               <div className="flex justify-between border-t border-ink-800 pt-3">
@@ -337,12 +416,6 @@ export function CheckoutView() {
                 </dd>
               </div>
             </dl>
-
-            {subtotal < FREE_SHIPPING_FROM && method === "SHIPPING" && (
-              <p className="mt-3 text-[11px] text-ink-400">
-                Despacho gratis en compras sobre {clp(FREE_SHIPPING_FROM)}.
-              </p>
-            )}
 
             {error && (
               <p className="mt-4 rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-brand-600">
@@ -354,12 +427,17 @@ export function CheckoutView() {
               disabled={loading}
               className="mt-5 w-full rounded-xl bg-brand-600 py-3 text-sm font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
             >
-              {loading ? "Procesando…" : `Pagar ${clp(total)}`}
+              {loading
+                ? "Procesando…"
+                : payment === "TRANSFER"
+                  ? `Confirmar orden · ${clp(total)}`
+                  : `Pagar ${clp(total)}`}
             </button>
 
             <p className="mt-3 text-center text-[11px] leading-relaxed text-ink-400">
-              Pago procesado por Mercado Pago. Tus datos viajan cifrados y no
-              almacenamos información de tarjetas.
+              {payment === "TRANSFER"
+                ? "Te mostramos los datos de la cuenta al confirmar. Despachamos apenas llegue tu comprobante."
+                : "Pago procesado por Mercado Pago. Tus datos viajan cifrados y no almacenamos información de tarjetas."}
             </p>
           </div>
         </aside>
@@ -398,5 +476,14 @@ function Field({
         className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none transition focus:border-accent-500/70 focus:ring-2 focus:ring-accent-500/20"
       />
     </label>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <dt className="text-ink-400">{label}</dt>
+      <dd className="text-right font-medium text-ink-200">{value}</dd>
+    </div>
   );
 }

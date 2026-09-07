@@ -1,4 +1,4 @@
-# Comarca TCG
+# Dream Deck TCG
 
 Tienda chilena de cartas coleccionables: **singles, sellados y mazos armados** de
 Magic, Pokémon, One Piece y Mitos y Leyendas.
@@ -65,8 +65,8 @@ Abre <http://localhost:3000>.
 
 | Variable         | Valor por defecto      |
 | ---------------- | ---------------------- |
-| `ADMIN_EMAIL`    | `admin@comarcatcg.cl`  |
-| `ADMIN_PASSWORD` | `ComarcaTCG2026!`      |
+| `ADMIN_EMAIL`    | `admin@dreamdecktcg.cl`  |
+| `ADMIN_PASSWORD` | `DreamDeckTCG2026!`      |
 
 > **Cambia la contraseña antes de publicar el sitio.** Puedes editarla en `.env`
 > y volver a correr `npm run db:seed`, o cambiarla desde *Panel → Perfiles → Clave*.
@@ -207,6 +207,18 @@ El webhook **verifica la firma HMAC** y consulta el pago en la API antes de
 marcar la orden como pagada y descontar stock. Sin `MP_WEBHOOK_SECRET` las
 notificaciones se rechazan (nunca se aceptan avisos sin verificar).
 
+### Transferencia bancaria (opción por defecto)
+
+El checkout ofrece **transferencia con 2% de descuento** como primera opción,
+antes que Mercado Pago. No pasa por ninguna pasarela: se muestra la cuenta,
+el comprador transfiere por su cuenta y manda el comprobante por email. La
+orden queda `PENDING` hasta que la confirmes a mano en **Panel → Órdenes**.
+
+**Completa tu cuenta real en `src/lib/bank.ts`** (banco, tipo de cuenta,
+número, RUT, titular y el email donde te lleguen los comprobantes) — hoy
+tiene placeholders `COMPLETAR: …` que se muestran tal cual en el checkout
+mientras no los reemplaces.
+
 ---
 
 ## 6. Seguridad implementada
@@ -235,7 +247,7 @@ src/app/(public)/         Tienda: home, catálogo, producto, carrito, checkout
 src/app/panel/            Panel privado: publicar, publicaciones, órdenes, perfiles
 src/app/api/              Login, búsqueda de cartas, publicaciones, checkout, webhook
 src/lib/providers/        Un archivo por catálogo de cartas
-src/lib/regions.ts        16 regiones y 346 comunas de Chile + tarifas de envío
+src/lib/regions.ts        16 regiones y 346 comunas de Chile (despacho es "por pagar")
 src/components/cart/      Carrito (contexto, drawer, checkout)
 ```
 

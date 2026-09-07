@@ -88,7 +88,7 @@ export default async function PanelHome() {
           <p className="mt-1 text-[13px] text-ink-400">
             {isAdmin
               ? "Tienes control total sobre publicaciones, perfiles y órdenes."
-              : "Administra tus publicaciones en Comarca TCG."}
+              : "Administra tus publicaciones en Dream Deck TCG."}
           </p>
         </div>
         <Link

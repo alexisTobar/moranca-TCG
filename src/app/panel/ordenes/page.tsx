@@ -50,6 +50,8 @@ export default async function OrdersPage() {
       notes: string | null;
       shipMethod: string;
       shipCost: number;
+      paymentMethod: string;
+      discount: number;
       subtotal: number;
       total: number;
       createdAt: Date;
@@ -92,6 +94,9 @@ export default async function OrdersPage() {
                   #{o.id.slice(-6).toUpperCase()}
                 </span>
                 <span className="text-[12px] text-ink-400">{o.buyerName}</span>
+                <span className="rounded-full border border-ink-700 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-ink-400">
+                  {o.paymentMethod === "TRANSFER" ? "Transferencia" : "Mercado Pago"}
+                </span>
                 <span className="ml-auto font-display text-sm font-bold text-accent-400">
                   {clp(o.total)}
                 </span>
@@ -150,9 +155,21 @@ export default async function OrdersPage() {
                       <dt className="text-ink-400">Subtotal</dt>
                       <dd className="text-ink-300">{clp(o.subtotal || o.total - o.shipCost)}</dd>
                     </div>
+                    {o.discount > 0 && (
+                      <div className="flex justify-between">
+                        <dt className="text-emerald-700">Descuento transferencia</dt>
+                        <dd className="text-emerald-700">-{clp(o.discount)}</dd>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <dt className="text-ink-400">Despacho</dt>
-                      <dd className="text-ink-300">{o.shipCost ? clp(o.shipCost) : "Gratis"}</dd>
+                      <dd className="text-ink-300">
+                        {o.shipMethod === "PICKUP"
+                          ? "Gratis"
+                          : o.shipCost
+                            ? clp(o.shipCost)
+                            : "Por pagar"}
+                      </dd>
                     </div>
                     <div className="flex justify-between font-semibold">
                       <dt className="text-ink-200">Total</dt>

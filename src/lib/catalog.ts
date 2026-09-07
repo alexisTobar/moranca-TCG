@@ -30,7 +30,7 @@ export async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T
     return await fn();
   } catch (error) {
     if (process.env.NODE_ENV !== "production") {
-      console.warn("[comarca] consulta omitida:", (error as Error).message);
+      console.warn("[dreamdeck] consulta omitida:", (error as Error).message);
     }
     return fallback;
   }

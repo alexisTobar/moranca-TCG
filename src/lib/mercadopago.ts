@@ -53,7 +53,7 @@ export async function createPreference(params: {
       },
       auto_return: "approved",
       notification_url: `${site}/api/mercadopago/webhook`,
-      statement_descriptor: "COMARCATCG",
+      statement_descriptor: "DREAMDECKTCG",
     }),
     cache: "no-store",
   });

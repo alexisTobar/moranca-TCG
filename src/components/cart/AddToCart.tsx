@@ -1,16 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useCart, type CartItem } from "./CartProvider";
 import { clp } from "@/lib/format";
 
 type Props = Omit<CartItem, "quantity">;
 
 export function AddToCartPanel(props: Props) {
-  const { add, items } = useCart();
+  const { add, items, flyToCart } = useCart();
   const router = useRouter();
   const [qty, setQty] = useState(1);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   const inCart = items.find((i) => i.listingId === props.listingId)?.quantity ?? 0;
   const soldOut = props.maxStock <= 0;
@@ -67,9 +68,13 @@ export function AddToCartPanel(props: Props) {
             </div>
 
             <button
+              ref={btnRef}
               type="button"
               disabled={remaining <= 0}
-              onClick={() => add(props, qty)}
+              onClick={() => {
+                add(props, qty);
+                if (btnRef.current) flyToCart(props.imageUrl, btnRef.current);
+              }}
               className="flex-1 rounded-xl border border-accent-500/60 bg-accent-500/10 px-6 py-3 text-sm font-bold text-accent-300 transition hover:bg-accent-500/20 disabled:opacity-50"
             >
               {remaining <= 0 ? "Ya tienes todo el stock" : "Agregar al carrito"}
@@ -98,7 +103,7 @@ export function AddToCartPanel(props: Props) {
 }
 
 export function AddToCartMini(props: Props) {
-  const { add } = useCart();
+  const { add, flyToCart } = useCart();
   return (
     <button
       type="button"
@@ -106,6 +111,7 @@ export function AddToCartMini(props: Props) {
         e.preventDefault();
         e.stopPropagation();
         add(props, 1);
+        flyToCart(props.imageUrl, e.currentTarget);
       }}
       disabled={props.maxStock <= 0}
       className="w-full rounded-lg border border-ink-700 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:border-accent-500/60 hover:text-accent-300 disabled:opacity-40"

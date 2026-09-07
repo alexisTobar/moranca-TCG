@@ -3,7 +3,7 @@ import { CONDITIONS } from "@/lib/games";
 
 export const metadata: Metadata = {
   title: "Ayuda",
-  description: "Cómo comprar, envíos y estados de carta en Comarca TCG.",
+  description: "Cómo comprar, envíos y estados de carta en Dream Deck TCG.",
 };
 
 const FAQ = [
@@ -21,7 +21,7 @@ const FAQ = [
   },
   {
     q: "¿Puedo vender mis cartas aquí?",
-    a: "Los perfiles de vendedor los crea el administrador de Comarca TCG. Escríbenos y habilitamos tu cuenta para publicar singles, sellados y mazos.",
+    a: "Los perfiles de vendedor los crea el administrador de Dream Deck TCG. Escríbenos y habilitamos tu cuenta para publicar singles, sellados y mazos.",
   },
 ];
 
@@ -30,7 +30,7 @@ export default function HelpPage() {
     <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="font-display text-4xl font-bold text-carbon">Centro de ayuda</h1>
       <p className="mt-2 text-[14px] text-ink-400">
-        Todo lo que necesitas saber para comprar y vender en Comarca TCG.
+        Todo lo que necesitas saber para comprar y vender en Dream Deck TCG.
       </p>
 
       <section className="mt-10 space-y-3">
