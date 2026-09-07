@@ -9,6 +9,7 @@ export const runtime = "nodejs";
 
 const MAX_RESULTS = 120;
 const GAME_IDS = GAME_LIST.map((g) => g.id) as GameId[];
+const MAGIC_COLORS = new Set(["w", "u", "b", "r", "g", "c"]);
 
 export async function GET(req: Request) {
   // Basta con validar la firma del token: buscar cartas es solo lectura y no
@@ -22,6 +23,8 @@ export async function GET(req: Request) {
   const game = searchParams.get("game") ?? "";
   const q = (searchParams.get("q") ?? "").slice(0, 80);
   const formato = searchParams.get("format") ?? "";
+  const colorParam = (searchParams.get("color") ?? "").toLowerCase();
+  const editionParam = (searchParams.get("edition") ?? "").toLowerCase();
   const limit = Math.min(
     MAX_RESULTS,
     Math.max(1, Number(searchParams.get("limit") ?? 60))
@@ -30,7 +33,19 @@ export async function GET(req: Request) {
   if (!isGameId(game)) {
     return NextResponse.json({ error: "Juego no soportado" }, { status: 400 });
   }
-  if (q.trim().length < 2) {
+
+  // Magic acepta filtrar por color y edición directo en la sintaxis de
+  // Scryfall, incluso sin nombre — "c:r set:war" es una búsqueda válida sola.
+  let searchTerm = q.trim();
+  if (game === "magic") {
+    const color = MAGIC_COLORS.has(colorParam) ? colorParam : "";
+    const edition = /^[a-z0-9]{2,6}$/.test(editionParam) ? editionParam : "";
+    searchTerm = [searchTerm, color && `c:${color}`, edition && `set:${edition}`]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  if (searchTerm.length < 2) {
     return NextResponse.json({ results: [], usdClp: null });
   }
 
@@ -46,7 +61,7 @@ export async function GET(req: Request) {
     // Con filtro de formato pedimos de más y recortamos después, para que el
     // límite se aplique sobre lo ya filtrado y no antes.
     const [crudos, rate] = await Promise.all([
-      searchCards(game, q, formato ? 500 : limit),
+      searchCards(game, searchTerm, formato ? 500 : limit),
       usdToClp(),
     ]);
 

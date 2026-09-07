@@ -6,6 +6,20 @@ import { GAME_LIST, type GameId } from "@/lib/games";
 import { clp } from "@/lib/format";
 import { MYL_FORMATOS } from "@/lib/providers/myl-formatos";
 
+const MAGIC_COLORS = [
+  { value: "w", label: "Blanco" },
+  { value: "u", label: "Azul" },
+  { value: "b", label: "Negro" },
+  { value: "r", label: "Rojo" },
+  { value: "g", label: "Verde" },
+  { value: "c", label: "Incoloro" },
+];
+
+interface MagicSetOption {
+  code: string;
+  name: string;
+}
+
 export interface CardResult {
   externalId: string;
   name: string;
@@ -40,6 +54,9 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
   const [results, setResults] = useState<CardResult[]>([]);
   const [visible, setVisible] = useState(STEP);
   const [formato, setFormato] = useState("");
+  const [color, setColor] = useState("");
+  const [edition, setEdition] = useState("");
+  const [magicSets, setMagicSets] = useState<MagicSetOption[]>([]);
   const [usdClp, setUsdClp] = useState<number | null>(null);
   const [suggestions, setSuggestions] = useState<
     Array<{ game: GameId; count: number; sample: string | null }>
@@ -48,10 +65,20 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  // Magic puede filtrar solo por color/edición sin escribir un nombre.
+  const hasMagicFilters = game === "magic" && (color !== "" || edition !== "");
+
+  useEffect(() => {
+    if (game !== "magic" || magicSets.length > 0) return;
+    fetch("/api/cards/magic-sets")
+      .then((r) => r.json())
+      .then((data) => setMagicSets(data.sets ?? []))
+      .catch(() => {});
+  }, [game, magicSets.length]);
 
   useEffect(() => {
     const term = query.trim();
-    if (term.length < 2) {
+    if (term.length < 2 && !hasMagicFilters) {
       setResults([]);
       setSuggestions([]);
       setError(null);
@@ -67,10 +94,14 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
       setTouched(true);
 
       try {
-        const res = await fetch(
-          `/api/cards/search?game=${game}&q=${encodeURIComponent(term)}&limit=120${formato ? `&format=${encodeURIComponent(formato)}` : ""}`,
-          { signal: controller.signal }
-        );
+        const params = new URLSearchParams({ game, q: term, limit: "120" });
+        if (formato) params.set("format", formato);
+        if (game === "magic" && color) params.set("color", color);
+        if (game === "magic" && edition) params.set("edition", edition);
+
+        const res = await fetch(`/api/cards/search?${params.toString()}`, {
+          signal: controller.signal,
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "Error en la búsqueda");
         setResults(data.results ?? []);
@@ -88,7 +119,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [query, game, formato]);
+  }, [query, game, formato, color, edition]);
 
   return (
     <div className="rounded-2xl card-surface p-5">
@@ -111,6 +142,8 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
               onGameChange(g.id);
               setResults([]);
               setFormato("");
+              setColor("");
+              setEdition("");
             }}
             className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition ${
               game === g.id
@@ -126,6 +159,60 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
           </button>
         ))}
       </div>
+
+      {/* Magic: filtro por color y edición */}
+      {game === "magic" && (
+        <div className="mt-2 flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-ink-400">
+              Color
+            </span>
+            <button
+              type="button"
+              onClick={() => setColor("")}
+              className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold transition ${
+                color === ""
+                  ? "border-brand-500 bg-brand-500/10 text-brand-600"
+                  : "border-ink-700 text-ink-400 hover:text-ink-200"
+              }`}
+            >
+              Todos
+            </button>
+            {MAGIC_COLORS.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                onClick={() => setColor(c.value)}
+                className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold transition ${
+                  color === c.value
+                    ? "border-brand-500 bg-brand-500/10 text-brand-600"
+                    : "border-ink-700 text-ink-400 hover:text-ink-200"
+                }`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+
+          <label className="flex items-center gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-ink-400">
+              Edición
+            </span>
+            <select
+              value={edition}
+              onChange={(e) => setEdition(e.target.value)}
+              className="rounded-md border border-ink-700 bg-white px-2 py-1 text-[11px] font-semibold text-ink-200 outline-none focus:border-brand-500"
+            >
+              <option value="">Todas</option>
+              {magicSets.map((s) => (
+                <option key={s.code} value={s.code}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
 
       {/* Mitos y Leyendas: filtro por formato competitivo */}
       {game === "myl" && (
@@ -291,10 +378,17 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
         !loading &&
         !error &&
         results.length === 0 &&
-        query.trim().length >= 2 && (
+        (query.trim().length >= 2 || hasMagicFilters) && (
           <div className="mt-3 rounded-lg border border-ink-700 bg-ink-900 p-3">
             <p className="text-[12px] text-ink-400">
-              Sin resultados para <strong className="text-ink-200">“{query}”</strong>{" "}
+              {query.trim() ? (
+                <>
+                  Sin resultados para{" "}
+                  <strong className="text-ink-200">“{query}”</strong>{" "}
+                </>
+              ) : (
+                "Sin resultados con esos filtros "
+              )}
               en {GAME_LIST.find((g) => g.id === game)?.short}.
             </p>
 

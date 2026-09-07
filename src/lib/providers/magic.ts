@@ -146,3 +146,64 @@ export function magicCollectionKey(setCode: string, collectorNumber: string): st
 export function magicCardToResult(c: ScryfallCard): CardResult {
   return toCardResult(c);
 }
+
+export interface MagicSet {
+  code: string;
+  name: string;
+  releasedAt: string | null;
+}
+
+interface ScryfallSet {
+  code: string;
+  name: string;
+  set_type: string;
+  digital: boolean;
+  released_at?: string | null;
+}
+
+interface ScryfallSetList {
+  data?: ScryfallSet[];
+}
+
+/** Tipos de edición con cartas físicas vendibles; deja fuera tokens, arte, etc. */
+const SELLABLE_SET_TYPES = new Set([
+  "core",
+  "expansion",
+  "masters",
+  "commander",
+  "draft_innovation",
+  "funny",
+  "starter",
+  "box",
+  "premium_deck",
+  "duel_deck",
+  "from_the_vault",
+  "spellbook",
+  "arsenal",
+  "planechase",
+  "archenemy",
+  "vanguard",
+]);
+
+let setsCache: { at: number; sets: MagicSet[] } | null = null;
+const SETS_TTL = 1000 * 60 * 60 * 24;
+
+/** Lista de ediciones de Magic para el filtro del buscador, más recientes primero. */
+export async function fetchMagicSets(): Promise<MagicSet[]> {
+  if (setsCache && Date.now() - setsCache.at < SETS_TTL) return setsCache.sets;
+
+  const res = await fetchJson<ScryfallSetList>(
+    "https://api.scryfall.com/sets",
+    {},
+    60 * 60 * 24,
+    2
+  );
+
+  const sets = (res.data ?? [])
+    .filter((s) => !s.digital && SELLABLE_SET_TYPES.has(s.set_type))
+    .map((s) => ({ code: s.code, name: s.name, releasedAt: s.released_at ?? null }))
+    .sort((a, b) => (b.releasedAt ?? "").localeCompare(a.releasedAt ?? ""));
+
+  setsCache = { at: Date.now(), sets };
+  return sets;
+}
