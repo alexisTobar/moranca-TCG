@@ -22,6 +22,31 @@ interface ScryfallList {
   next_page?: string;
 }
 
+function toCardResult(c: ScryfallCard): CardResult {
+  const uris = c.image_uris ?? c.card_faces?.[0]?.image_uris ?? {};
+  const setCode = c.set?.toUpperCase();
+  return {
+    externalId: c.id,
+    name: c.name,
+    imageUrl: uris.normal ?? uris.large ?? uris.png ?? "",
+    imageLarge: uris.large ?? uris.png ?? uris.normal,
+    setName: c.set_name,
+    setCode,
+    cardNumber: c.collector_number,
+    code:
+      setCode && c.collector_number
+        ? `${setCode} ${c.collector_number}`
+        : (setCode ?? c.collector_number),
+    rarity: c.rarity,
+    game: "magic",
+    extra: c.type_line,
+    priceUsd: num(c.prices?.usd),
+    priceUsdFoil: num(c.prices?.usd_foil),
+    priceSource: "TCGplayer vía Scryfall",
+    tcgplayerId: c.tcgplayer_id ?? null,
+  };
+}
+
 /**
  * Magic: The Gathering — Scryfall (pública, sin API key).
  * Devuelve todas las impresiones de la carta con su set, número y el precio
@@ -48,32 +73,76 @@ export const magicProvider: CardProvider = {
       next = page.has_more && page.next_page ? page.next_page : null;
     }
 
-    return cards
-      .slice(0, limit)
-      .map<CardResult>((c) => {
-        const uris = c.image_uris ?? c.card_faces?.[0]?.image_uris ?? {};
-        const setCode = c.set?.toUpperCase();
-        return {
-          externalId: c.id,
-          name: c.name,
-          imageUrl: uris.normal ?? uris.large ?? uris.png ?? "",
-          imageLarge: uris.large ?? uris.png ?? uris.normal,
-          setName: c.set_name,
-          setCode,
-          cardNumber: c.collector_number,
-          code:
-            setCode && c.collector_number
-              ? `${setCode} ${c.collector_number}`
-              : (setCode ?? c.collector_number),
-          rarity: c.rarity,
-          game: "magic",
-          extra: c.type_line,
-          priceUsd: num(c.prices?.usd),
-          priceUsdFoil: num(c.prices?.usd_foil),
-          priceSource: "TCGplayer vía Scryfall",
-          tcgplayerId: c.tcgplayer_id ?? null,
-        };
-      })
-      .filter((c) => c.imageUrl);
+    return cards.slice(0, limit).map(toCardResult).filter((c) => c.imageUrl);
   },
 };
+
+export interface CollectionIdentifier {
+  setCode: string;
+  collectorNumber: string;
+}
+
+interface ScryfallCollectionResponse {
+  data?: ScryfallCard[];
+  not_found?: Array<{ set?: string; collector_number?: string }>;
+}
+
+/**
+ * Búsqueda masiva por set + número de coleccionista, para subir listas de
+ * colección completas sin gastar una consulta por carta. Scryfall acepta
+ * hasta 75 identificadores por llamada a /cards/collection.
+ */
+export async function fetchMagicCollection(
+  identifiers: CollectionIdentifier[]
+): Promise<{ found: Map<string, ScryfallCard>; notFound: CollectionIdentifier[] }> {
+  const found = new Map<string, ScryfallCard>();
+  const notFound: CollectionIdentifier[] = [];
+  const BATCH = 75;
+
+  const key = (setCode: string, collectorNumber: string) =>
+    `${setCode.toLowerCase()}:${collectorNumber}`;
+
+  for (let i = 0; i < identifiers.length; i += BATCH) {
+    const chunk = identifiers.slice(i, i + BATCH);
+    try {
+      const res = await fetchJson<ScryfallCollectionResponse>(
+        "https://api.scryfall.com/cards/collection",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            identifiers: chunk.map((c) => ({
+              set: c.setCode,
+              collector_number: c.collectorNumber,
+            })),
+          }),
+        },
+        0,
+        2
+      );
+
+      for (const card of res.data ?? []) {
+        if (card.set && card.collector_number) {
+          found.set(key(card.set, card.collector_number), card);
+        }
+      }
+      for (const miss of res.not_found ?? []) {
+        if (miss.set && miss.collector_number) {
+          notFound.push({ setCode: miss.set, collectorNumber: miss.collector_number });
+        }
+      }
+    } catch {
+      notFound.push(...chunk);
+    }
+  }
+
+  return { found, notFound };
+}
+
+export function magicCollectionKey(setCode: string, collectorNumber: string): string {
+  return `${setCode.toLowerCase()}:${collectorNumber}`;
+}
+
+export function magicCardToResult(c: ScryfallCard): CardResult {
+  return toCardResult(c);
+}

@@ -90,5 +90,32 @@ export const checkoutSchema = z.object({
   notes: z.string().max(600).optional().nullable(),
 });
 
+export const bulkPreviewSchema = z.object({
+  game: z.literal("magic"),
+  text: z.string().min(1),
+});
+
+export const bulkListingItemSchema = z.object({
+  title: z.string().min(1).max(180),
+  imageUrl: imagenUrl,
+  price: z.number().int().min(1).max(99_999_999),
+  stock: z.number().int().min(1).max(9999).default(1),
+  isFoil: z.boolean().default(false),
+  setName: z.string().max(160).optional().nullable(),
+  cardNumber: z.string().max(40).optional().nullable(),
+  rarity: z.string().max(60).optional().nullable(),
+  externalId: z.string().max(120).optional().nullable(),
+});
+
+export const bulkCreateSchema = z.object({
+  game: z.literal("magic"),
+  status: z.enum(["DRAFT", "ACTIVE", "PAUSED"]).default("ACTIVE"),
+  condition: z.string().max(10).optional().nullable(),
+  language: z.string().max(10).optional().nullable(),
+  sellerId: z.string().max(60).optional().nullable(),
+  items: z.array(bulkListingItemSchema).min(1),
+});
+
 export type ListingInput = z.infer<typeof listingSchema>;
 export type DeckCardInput = z.infer<typeof deckCardSchema>;
+export type BulkListingItemInput = z.infer<typeof bulkListingItemSchema>;

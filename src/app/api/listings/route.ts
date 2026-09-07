@@ -2,24 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { listingSchema } from "@/lib/validators";
-import { slugify } from "@/lib/format";
+import { uniqueSlug } from "@/lib/catalog";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-async function uniqueSlug(base: string): Promise<string> {
-  const root = slugify(base) || "publicacion";
-  let candidate = root;
-  for (let i = 2; i < 200; i++) {
-    const exists = await prisma.listing.findUnique({
-      where: { slug: candidate },
-      select: { id: true },
-    });
-    if (!exists) return candidate;
-    candidate = `${root}-${i}`;
-  }
-  return `${root}-${Date.now().toString(36)}`;
-}
 
 export async function POST(req: Request) {
   try {

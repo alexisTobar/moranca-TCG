@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
+import { slugify } from "@/lib/format";
 
 export const LISTING_CARD_SELECT = {
   id: true,
@@ -33,6 +34,21 @@ export async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T
     }
     return fallback;
   }
+}
+
+/** Genera un slug único agregando -2, -3… si ya existe otra publicación con ese slug. */
+export async function uniqueSlug(base: string): Promise<string> {
+  const root = slugify(base) || "publicacion";
+  let candidate = root;
+  for (let i = 2; i < 200; i++) {
+    const exists = await prisma.listing.findUnique({
+      where: { slug: candidate },
+      select: { id: true },
+    });
+    if (!exists) return candidate;
+    candidate = `${root}-${i}`;
+  }
+  return `${root}-${Date.now().toString(36)}`;
 }
 
 export function activeListings(where: Prisma.ListingWhereInput = {}) {
