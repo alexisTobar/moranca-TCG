@@ -24,6 +24,8 @@ const STATUS_LABEL: Record<string, string> = {
   SOLD: "Vendida",
 };
 
+const PAGE_SIZE = 30;
+
 export default async function ListingsPage({
   searchParams,
 }: {
@@ -33,49 +35,73 @@ export default async function ListingsPage({
   if (!user) return null;
   const sp = await searchParams;
   const status = typeof sp.status === "string" ? sp.status : undefined;
+  const q = typeof sp.q === "string" ? sp.q.trim() : "";
+  const page = Math.max(1, Number(typeof sp.page === "string" ? sp.page : "1") || 1);
 
   const where: Prisma.ListingWhereInput = {
     ...(user.role === "ADMIN" ? {} : { sellerId: user.id }),
     ...(status && ["ACTIVE", "DRAFT", "PAUSED", "SOLD"].includes(status)
       ? { status: status as Prisma.ListingWhereInput["status"] }
       : {}),
+    ...(q
+      ? {
+          OR: [
+            { title: { contains: q, mode: "insensitive" } },
+            { setName: { contains: q, mode: "insensitive" } },
+          ],
+        }
+      : {}),
   };
 
-  const listings = await safeQuery(
-    () =>
-      prisma.listing.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          game: true,
-          type: true,
-          price: true,
-          stock: true,
-          status: true,
-          imageUrl: true,
-          createdAt: true,
-          seller: { select: { name: true } },
-          _count: { select: { deckCards: true } },
-        },
-      }),
-    [] as Array<{
-      id: string;
-      slug: string;
-      title: string;
-      game: string;
-      type: string;
-      price: number;
-      stock: number;
-      status: string;
-      imageUrl: string | null;
-      createdAt: Date;
-      seller: { name: string };
-      _count: { deckCards: number };
-    }>
-  );
+  const [listings, total] = await Promise.all([
+    safeQuery(
+      () =>
+        prisma.listing.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip: (page - 1) * PAGE_SIZE,
+          take: PAGE_SIZE,
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            game: true,
+            type: true,
+            price: true,
+            stock: true,
+            status: true,
+            imageUrl: true,
+            createdAt: true,
+            seller: { select: { name: true } },
+            _count: { select: { deckCards: true } },
+          },
+        }),
+      [] as Array<{
+        id: string;
+        slug: string;
+        title: string;
+        game: string;
+        type: string;
+        price: number;
+        stock: number;
+        status: string;
+        imageUrl: string | null;
+        createdAt: Date;
+        seller: { name: string };
+        _count: { deckCards: number };
+      }>
+    ),
+    safeQuery(() => prisma.listing.count({ where }), 0),
+  ]);
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const buildHref = (patch: Record<string, string | undefined>) => {
+    const params = new URLSearchParams();
+    const current: Record<string, string | undefined> = { q: q || undefined, status, ...patch };
+    for (const [k, v] of Object.entries(current)) if (v) params.set(k, v);
+    const s = params.toString();
+    return s ? `/panel/publicaciones?${s}` : "/panel/publicaciones";
+  };
 
   return (
     <div className="space-y-6">
@@ -83,7 +109,7 @@ export default async function ListingsPage({
         <div>
           <h1 className="font-display text-3xl font-bold text-carbon">Publicaciones</h1>
           <p className="mt-1 text-[13px] text-ink-400">
-            {listings.length} {listings.length === 1 ? "publicación" : "publicaciones"}
+            {total} {total === 1 ? "publicación" : "publicaciones"}
             {user.role === "ADMIN" ? " en toda la tienda" : " tuyas"}
           </p>
         </div>
@@ -95,6 +121,27 @@ export default async function ListingsPage({
         </Link>
       </header>
 
+      <form action="/panel/publicaciones" className="flex gap-2">
+        {status && <input type="hidden" name="status" value={status} />}
+        <input
+          name="q"
+          defaultValue={q}
+          placeholder="Buscar por nombre o edición…"
+          className="w-full max-w-sm rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+        />
+        <button className="rounded-lg bg-brand-600 px-4 py-2 text-[12px] font-bold text-paper transition hover:bg-brand-500">
+          Buscar
+        </button>
+        {q && (
+          <Link
+            href={buildHref({ q: undefined })}
+            className="rounded-lg border border-ink-700 px-3 py-2 text-[12px] font-semibold text-ink-400 transition hover:text-ink-200"
+          >
+            Limpiar
+          </Link>
+        )}
+      </form>
+
       <div className="flex flex-wrap gap-1.5">
         {[
           { value: undefined, label: "Todas" },
@@ -105,7 +152,7 @@ export default async function ListingsPage({
         ].map((f) => (
           <Link
             key={f.label}
-            href={f.value ? `/panel/publicaciones?status=${f.value}` : "/panel/publicaciones"}
+            href={buildHref({ status: f.value, page: undefined })}
             className={`rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition ${
               status === f.value
                 ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
@@ -119,7 +166,11 @@ export default async function ListingsPage({
 
       {listings.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-ink-700 p-16 text-center">
-          <p className="text-sm text-ink-400">No hay publicaciones en este filtro.</p>
+          <p className="text-sm text-ink-400">
+            {q
+              ? `Sin resultados para "${q}" en este filtro.`
+              : "No hay publicaciones en este filtro."}
+          </p>
         </div>
       ) : (
         <ul className="divide-y divide-ink-800 overflow-hidden rounded-2xl card-surface">
@@ -188,6 +239,30 @@ export default async function ListingsPage({
             </li>
           ))}
         </ul>
+      )}
+
+      {pages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          {Array.from({ length: pages }, (_, i) => i + 1)
+            .filter((p) => p === 1 || p === pages || Math.abs(p - page) <= 2)
+            .map((p, idx, arr) => (
+              <span key={p} className="flex items-center gap-2">
+                {idx > 0 && arr[idx - 1] !== p - 1 && (
+                  <span className="text-ink-600">…</span>
+                )}
+                <Link
+                  href={buildHref({ page: String(p) })}
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                    p === page
+                      ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                      : "border-ink-700 text-ink-300 hover:border-ink-600"
+                  }`}
+                >
+                  {p}
+                </Link>
+              </span>
+            ))}
+        </div>
       )}
     </div>
   );
