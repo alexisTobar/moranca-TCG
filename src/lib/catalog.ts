@@ -17,6 +17,7 @@ export const LISTING_CARD_SELECT = {
   stock: true,
   setName: true,
   createdAt: true,
+  sellerId: true,
   seller: { select: { name: true, slug: true } },
   _count: { select: { deckCards: true } },
 } satisfies Prisma.ListingSelect;

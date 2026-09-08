@@ -20,6 +20,7 @@ export interface CartItem {
   game: string;
   type: string;
   maxStock: number;
+  sellerId: string;
   sellerName: string;
   quantity: number;
 }

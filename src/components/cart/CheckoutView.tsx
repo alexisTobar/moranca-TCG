@@ -4,12 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Landmark, MessageCircle } from "lucide-react";
+import { CheckCircle2, CreditCard, Landmark, MessageCircle } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { clp } from "@/lib/format";
 import { REGIONS, comunasOf, PICKUP_POINT, type ShippingMethod } from "@/lib/regions";
 
 const TRANSFER_DISCOUNT_RATE = 0.02;
+type PayMethod = "TRANSFER" | "MP";
 
 interface OrderResult {
   orderId: string;
@@ -21,9 +22,12 @@ interface OrderResult {
 export function CheckoutView({
   buyerName,
   buyerEmail,
+  mpEnabled,
 }: {
   buyerName: string;
   buyerEmail: string;
+  /** Si Mercado Pago está configurado en el servidor (MP_ACCESS_TOKEN). */
+  mpEnabled: boolean;
 }) {
   const router = useRouter();
   const { items, subtotal, clear, ready } = useCart();
@@ -35,9 +39,24 @@ export function CheckoutView({
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<OrderResult[] | null>(null);
 
+  // Mercado Pago cobra a través de una sola cuenta (la del sitio), así que
+  // solo se puede ofrecer cuando todas las cartas del carrito son del mismo
+  // vendedor. Con varios vendedores, cada uno necesita su propia orden y su
+  // propia transferencia.
+  const sellerIds = useMemo(
+    () => new Set(items.map((i) => i.sellerId).filter(Boolean)),
+    [items]
+  );
+  const singleSeller = sellerIds.size === 1;
+  const mpAvailable = mpEnabled && singleSeller;
+
+  const [payMethod, setPayMethod] = useState<PayMethod>("TRANSFER");
+  const effectivePayMethod: PayMethod = payMethod === "MP" && !mpAvailable ? "TRANSFER" : payMethod;
+
   const comunas = useMemo(() => comunasOf(region), [region]);
   const ship = 0; // todo despacho es por pagar directo al courier, no se cobra acá
-  const discount = Math.round(subtotal * TRANSFER_DISCOUNT_RATE);
+  const discount =
+    effectivePayMethod === "TRANSFER" ? Math.round(subtotal * TRANSFER_DISCOUNT_RATE) : 0;
   const total = subtotal - discount + ship;
 
   if (!ready) {
@@ -129,10 +148,18 @@ export function CheckoutView({
           shipCity: method === "SHIPPING" ? comuna : null,
           shipAddress: method === "SHIPPING" ? form.get("shipAddress") : null,
           notes: form.get("notes"),
+          paymentMethod: effectivePayMethod,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "No se pudo procesar la orden");
+
+      if (data.initPoint) {
+        // Mercado Pago: la orden ya quedó creada, ahora se paga en su checkout.
+        clear();
+        window.location.href = data.initPoint as string;
+        return;
+      }
 
       clear();
       setDone(data.orders as OrderResult[]);
@@ -163,19 +190,61 @@ export function CheckoutView({
           {/* PAGO */}
           <section className="rounded-2xl card-surface p-5">
             <h2 className="text-sm font-semibold text-carbon">1 · Método de pago</h2>
-            <div className="mt-4 flex items-start gap-3 rounded-xl border border-accent-500/60 bg-accent-500/10 p-4">
-              <Landmark className="h-4 w-4 shrink-0 text-accent-400" strokeWidth={2} />
-              <div>
-                <p className="text-[13px] font-bold text-accent-300">
-                  Transferencia bancaria · -2% dcto
-                </p>
-                <p className="mt-0.5 text-[11px] text-ink-400">
-                  Al confirmar te mostramos la cuenta de cada vendedor (si tu
-                  carrito tiene más de uno, se separa en una orden por cada
-                  cual). Le mandas el comprobante desde{" "}
-                  <strong>Mi cuenta</strong> una vez creada la orden.
-                </p>
-              </div>
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setPayMethod("TRANSFER")}
+                className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${
+                  effectivePayMethod === "TRANSFER"
+                    ? "border-accent-500/60 bg-accent-500/10"
+                    : "border-ink-700 hover:border-ink-600"
+                }`}
+              >
+                <Landmark className="h-4 w-4 shrink-0 text-accent-400" strokeWidth={2} />
+                <div>
+                  <p
+                    className={`text-[13px] font-bold ${
+                      effectivePayMethod === "TRANSFER" ? "text-accent-300" : "text-ink-200"
+                    }`}
+                  >
+                    Transferencia bancaria · -2% dcto
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-ink-400">
+                    Te mostramos la cuenta de cada vendedor al confirmar (si tu
+                    carrito tiene más de uno, se separa en una orden por cada
+                    cual). Le mandas el comprobante desde <strong>Mi cuenta</strong>.
+                  </p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                disabled={!mpAvailable}
+                onClick={() => setPayMethod("MP")}
+                className={`flex items-start gap-3 rounded-xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                  effectivePayMethod === "MP"
+                    ? "border-accent-500/60 bg-accent-500/10"
+                    : "border-ink-700 hover:border-ink-600"
+                }`}
+              >
+                <CreditCard className="h-4 w-4 shrink-0 text-accent-400" strokeWidth={2} />
+                <div>
+                  <p
+                    className={`text-[13px] font-bold ${
+                      effectivePayMethod === "MP" ? "text-accent-300" : "text-ink-200"
+                    }`}
+                  >
+                    Mercado Pago
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-ink-400">
+                    {!mpEnabled
+                      ? "No disponible por ahora."
+                      : !singleSeller
+                        ? "Solo cuando compras a un único vendedor."
+                        : "Tarjetas, saldo en cuenta u otros medios de Mercado Pago. Precio sin descuento."}
+                  </p>
+                </div>
+              </button>
             </div>
           </section>
 
@@ -347,10 +416,12 @@ export function CheckoutView({
                 <dt className="text-ink-400">Subtotal</dt>
                 <dd className="text-ink-200">{clp(subtotal)}</dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-emerald-700">Descuento transferencia (2%)</dt>
-                <dd className="text-emerald-700">-{clp(discount)}</dd>
-              </div>
+              {discount > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-emerald-700">Descuento transferencia (2%)</dt>
+                  <dd className="text-emerald-700">-{clp(discount)}</dd>
+                </div>
+              )}
               <div className="flex justify-between">
                 <dt className="text-ink-400">
                   {method === "PICKUP" ? "Retiro" : "Despacho"}
@@ -377,12 +448,17 @@ export function CheckoutView({
               disabled={loading}
               className="mt-5 w-full rounded-xl bg-brand-600 py-3 text-sm font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
             >
-              {loading ? "Procesando…" : `Confirmar orden · ${clp(total)}`}
+              {loading
+                ? "Procesando…"
+                : effectivePayMethod === "MP"
+                  ? `Pagar con Mercado Pago · ${clp(total)}`
+                  : `Confirmar orden · ${clp(total)}`}
             </button>
 
             <p className="mt-3 text-center text-[11px] leading-relaxed text-ink-400">
-              Te mostramos los datos de la cuenta al confirmar. Despachamos
-              apenas confirmemos tu comprobante en el chat de la orden.
+              {effectivePayMethod === "MP"
+                ? "Te llevamos al checkout seguro de Mercado Pago. Despachamos apenas se confirme el pago."
+                : "Te mostramos los datos de la cuenta al confirmar. Despachamos apenas confirmemos tu comprobante en el chat de la orden."}
             </p>
           </div>
         </aside>

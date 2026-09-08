@@ -6,6 +6,7 @@ import { safeQuery } from "@/lib/catalog";
 import { AccountProfileForm } from "@/components/account/AccountProfileForm";
 import { SellerRequestBox } from "@/components/account/SellerRequestBox";
 import { OrderCard, type AccountOrder } from "@/components/account/OrderCard";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export const metadata: Metadata = {
   title: "Mi cuenta",
@@ -43,8 +44,18 @@ export default async function AccountPage() {
           id: true,
           status: true,
           total: true,
+          paymentMethod: true,
           createdAt: true,
-          seller: { select: { name: true } },
+          seller: {
+            select: {
+              name: true,
+              bankName: true,
+              bankAccountType: true,
+              bankAccountNumber: true,
+              bankHolderName: true,
+              bankRut: true,
+            },
+          },
           items: { select: { id: true, title: true, quantity: true, unitPrice: true } },
         },
       }),
@@ -55,18 +66,31 @@ export default async function AccountPage() {
     id: o.id,
     status: o.status,
     total: o.total,
+    paymentMethod: o.paymentMethod,
     sellerName: o.seller?.name ?? "Vendedor",
+    bankTransfer: o.seller?.bankAccountNumber
+      ? {
+          bankName: o.seller.bankName,
+          accountType: o.seller.bankAccountType,
+          accountNumber: o.seller.bankAccountNumber,
+          holderName: o.seller.bankHolderName,
+          rut: o.seller.bankRut,
+        }
+      : null,
     createdAt: o.createdAt.toISOString(),
     items: o.items,
   }));
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
-      <header>
-        <h1 className="font-display text-3xl font-bold text-carbon">Mi cuenta</h1>
-        <p className="mt-1 text-[13px] text-ink-400">
-          {user.email} · {user.role === "SELLER" ? "Vendedor" : user.role === "ADMIN" ? "Administrador" : "Comprador"}
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-carbon">Mi cuenta</h1>
+          <p className="mt-1 text-[13px] text-ink-400">
+            {user.email} · {user.role === "SELLER" ? "Vendedor" : user.role === "ADMIN" ? "Administrador" : "Comprador"}
+          </p>
+        </div>
+        <LogoutButton />
       </header>
 
       <section className="rounded-2xl card-surface p-5">

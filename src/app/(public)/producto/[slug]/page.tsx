@@ -172,6 +172,7 @@ export default async function ProductPage({
             game={listing.game}
             type={listing.type}
             maxStock={listing.stock}
+            sellerId={listing.sellerId}
             sellerName={listing.seller.name}
           />
 

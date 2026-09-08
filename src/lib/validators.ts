@@ -126,6 +126,7 @@ export const checkoutSchema = z.object({
   shipCity: z.string().max(80).optional().nullable(),
   shipRegion: z.string().max(80).optional().nullable(),
   notes: z.string().max(600).optional().nullable(),
+  paymentMethod: z.enum(["TRANSFER", "MP"]).default("TRANSFER"),
 });
 
 export const orderMessageSchema = z.object({

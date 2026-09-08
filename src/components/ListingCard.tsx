@@ -18,6 +18,7 @@ export interface ListingCardData {
   isFoil: boolean;
   stock: number;
   setName: string | null;
+  sellerId: string;
   seller: { name: string; slug: string };
   _count?: { deckCards: number };
 }
@@ -107,6 +108,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
           game={listing.game}
           type={listing.type}
           maxStock={listing.stock}
+          sellerId={listing.sellerId}
           sellerName={listing.seller.name}
         />
       </div>
