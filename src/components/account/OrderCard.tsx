@@ -79,19 +79,19 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
               </p>
             </div>
           ) : order.bankTransfer ? (
-            <div className="flex items-start gap-2">
+            <div className="flex items-start gap-2.5">
               <Landmark className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-400" strokeWidth={2} />
-              <div className="min-w-0 text-[11px] leading-relaxed text-ink-300">
-                <p className="mb-1 font-bold uppercase tracking-wider text-ink-400">
+              <div className="min-w-0 flex-1">
+                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-ink-400">
                   Transferir a
                 </p>
-                <p>
-                  {order.bankTransfer.bankName} · cuenta {order.bankTransfer.accountType} N°{" "}
-                  {order.bankTransfer.accountNumber}
-                </p>
-                <p>
-                  RUT {order.bankTransfer.rut} · {order.bankTransfer.holderName}
-                </p>
+                <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[12px]">
+                  <BankRow label="Banco" value={order.bankTransfer.bankName} />
+                  <BankRow label="Tipo de cuenta" value={order.bankTransfer.accountType} />
+                  <BankRow label="N° de cuenta" value={order.bankTransfer.accountNumber} strong />
+                  <BankRow label="RUT" value={order.bankTransfer.rut} />
+                  <BankRow label="Titular" value={order.bankTransfer.holderName} />
+                </dl>
               </div>
             </div>
           ) : (
@@ -108,5 +108,23 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
 
       <OrderChatToggle orderId={order.id} currentUserId={userId} className="mt-3" />
     </div>
+  );
+}
+
+function BankRow({
+  label,
+  value,
+  strong = false,
+}: {
+  label: string;
+  value: string | null;
+  strong?: boolean;
+}) {
+  if (!value) return null;
+  return (
+    <>
+      <dt className="text-ink-400">{label}</dt>
+      <dd className={strong ? "font-bold text-ink-200" : "text-ink-300"}>{value}</dd>
+    </>
   );
 }

@@ -6,7 +6,6 @@ import { safeQuery } from "@/lib/catalog";
 import { AccountProfileForm } from "@/components/account/AccountProfileForm";
 import { SellerRequestBox } from "@/components/account/SellerRequestBox";
 import { OrderCard, type AccountOrder } from "@/components/account/OrderCard";
-import { LogoutButton } from "@/components/LogoutButton";
 
 export const metadata: Metadata = {
   title: "Mi cuenta",
@@ -83,14 +82,11 @@ export default async function AccountPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-carbon">Mi cuenta</h1>
-          <p className="mt-1 text-[13px] text-ink-400">
-            {user.email} · {user.role === "SELLER" ? "Vendedor" : user.role === "ADMIN" ? "Administrador" : "Comprador"}
-          </p>
-        </div>
-        <LogoutButton />
+      <header>
+        <h1 className="font-display text-3xl font-bold text-carbon">Mi cuenta</h1>
+        <p className="mt-1 text-[13px] text-ink-400">
+          {user.email} · {user.role === "SELLER" ? "Vendedor" : user.role === "ADMIN" ? "Administrador" : "Comprador"}
+        </p>
       </header>
 
       <section className="rounded-2xl card-surface p-5">

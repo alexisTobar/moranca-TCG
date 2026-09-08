@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { SearchBox } from "./SearchBox";
 import { MobileNav } from "./MobileNav";
 import { CartButton } from "./cart/CartDrawer";
+import { LogoutButton } from "./LogoutButton";
 
 const NAV = [
   { href: "/cartas", label: "Cartas" },
@@ -51,7 +52,11 @@ export async function SiteHeader() {
             >
               {user.role === "BUYER" ? "Mi cuenta" : "Mi panel"}
             </Link>
-          ) : (
+          ) : null}
+          {user?.role === "BUYER" && (
+            <LogoutButton className="hidden !px-3.5 !py-2 !text-[13px] !font-medium sm:block" />
+          )}
+          {!user && (
             <Link
               href="/ingresar"
               className="hidden rounded-lg border border-ink-700 px-3.5 py-2 text-[13px] font-medium text-ink-200 transition hover:border-accent-500/60 hover:text-accent-300 sm:block"
@@ -65,6 +70,7 @@ export async function SiteHeader() {
             isLogged={Boolean(user)}
             accountHref={user?.role === "BUYER" ? "/cuenta" : "/panel"}
             accountLabel={user?.role === "BUYER" ? "Mi cuenta" : "Mi panel"}
+            showLogout={user?.role === "BUYER"}
           />
         </div>
       </div>

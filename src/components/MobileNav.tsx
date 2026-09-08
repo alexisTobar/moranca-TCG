@@ -2,17 +2,20 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { LogoutButton } from "./LogoutButton";
 
 export function MobileNav({
   nav,
   isLogged,
   accountHref = "/panel",
   accountLabel = "Mi panel",
+  showLogout = false,
 }: {
   nav: { href: string; label: string }[];
   isLogged: boolean;
   accountHref?: string;
   accountLabel?: string;
+  showLogout?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -59,6 +62,7 @@ export function MobileNav({
             >
               {isLogged ? accountLabel : "Ingresar"}
             </Link>
+            {showLogout && <LogoutButton className="mt-1 w-full" />}
           </div>
         </div>
       )}

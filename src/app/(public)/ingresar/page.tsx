@@ -20,7 +20,7 @@ export default async function LoginPage({
   const registerHref = next ? `/registro?next=${encodeURIComponent(next)}` : "/registro";
 
   return (
-    <div className="relative flex min-h-[80vh] items-center justify-center px-4 py-16">
+    <div className="relative flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4 py-12 sm:py-16">
       <div className="pointer-events-none absolute left-1/2 top-1/3 h-[420px] w-[600px] -translate-x-1/2 rounded-full bg-accent-500/10 blur-[120px]" />
 
       <div className="relative w-full max-w-sm">
