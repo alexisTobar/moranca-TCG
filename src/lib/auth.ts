@@ -7,6 +7,7 @@ import { slugify } from "@/lib/format";
 
 export const SESSION_COOKIE = "dreamdeck_session";
 const MAX_AGE_SECONDS = 60 * 60 * 8; // 8 horas
+const REMEMBER_MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 días con "Recordarme"
 
 export interface SessionPayload {
   sub: string;
@@ -33,13 +34,14 @@ export async function verifyPassword(plain: string, hash: string) {
   return bcrypt.compare(plain, hash);
 }
 
-export async function createSession(payload: SessionPayload) {
+export async function createSession(payload: SessionPayload, remember = false) {
+  const maxAge = remember ? REMEMBER_MAX_AGE_SECONDS : MAX_AGE_SECONDS;
   const token = await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setIssuer("dreamdeck-tcg")
     .setAudience("dreamdeck-tcg")
-    .setExpirationTime(`${MAX_AGE_SECONDS}s`)
+    .setExpirationTime(`${maxAge}s`)
     .sign(secretKey());
 
   const store = await cookies();
@@ -48,7 +50,7 @@ export async function createSession(payload: SessionPayload) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: MAX_AGE_SECONDS,
+    maxAge,
   });
 }
 

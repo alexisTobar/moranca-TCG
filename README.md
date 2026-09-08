@@ -226,6 +226,19 @@ siguen creando a mano desde **Panel → Vendedores**, como antes.
   vuelva a iniciar sesión — el chequeo de rol para entrar al panel se hace
   contra la base, no contra el rol guardado en la cookie de sesión).
 
+### Login
+
+`/ingresar` tiene **mostrar/ocultar contraseña**, **"Recordar sesión"** (30
+días en vez de las 8 horas normales) y **recuperar contraseña**
+(`/recuperar` → correo con link de un solo uso, vence en 1 hora, token
+guardado con hash SHA-256). Sin `RESEND_API_KEY` configurado, el link de
+recuperación no se manda por correo: queda en los logs del servidor para
+poder probar el flujo igual (ver `.env.example`).
+
+**Login con Google:** no está implementado todavía — necesita credenciales
+OAuth propias (Client ID/Secret) desde Google Cloud Console, que solo se
+pueden crear desde tu cuenta. Se agrega cuando las tengas.
+
 ---
 
 ## 7. Chat de la orden

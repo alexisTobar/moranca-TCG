@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ImageOff } from "lucide-react";
+import { toast } from "sonner";
 import { CardSearch, type CardResult } from "./CardSearch";
 import { ImageUploader } from "./ImageUploader";
 import {
@@ -51,6 +52,12 @@ export interface SellerOption {
   name: string;
 }
 
+// One Piece, Magic y Pokémon casi siempre se venden en su edición en inglés;
+// Mitos y Leyendas solo se imprime en español.
+function defaultLanguage(game: GameId): string {
+  return game === "myl" ? "ES" : "EN";
+}
+
 const EMPTY: ListingFormValues = {
   type: "SINGLE",
   status: "ACTIVE",
@@ -60,7 +67,7 @@ const EMPTY: ListingFormValues = {
   price: 0,
   stock: 1,
   condition: "NM",
-  language: "ES",
+  language: defaultLanguage("magic"),
   isFoil: false,
   description: null,
   setName: null,
@@ -98,6 +105,11 @@ export function ListingForm({
     key: K,
     value: ListingFormValues[K]
   ) => setValues((v) => ({ ...v, [key]: value }));
+
+  // Al cambiar de juego, el idioma vuelve a su default (inglés para todo menos
+  // MyL) — se puede seguir cambiando a mano después si la carta es una excepción.
+  const pickGame = (game: GameId) =>
+    setValues((v) => ({ ...v, game, language: defaultLanguage(game) }));
 
   const totalDeckCards = useMemo(
     () => values.deckCards.reduce((a, c) => a + c.quantity, 0),
@@ -197,10 +209,17 @@ export function ListingForm({
       // de mandar a "Publicaciones": subir varias seguidas era tedioso si tocaba
       // volver a /panel/publicar cada vez.
       const cardName = reference?.name ?? values.title;
-      const label = values.setName ? `${cardName} · ${values.setName}` : cardName;
-      alert(`Se agregó: ${label} (${gameName(values.game)})`);
+      toast.success(`Se agregó: ${cardName}`, {
+        description: [values.setName, gameName(values.game)].filter(Boolean).join(" · "),
+      });
 
-      setValues((v) => ({ ...EMPTY, type: v.type, game: v.game, sellerId: v.sellerId }));
+      setValues((v) => ({
+        ...EMPTY,
+        type: v.type,
+        game: v.game,
+        language: defaultLanguage(v.game),
+        sellerId: v.sellerId,
+      }));
       setReference(null);
       setSaving(false);
     } catch (err) {
@@ -243,7 +262,7 @@ export function ListingForm({
       {values.type !== "SEALED" && (
         <CardSearch
           game={values.game}
-          onGameChange={(g) => set("game", g)}
+          onGameChange={pickGame}
           onPick={pickCard}
           label={
             values.type === "DECK"
@@ -266,7 +285,7 @@ export function ListingForm({
               <button
                 key={g}
                 type="button"
-                onClick={() => set("game", g)}
+                onClick={() => pickGame(g)}
                 className={`rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition ${
                   values.game === g
                     ? "border-accent-500/60 bg-accent-500/10 text-accent-300"

@@ -63,14 +63,27 @@ model User {
   sellerRequestMessage String?
   sellerRequestAt      DateTime?
 
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  listings     Listing[]
-  buyerOrders  Order[]        @relation("BuyerOrders")
-  sellerOrders Order[]        @relation("SellerOrders")
-  sentMessages OrderMessage[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  listings       Listing[]
+  buyerOrders    Order[]         @relation("BuyerOrders")
+  sellerOrders   Order[]         @relation("SellerOrders")
+  sentMessages   OrderMessage[]
+  passwordResets PasswordReset[]
 
   @@index([active])
+}
+
+model PasswordReset {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 model Listing {

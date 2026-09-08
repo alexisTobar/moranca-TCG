@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -101,19 +102,38 @@ function Field({
   autoComplete?: string;
   hint?: string;
 }) {
+  const [reveal, setReveal] = useState(false);
+  const isPassword = type === "password";
+
   return (
     <label className="block">
       <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
         {label}
       </span>
-      <input
-        name={name}
-        type={type}
-        required={required}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none transition focus:border-accent-500/70 focus:ring-2 focus:ring-accent-500/20"
-      />
+      <div className="relative">
+        <input
+          name={name}
+          type={isPassword ? (reveal ? "text" : "password") : type}
+          required={required}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          className={`w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none transition focus:border-accent-500/70 focus:ring-2 focus:ring-accent-500/20 ${isPassword ? "pr-10" : ""}`}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setReveal((v) => !v)}
+            aria-label={reveal ? "Ocultar contraseña" : "Mostrar contraseña"}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-200"
+          >
+            {reveal ? (
+              <EyeOff className="h-4 w-4" strokeWidth={1.75} />
+            ) : (
+              <Eye className="h-4 w-4" strokeWidth={1.75} />
+            )}
+          </button>
+        )}
+      </div>
       {hint && <span className="mt-1 block text-[11px] text-ink-400">{hint}</span>}
     </label>
   );

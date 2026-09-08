@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 const schema = z.object({
   email: z.string().email().max(160),
   password: z.string().min(1).max(200),
+  remember: z.boolean().default(false),
 });
 
 export async function POST(req: Request) {
@@ -79,12 +80,15 @@ export async function POST(req: Request) {
   }
 
   await clearRateLimit(key);
-  await createSession({
-    sub: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-  });
+  await createSession(
+    {
+      sub: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    },
+    parsed.data.remember
+  );
 
   return NextResponse.json({
     ok: true,

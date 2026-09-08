@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { isValidRut } from "./rut";
 
-const passwordSchema = z
+export const passwordSchema = z
   .string()
   .min(10, "La contraseña debe tener al menos 10 caracteres")
   .max(200)

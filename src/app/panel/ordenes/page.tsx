@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { safeQuery } from "@/lib/catalog";
 import { clp, timeAgo } from "@/lib/format";
 import { OrderChatToggle } from "@/components/OrderChatToggle";
+import { OrderStatusActions } from "@/components/OrderStatusActions";
 
 export const dynamic = "force-dynamic";
 
@@ -184,6 +185,10 @@ export default async function OrdersPage() {
                     </div>
                   </dl>
                 </div>
+              </div>
+
+              <div className="mt-4 border-t border-ink-800 pt-4">
+                <OrderStatusActions orderId={o.id} status={o.status} />
               </div>
 
               <OrderChatToggle
