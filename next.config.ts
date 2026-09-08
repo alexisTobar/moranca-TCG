@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const config: NextConfig = {
-  // TEMP: distDir aislado solo para no chocar con otro `next dev` corriendo
-  // sobre esta misma carpeta durante la verificación. Se revierte después.
-  distDir: ".next-verify",
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "cards.scryfall.io" },
