@@ -10,6 +10,7 @@ import {
   CONDITIONS,
   LANGUAGES,
   LISTING_TYPES,
+  gameName,
   type GameId,
 } from "@/lib/games";
 import { clp } from "@/lib/format";
@@ -186,8 +187,22 @@ export function ListingForm({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "No se pudo guardar");
 
-      router.push("/panel/publicaciones");
-      router.refresh();
+      if (isEdit) {
+        router.push("/panel/publicaciones");
+        router.refresh();
+        return;
+      }
+
+      // Al crear se queda en el formulario (listo para la próxima carta) en vez
+      // de mandar a "Publicaciones": subir varias seguidas era tedioso si tocaba
+      // volver a /panel/publicar cada vez.
+      const cardName = reference?.name ?? values.title;
+      const label = values.setName ? `${cardName} · ${values.setName}` : cardName;
+      alert(`Se agregó: ${label} (${gameName(values.game)})`);
+
+      setValues((v) => ({ ...EMPTY, type: v.type, game: v.game, sellerId: v.sellerId }));
+      setReference(null);
+      setSaving(false);
     } catch (err) {
       setError((err as Error).message);
       setSaving(false);

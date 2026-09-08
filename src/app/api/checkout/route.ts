@@ -1,16 +1,45 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { AuthError, requireUser } from "@/lib/auth";
 import { checkoutSchema } from "@/lib/validators";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
-import { createPreference, mercadoPagoEnabled } from "@/lib/mercadopago";
 import { shippingCost, zoneOf, comunasOf } from "@/lib/regions";
-import { BANK_TRANSFER, TRANSFER_DISCOUNT_RATE } from "@/lib/bank";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/** Descuento por pagar con transferencia (único método disponible hoy). */
+const TRANSFER_DISCOUNT_RATE = 0.02;
+
+function bankNotice(
+  total: number,
+  seller: {
+    name: string;
+    bankName: string | null;
+    bankAccountType: string | null;
+    bankAccountNumber: string | null;
+    bankHolderName: string | null;
+    bankRut: string | null;
+  }
+): string {
+  if (!seller.bankName || !seller.bankAccountNumber) {
+    return `Guardamos tu orden con ${seller.name}. Todavía no configuró su cuenta bancaria: te contactaremos por email para coordinar el pago de ${total.toLocaleString("es-CL")} CLP.`;
+  }
+  return `Transfiere ${total.toLocaleString("es-CL")} CLP a ${seller.name} — ${seller.bankName}, cuenta ${seller.bankAccountType} N° ${seller.bankAccountNumber}, RUT ${seller.bankRut}, a nombre de ${seller.bankHolderName}. Manda el comprobante por el chat de la orden.`;
+}
+
 export async function POST(req: Request) {
-  const limiter = await rateLimit(clientKey(req, "checkout"), 12, 600);
+  let user;
+  try {
+    user = await requireUser();
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: "Debes iniciar sesión para comprar" }, { status: 401 });
+    }
+    throw error;
+  }
+
+  const limiter = await rateLimit(clientKey(req, `checkout:${user.id}`), 12, 600);
   if (!limiter.allowed) {
     return NextResponse.json(
       { error: "Demasiadas órdenes seguidas. Intenta en unos minutos." },
@@ -56,16 +85,14 @@ export async function POST(req: Request) {
   // Los precios y el stock siempre se leen de la base de datos.
   const listings = await prisma.listing.findMany({
     where: { id: { in: data.items.map((i) => i.listingId) } },
-    select: { id: true, title: true, price: true, stock: true, status: true },
+    select: { id: true, title: true, price: true, stock: true, status: true, sellerId: true },
   });
 
   const byId = new Map(listings.map((l) => [l.id, l]));
-  const orderItems: Array<{
-    listingId: string;
-    title: string;
-    unitPrice: number;
-    quantity: number;
-  }> = [];
+  const bySeller = new Map<
+    string,
+    Array<{ listingId: string; title: string; unitPrice: number; quantity: number }>
+  >();
 
   for (const item of data.items) {
     const listing = byId.get(item.listingId);
@@ -83,96 +110,74 @@ export async function POST(req: Request) {
         { status: 409 }
       );
     }
-    orderItems.push({
+    const group = bySeller.get(listing.sellerId) ?? [];
+    group.push({
       listingId: listing.id,
       title: listing.title,
       unitPrice: listing.price,
       quantity: item.quantity,
     });
+    bySeller.set(listing.sellerId, group);
   }
 
-  const subtotal = orderItems.reduce((a, i) => a + i.unitPrice * i.quantity, 0);
-  const ship = shippingCost(data.shipMethod, data.shipRegion ?? null, subtotal);
-  // El descuento por transferencia se recalcula acá, nunca se confía en el
-  // monto que mande el cliente.
-  const discount =
-    data.paymentMethod === "TRANSFER" ? Math.round(subtotal * TRANSFER_DISCOUNT_RATE) : 0;
-  const total = subtotal - discount + ship;
-
-  const order = await prisma.order.create({
-    data: {
-      buyerName: data.buyerName,
-      buyerEmail: data.buyerEmail.toLowerCase().trim(),
-      buyerPhone: data.buyerPhone ?? null,
-      paymentMethod: data.paymentMethod,
-      shipMethod: data.shipMethod,
-      shipAddress: data.shipAddress ?? null,
-      shipCity: data.shipCity ?? null,
-      shipRegion: data.shipRegion ?? null,
-      shipCost: ship,
-      discount,
-      subtotal,
-      total,
-      notes: data.notes ?? null,
-      items: { create: orderItems },
+  const sellers = await prisma.user.findMany({
+    where: { id: { in: [...bySeller.keys()] } },
+    select: {
+      id: true,
+      name: true,
+      bankName: true,
+      bankAccountType: true,
+      bankAccountNumber: true,
+      bankHolderName: true,
+      bankRut: true,
     },
-    select: { id: true },
   });
+  const sellerById = new Map(sellers.map((s) => [s.id, s]));
 
-  // Transferencia: no pasa por Mercado Pago, se le muestran los datos de la
-  // cuenta y queda pendiente hasta que llegue el comprobante.
-  if (data.paymentMethod === "TRANSFER") {
-    return NextResponse.json({
-      ok: true,
+  // Un carrito con cartas de varios vendedores queda como una orden por
+  // vendedor: cada uno tiene su propia cuenta bancaria y su propio chat.
+  const orders = [];
+  for (const [sellerId, items] of bySeller) {
+    const seller = sellerById.get(sellerId);
+    if (!seller) continue;
+
+    const subtotal = items.reduce((a, i) => a + i.unitPrice * i.quantity, 0);
+    const ship = shippingCost(data.shipMethod, data.shipRegion ?? null, subtotal);
+    const discount = Math.round(subtotal * TRANSFER_DISCOUNT_RATE);
+    const total = subtotal - discount + ship;
+
+    const order = await prisma.order.create({
+      data: {
+        buyerId: user.id,
+        sellerId: seller.id,
+        buyerName: user.name,
+        buyerEmail: user.email,
+        paymentMethod: "TRANSFER",
+        shipMethod: data.shipMethod,
+        shipAddress: data.shipAddress ?? null,
+        shipCity: data.shipCity ?? null,
+        shipRegion: data.shipRegion ?? null,
+        shipCost: ship,
+        discount,
+        subtotal,
+        total,
+        notes: data.notes ?? null,
+        items: { create: items },
+      },
+      select: { id: true },
+    });
+
+    orders.push({
       orderId: order.id,
-      notice: `Transfiere ${total.toLocaleString("es-CL")} CLP a ${BANK_TRANSFER.bank}, cuenta ${BANK_TRANSFER.accountType} N° ${BANK_TRANSFER.accountNumber}, RUT ${BANK_TRANSFER.rut}, a nombre de ${BANK_TRANSFER.holderName}. Envía el comprobante a ${BANK_TRANSFER.email} indicando el N° de orden. Despachamos apenas confirmemos el pago.`,
+      sellerName: seller.name,
+      total,
+      notice: bankNotice(total, seller),
     });
   }
 
-  if (!mercadoPagoEnabled()) {
-    return NextResponse.json({
-      ok: true,
-      orderId: order.id,
-      notice:
-        "Mercado Pago aún no está configurado: te contactaremos por email para coordinar el pago.",
-    });
+  if (orders.length === 0) {
+    return NextResponse.json({ error: "No se pudo procesar la orden" }, { status: 500 });
   }
 
-  try {
-    const preference = await createPreference({
-      orderId: order.id,
-      items: [
-        ...orderItems.map((i) => ({
-          title: i.title,
-          quantity: i.quantity,
-          unit_price: i.unitPrice,
-        })),
-        ...(ship > 0
-          ? [{ title: "Despacho", quantity: 1, unit_price: ship }]
-          : []),
-      ],
-      payer: { name: data.buyerName, email: data.buyerEmail },
-    });
-
-    if (preference) {
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { preferenceId: preference.id },
-      });
-      return NextResponse.json({
-        ok: true,
-        orderId: order.id,
-        checkoutUrl: preference.init_point,
-      });
-    }
-  } catch (error) {
-    console.error("[checkout] Mercado Pago", error);
-  }
-
-  return NextResponse.json({
-    ok: true,
-    orderId: order.id,
-    notice:
-      "No pudimos abrir Mercado Pago en este momento. Guardamos tu orden y te contactaremos.",
-  });
+  return NextResponse.json({ ok: true, orders });
 }

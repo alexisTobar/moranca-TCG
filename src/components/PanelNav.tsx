@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, PlusCircle, ListChecks, Package, Users } from "lucide-react";
+import {
+  LayoutDashboard,
+  PlusCircle,
+  ListChecks,
+  Package,
+  Users,
+  UserCircle,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const ITEMS: Array<{
@@ -16,7 +23,8 @@ const ITEMS: Array<{
   { href: "/panel/publicar", label: "Publicar", icon: PlusCircle },
   { href: "/panel/publicaciones", label: "Publicaciones", icon: ListChecks },
   { href: "/panel/ordenes", label: "Órdenes", icon: Package },
-  { href: "/panel/usuarios", label: "Perfiles", icon: Users, adminOnly: true },
+  { href: "/panel/perfil", label: "Mi perfil", icon: UserCircle },
+  { href: "/panel/usuarios", label: "Vendedores", icon: Users, adminOnly: true },
 ];
 
 export function PanelNav({ isAdmin }: { isAdmin: boolean }) {

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
+import { slugify } from "@/lib/format";
 
 export const SESSION_COOKIE = "dreamdeck_session";
 const MAX_AGE_SECONDS = 60 * 60 * 8; // 8 horas
@@ -11,7 +12,7 @@ export interface SessionPayload {
   sub: string;
   email: string;
   name: string;
-  role: "ADMIN" | "SELLER";
+  role: "ADMIN" | "SELLER" | "BUYER";
 }
 
 function secretKey(): Uint8Array {
@@ -67,7 +68,8 @@ export async function verifyToken(token: string): Promise<SessionPayload | null>
       sub: String(payload.sub),
       email: String(payload.email ?? ""),
       name: String(payload.name ?? ""),
-      role: payload.role === "ADMIN" ? "ADMIN" : "SELLER",
+      role:
+        payload.role === "ADMIN" ? "ADMIN" : payload.role === "BUYER" ? "BUYER" : "SELLER",
     };
   } catch {
     return null;
@@ -111,6 +113,21 @@ export async function requireAdmin() {
   const user = await requireUser();
   if (user.role !== "ADMIN") throw new AuthError("Requiere rol administrador", 403);
   return user;
+}
+
+/** Genera un slug único de perfil, agregando -2, -3… si ya existe. */
+export async function uniqueUserSlug(base: string): Promise<string> {
+  const root = slugify(base) || "cuenta";
+  let candidate = root;
+  for (let i = 2; i < 200; i++) {
+    const exists = await prisma.user.findUnique({
+      where: { slug: candidate },
+      select: { id: true },
+    });
+    if (!exists) return candidate;
+    candidate = `${root}-${i}`;
+  }
+  return `${root}-${Date.now().toString(36)}`;
 }
 
 export class AuthError extends Error {

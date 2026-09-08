@@ -11,6 +11,7 @@ datasource db {
 enum Role {
   ADMIN
   SELLER
+  BUYER
 }
 
 enum ListingType {
@@ -45,9 +46,29 @@ model User {
   bio       String?
   phone     String?
   city      String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  listings  Listing[]
+
+  // Datos de registro del comprador.
+  rut     String?
+  address String?
+
+  // Cuenta bancaria del vendedor, la configura cada uno en su propio perfil.
+  bankName          String?
+  bankAccountType   String?
+  bankAccountNumber String?
+  bankHolderName    String?
+  bankRut           String?
+
+  // Solicitud de comprador para pasar a vendedor.
+  sellerRequestStatus  String?
+  sellerRequestMessage String?
+  sellerRequestAt      DateTime?
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  listings     Listing[]
+  buyerOrders  Order[]        @relation("BuyerOrders")
+  sellerOrders Order[]        @relation("SellerOrders")
+  sentMessages OrderMessage[]
 
   @@index([active])
 }
@@ -104,6 +125,10 @@ model DeckCard {
 model Order {
   id            String      @id @default(cuid())
   status        OrderStatus @default(PENDING)
+  buyerId       String?
+  buyer         User?       @relation("BuyerOrders", fields: [buyerId], references: [id])
+  sellerId      String?
+  seller        User?       @relation("SellerOrders", fields: [sellerId], references: [id])
   buyerName     String
   buyerEmail    String
   buyerPhone    String?
@@ -112,7 +137,7 @@ model Order {
   shipRegion    String?
   shipMethod    String      @default("SHIPPING")
   shipCost      Int         @default(0)
-  paymentMethod String      @default("MERCADOPAGO")
+  paymentMethod String      @default("TRANSFER")
   discount      Int         @default(0)
   subtotal      Int         @default(0)
   total         Int
@@ -120,10 +145,26 @@ model Order {
   paymentId     String?
   notes         String?
   items         OrderItem[]
+  messages      OrderMessage[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
   @@index([status])
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+model OrderMessage {
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  senderId      String
+  sender        User     @relation(fields: [senderId], references: [id])
+  body          String
+  attachmentUrl String?
+  createdAt     DateTime @default(now())
+
+  @@index([orderId, createdAt])
 }
 
 model OrderItem {

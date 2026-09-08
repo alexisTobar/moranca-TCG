@@ -52,22 +52,32 @@ async function readSession(token: string | undefined) {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isPanel = pathname.startsWith("/panel");
+  const isAccount = pathname.startsWith("/cuenta");
+  const isCheckout = pathname === "/checkout";
   const isLogin = pathname === "/ingresar";
 
-  if (!isPanel && !isLogin) return securityHeaders(NextResponse.next());
+  if (!isPanel && !isAccount && !isCheckout && !isLogin) {
+    return securityHeaders(NextResponse.next());
+  }
 
   const session = await readSession(req.cookies.get(SESSION_COOKIE)?.value);
 
-  if (isPanel && !session) {
+  if ((isPanel || isAccount || isCheckout) && !session) {
     const url = req.nextUrl.clone();
     url.pathname = "/ingresar";
     url.search = `?next=${encodeURIComponent(pathname)}`;
     return securityHeaders(NextResponse.redirect(url));
   }
 
+  // El filtro fino de "comprador no entra al panel de vendedor" vive en
+  // panel/layout.tsx (con el rol recién leído de la base), no acá: el rol
+  // dentro de este JWT puede quedar desactualizado si un admin recién le
+  // aprobó la solicitud de vendedor a alguien que no ha vuelto a iniciar
+  // sesión, y este middleware no puede refrescarlo sin pegarle a la base.
+
   if (isLogin && session) {
     const url = req.nextUrl.clone();
-    url.pathname = "/panel";
+    url.pathname = session.role === "BUYER" ? "/cuenta" : "/panel";
     url.search = "";
     return securityHeaders(NextResponse.redirect(url));
   }

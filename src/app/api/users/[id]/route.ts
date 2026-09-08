@@ -35,6 +35,11 @@ export async function PATCH(
       );
     }
 
+    // Aprobar una solicitud de vendedor sube el rol pase lo que pase con
+    // "role" en el body (evita que un olvido del cliente deje al usuario
+    // aprobado pero seguir como comprador).
+    const approvingSeller = data.sellerRequestStatus === "APPROVED";
+
     const user = await prisma.user.update({
       where: { id },
       data: {
@@ -43,10 +48,14 @@ export async function PATCH(
           ? { email: data.email.toLowerCase().trim() }
           : {}),
         ...(data.role !== undefined ? { role: data.role } : {}),
+        ...(approvingSeller ? { role: "SELLER" } : {}),
         ...(data.city !== undefined ? { city: data.city } : {}),
         ...(data.phone !== undefined ? { phone: data.phone } : {}),
         ...(data.bio !== undefined ? { bio: data.bio } : {}),
         ...(data.active !== undefined ? { active: data.active } : {}),
+        ...(data.sellerRequestStatus !== undefined
+          ? { sellerRequestStatus: data.sellerRequestStatus }
+          : {}),
         ...(data.password ? { password: await hashPassword(data.password) } : {}),
       },
       select: { id: true, name: true, email: true, role: true, active: true },

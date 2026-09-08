@@ -1,4 +1,19 @@
 import { z } from "zod";
+import { isValidRut } from "./rut";
+
+const passwordSchema = z
+  .string()
+  .min(10, "La contraseña debe tener al menos 10 caracteres")
+  .max(200)
+  .regex(/[a-z]/, "Debe incluir una minúscula")
+  .regex(/[A-Z]/, "Debe incluir una mayúscula")
+  .regex(/[0-9]/, "Debe incluir un número");
+
+const rutSchema = z
+  .string()
+  .min(3)
+  .max(15)
+  .refine(isValidRut, { message: "El RUT no es válido" });
 
 /** Acepta una URL completa o una ruta interna como /api/uploads/abc.png */
 const imagenUrl = z
@@ -52,13 +67,7 @@ export const listingSchema = listingBaseSchema.refine(
 export const userSchema = z.object({
   name: z.string().min(2).max(80),
   email: z.string().email().max(160),
-  password: z
-    .string()
-    .min(10, "La contraseña debe tener al menos 10 caracteres")
-    .max(200)
-    .regex(/[a-z]/, "Debe incluir una minúscula")
-    .regex(/[A-Z]/, "Debe incluir una mayúscula")
-    .regex(/[0-9]/, "Debe incluir un número"),
+  password: passwordSchema,
   role: z.enum(["ADMIN", "SELLER"]).default("SELLER"),
   city: z.string().max(80).optional().nullable(),
   phone: z.string().max(40).optional().nullable(),
@@ -67,8 +76,40 @@ export const userSchema = z.object({
 });
 
 export const userUpdateSchema = userSchema.partial().extend({
-  password: userSchema.shape.password.optional(),
+  password: passwordSchema.optional(),
+  sellerRequestStatus: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional().nullable(),
 });
+
+/** Autoregistro público de compradores. El rol siempre lo fija el servidor. */
+export const registerSchema = z.object({
+  name: z.string().min(2).max(80),
+  email: z.string().email().max(160),
+  password: passwordSchema,
+  rut: rutSchema,
+  phone: z.string().min(6).max(40),
+  address: z.string().min(5).max(200),
+});
+
+/** Cuenta bancaria que cada vendedor configura en su propio perfil. */
+export const bankAccountSchema = z.object({
+  bankName: z.string().min(2).max(80),
+  bankAccountType: z.string().min(2).max(40),
+  bankAccountNumber: z.string().min(3).max(40),
+  bankHolderName: z.string().min(2).max(120),
+  bankRut: rutSchema,
+});
+
+/** Edición de datos propios (comprador o vendedor), sin tocar rol ni email. */
+export const profileSchema = z.object({
+  name: z.string().min(2).max(80).optional(),
+  phone: z.string().min(6).max(40).optional().nullable(),
+  address: z.string().min(5).max(200).optional().nullable(),
+  rut: rutSchema.optional().nullable(),
+  city: z.string().max(80).optional().nullable(),
+});
+
+/** Perfil + cuenta bancaria (la bancaria solo aplica si el rol es vendedor). */
+export const accountUpdateSchema = profileSchema.merge(bankAccountSchema.partial());
 
 export const checkoutSchema = z.object({
   items: z
@@ -80,15 +121,20 @@ export const checkoutSchema = z.object({
     )
     .min(1, "El carrito está vacío")
     .max(50),
-  buyerName: z.string().min(2).max(120),
-  buyerEmail: z.string().email().max(160),
-  buyerPhone: z.string().max(40).optional().nullable(),
-  paymentMethod: z.enum(["TRANSFER", "MERCADOPAGO"]).default("TRANSFER"),
   shipMethod: z.enum(["PICKUP", "SHIPPING"]).default("SHIPPING"),
   shipAddress: z.string().max(200).optional().nullable(),
   shipCity: z.string().max(80).optional().nullable(),
   shipRegion: z.string().max(80).optional().nullable(),
   notes: z.string().max(600).optional().nullable(),
+});
+
+export const orderMessageSchema = z.object({
+  body: z.string().min(1).max(1000),
+  attachmentUrl: imagenUrl,
+});
+
+export const sellerRequestSchema = z.object({
+  message: z.string().max(400).optional().nullable(),
 });
 
 export const bulkPreviewSchema = z.object({

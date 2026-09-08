@@ -2,23 +2,15 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { LoginForm } from "@/components/LoginForm";
+import { RegisterForm } from "@/components/RegisterForm";
 
 export const metadata: Metadata = {
-  title: "Ingresar",
-  description: "Acceso al panel de administración de Dream Deck TCG.",
+  title: "Crear cuenta",
+  description: "Regístrate para comprar en Dream Deck TCG.",
   robots: { index: false, follow: false },
 };
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const sp = await searchParams;
-  const next = typeof sp.next === "string" ? sp.next : "";
-  const registerHref = next ? `/registro?next=${encodeURIComponent(next)}` : "/registro";
-
+export default function RegisterPage() {
   return (
     <div className="relative flex min-h-[80vh] items-center justify-center px-4 py-16">
       <div className="pointer-events-none absolute left-1/2 top-1/3 h-[420px] w-[600px] -translate-x-1/2 rounded-full bg-accent-500/10 blur-[120px]" />
@@ -29,23 +21,20 @@ export default async function LoginPage({
         </div>
 
         <div className="rounded-2xl card-surface p-7">
-          <h1 className="font-display text-2xl font-bold text-carbon">Ingresar</h1>
+          <h1 className="font-display text-2xl font-bold text-carbon">Crear cuenta</h1>
           <p className="mt-1 text-[13px] text-ink-400">
-            Inicia sesión para comprar, vender o revisar tus órdenes.
+            Solo los compradores registrados pueden comprar en Dream Deck.
           </p>
 
           <Suspense fallback={null}>
-            <LoginForm />
+            <RegisterForm />
           </Suspense>
         </div>
 
         <p className="mt-6 text-center text-[12px] text-ink-400">
-          ¿No tienes cuenta?{" "}
-          <Link
-            href={registerHref}
-            className="font-semibold text-accent-300 hover:text-accent-400"
-          >
-            Regístrate
+          ¿Ya tienes cuenta?{" "}
+          <Link href="/ingresar" className="font-semibold text-accent-300 hover:text-accent-400">
+            Ingresa
           </Link>
         </p>
       </div>

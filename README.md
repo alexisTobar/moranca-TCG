@@ -192,68 +192,92 @@ renombrado a `.png` se rechaza igual.
 
 ---
 
-## 5. Mercado Pago
+## 5. Pago: transferencia bancaria
 
-Mientras `MP_ACCESS_TOKEN` esté vacío, el checkout **igual guarda la orden** y
-avisa al comprador que lo contactarán. Al cargar el token, el botón redirige al
-checkout real de Mercado Pago.
+El checkout **solo acepta transferencia** (2% de descuento incluido), no hay
+pasarela de por medio. Cada vendedor configura su propia cuenta en
+**Panel → Mi perfil**; sin esos datos el comprador solo ve un aviso de que se
+le va a contactar. El comprador manda el comprobante por el **chat de la
+orden** (ver sección 7) y tú confirmas el pago a mano desde
+**Panel → Órdenes**.
 
-1. Crea la aplicación en <https://www.mercadopago.cl/developers/panel>.
-2. Copia el *Access Token* de producción en `MP_ACCESS_TOKEN`.
-3. En **Webhooks**, registra `https://TU-DOMINIO/api/mercadopago/webhook`
-   y copia la *clave secreta* en `MP_WEBHOOK_SECRET`.
+Si un carrito trae cartas de más de un vendedor, el checkout lo separa
+automáticamente en **una orden por vendedor**, cada una con su propia cuenta
+y su propio chat.
 
-El webhook **verifica la firma HMAC** y consulta el pago en la API antes de
-marcar la orden como pagada y descontar stock. Sin `MP_WEBHOOK_SECRET` las
-notificaciones se rechazan (nunca se aceptan avisos sin verificar).
-
-### Transferencia bancaria (opción por defecto)
-
-El checkout ofrece **transferencia con 2% de descuento** como primera opción,
-antes que Mercado Pago. No pasa por ninguna pasarela: se muestra la cuenta,
-el comprador transfiere por su cuenta y manda el comprobante por email. La
-orden queda `PENDING` hasta que la confirmes a mano en **Panel → Órdenes**.
-
-**Completa tu cuenta real en `src/lib/bank.ts`** (banco, tipo de cuenta,
-número, RUT, titular y el email donde te lleguen los comprobantes) — hoy
-tiene placeholders `COMPLETAR: …` que se muestran tal cual en el checkout
-mientras no los reemplaces.
+La integración con Mercado Pago (`src/lib/mercadopago.ts`,
+`src/app/api/mercadopago/webhook`) sigue en el código por si se reactiva más
+adelante, pero el checkout actual no la usa.
 
 ---
 
-## 6. Seguridad implementada
+## 6. Cuentas y compradores registrados
+
+Solo se puede comprar con sesión iniciada. Un comprador se autoregistra en
+`/registro` (nombre, RUT con dígito verificador válido, teléfono, dirección,
+contraseña) y queda con rol `BUYER`; `/checkout` y `/cuenta` exigen sesión
+(el middleware redirige a `/ingresar?next=...`). Los vendedores y el admin se
+siguen creando a mano desde **Panel → Vendedores**, como antes.
+
+- **`/cuenta`**: cada usuario logueado edita sus datos, ve sus compras y —si
+  es `BUYER`— puede mandar una solicitud para pasar a vendedor.
+- **Panel → Vendedores**: el admin aprueba o rechaza esas solicitudes;
+  aprobar sube el rol a `SELLER` al instante (sin esperar a que la persona
+  vuelva a iniciar sesión — el chequeo de rol para entrar al panel se hace
+  contra la base, no contra el rol guardado en la cookie de sesión).
+
+---
+
+## 7. Chat de la orden
+
+Cada orden tiene su propio chat entre comprador y vendedor (`OrderMessage`),
+visible en `/cuenta` para el comprador y en **Panel → Órdenes** para el
+vendedor/admin. Sirve principalmente para mandar el comprobante de
+transferencia (reusa el mismo endpoint de subida de imágenes que el
+publicador de cartas). Los mensajes con groserías se **bloquean antes de
+guardarse** (`src/lib/profanity.ts`) — quien escribe ve el error y puede
+reformular, no hay censura silenciosa.
+
+---
+
+## 8. Seguridad implementada
 
 - Contraseñas con **bcrypt** (12 rondas).
 - Sesión en **JWT firmado (HS256)** dentro de una cookie `httpOnly`, `secure`,
   `sameSite=lax`, con expiración de 8 horas.
-- Middleware que protege `/panel` y aplica **CSP, HSTS, X-Frame-Options,
-  nosniff, Referrer-Policy y Permissions-Policy**.
-- **Rate limiting** persistido en base de datos para login y checkout (sobrevive
-  entre instancias serverless); en memoria para el buscador de cartas, que solo
-  necesita frenar abuso y no justifica una consulta a la base por cada tecla.
-- Validación de toda entrada con **Zod**.
+- Middleware que protege `/panel`, `/cuenta` y `/checkout`, y aplica **CSP,
+  HSTS, X-Frame-Options, nosniff, Referrer-Policy y Permissions-Policy**.
+- **Rate limiting** persistido en base de datos para login, registro y checkout
+  (sobrevive entre instancias serverless); en memoria para el buscador de
+  cartas y el chat de órdenes, que solo necesitan frenar abuso.
+- Validación de toda entrada con **Zod**, incluido el dígito verificador del RUT.
 - Los **precios y el stock siempre se leen de la base de datos**, nunca del
   cliente; la comuna se valida contra su región.
-- Roles `ADMIN` / `SELLER`: un vendedor solo puede editar sus publicaciones.
+- Roles `ADMIN` / `SELLER` / `BUYER`: un vendedor solo edita sus publicaciones
+  y solo ve las órdenes donde es el vendedor; un comprador solo ve sus
+  propias órdenes. El chat de una orden solo lo puede leer su comprador, su
+  vendedor o un admin.
 
 ---
 
-## 7. Estructura
+## 9. Estructura
 
 ```
-prisma/schema.prisma      Modelo de datos (User, Listing, DeckCard, Order…)
+prisma/schema.prisma      Modelo de datos (User, Listing, Order, OrderMessage…)
 prisma/seed.mjs           Admin inicial + publicaciones de ejemplo
-src/app/(public)/         Tienda: home, catálogo, producto, carrito, checkout
-src/app/panel/            Panel privado: publicar, publicaciones, órdenes, perfiles
-src/app/api/              Login, búsqueda de cartas, publicaciones, checkout, webhook
+src/app/(public)/         Tienda: home, catálogo, producto, carrito, checkout, cuenta
+src/app/panel/            Panel privado: publicar, publicaciones, órdenes, perfil, vendedores
+src/app/api/              Login, registro, cuenta, cartas, publicaciones, checkout, órdenes/chat
 src/lib/providers/        Un archivo por catálogo de cartas
 src/lib/regions.ts        16 regiones y 346 comunas de Chile (despacho es "por pagar")
-src/components/cart/      Carrito (contexto, drawer, checkout)
+src/lib/rut.ts            Validación y formato de RUT chileno
+src/lib/profanity.ts      Filtro de groserías del chat de órdenes
+src/components/cart/      Carrito (contexto, drawer, checkout, animación al agregar)
 ```
 
 ---
 
-## 8. Comandos
+## 10. Comandos
 
 | Comando           | Qué hace                                    |
 | ----------------- | ------------------------------------------- |

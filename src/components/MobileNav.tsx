@@ -6,9 +6,13 @@ import { useState } from "react";
 export function MobileNav({
   nav,
   isLogged,
+  accountHref = "/panel",
+  accountLabel = "Mi panel",
 }: {
   nav: { href: string; label: string }[];
   isLogged: boolean;
+  accountHref?: string;
+  accountLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -49,11 +53,11 @@ export function MobileNav({
               </Link>
             ))}
             <Link
-              href={isLogged ? "/panel" : "/ingresar"}
+              href={isLogged ? accountHref : "/ingresar"}
               onClick={() => setOpen(false)}
               className="mt-2 rounded-lg bg-brand-600 px-3 py-2.5 text-center text-sm font-bold text-paper"
             >
-              {isLogged ? "Mi panel" : "Ingresar"}
+              {isLogged ? accountLabel : "Ingresar"}
             </Link>
           </div>
         </div>

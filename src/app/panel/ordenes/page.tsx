@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { safeQuery } from "@/lib/catalog";
 import { clp, timeAgo } from "@/lib/format";
+import { OrderChatToggle } from "@/components/OrderChatToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,13 @@ export default async function OrdersPage() {
         where:
           user.role === "ADMIN"
             ? {}
-            : { items: { some: { listing: { sellerId: user.id } } } },
+            : {
+                OR: [
+                  { sellerId: user.id },
+                  // Compatibilidad con órdenes de antes de vincular sellerId.
+                  { items: { some: { listing: { sellerId: user.id } } } },
+                ],
+              },
         orderBy: { createdAt: "desc" },
         take: 100,
         include: {
@@ -178,6 +185,12 @@ export default async function OrdersPage() {
                   </dl>
                 </div>
               </div>
+
+              <OrderChatToggle
+                orderId={o.id}
+                currentUserId={user.id}
+                className="mt-4 border-t border-ink-800 pt-4"
+              />
             </details>
           ))}
         </div>

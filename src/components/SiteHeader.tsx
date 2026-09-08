@@ -46,10 +46,10 @@ export async function SiteHeader() {
         <div className="ml-auto flex items-center gap-2">
           {user ? (
             <Link
-              href="/panel"
+              href={user.role === "BUYER" ? "/cuenta" : "/panel"}
               className="hidden rounded-lg border border-accent-500/50 bg-accent-500/10 px-3.5 py-2 text-[13px] font-semibold text-accent-300 transition hover:bg-accent-500/20 sm:block"
             >
-              Mi panel
+              {user.role === "BUYER" ? "Mi cuenta" : "Mi panel"}
             </Link>
           ) : (
             <Link
@@ -60,7 +60,12 @@ export async function SiteHeader() {
             </Link>
           )}
           <CartButton />
-          <MobileNav nav={NAV} isLogged={Boolean(user)} />
+          <MobileNav
+            nav={NAV}
+            isLogged={Boolean(user)}
+            accountHref={user?.role === "BUYER" ? "/cuenta" : "/panel"}
+            accountLabel={user?.role === "BUYER" ? "Mi cuenta" : "Mi panel"}
+          />
         </div>
       </div>
 
