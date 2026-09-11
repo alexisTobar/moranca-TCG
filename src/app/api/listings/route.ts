@@ -44,6 +44,7 @@ export async function POST(req: Request) {
         slug: await uniqueSlug(data.title),
         imageUrl: data.imageUrl ?? null,
         price: data.price,
+        offerPrice: data.offerPrice ?? null,
         stock: data.stock,
         condition: data.condition ?? null,
         language: data.language ?? null,

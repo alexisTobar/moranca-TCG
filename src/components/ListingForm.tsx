@@ -33,6 +33,7 @@ export interface ListingFormValues {
   title: string;
   imageUrl: string | null;
   price: number;
+  offerPrice: number | null;
   stock: number;
   condition: string | null;
   language: string | null;
@@ -65,6 +66,7 @@ const EMPTY: ListingFormValues = {
   title: "",
   imageUrl: null,
   price: 0,
+  offerPrice: null,
   stock: 1,
   condition: "NM",
   language: defaultLanguage("magic"),
@@ -174,6 +176,9 @@ export function ListingForm({
 
     if (!values.title.trim()) return setError("Ponle un título a la publicación.");
     if (values.price < 1) return setError("El precio debe ser mayor a 0.");
+    if (values.offerPrice != null && values.offerPrice >= values.price) {
+      return setError("El precio de oferta debe ser menor al precio normal.");
+    }
     if (values.type === "DECK" && values.deckCards.length === 0) {
       return setError("Agrega al menos una carta al mazo.");
     }
@@ -183,6 +188,7 @@ export function ListingForm({
       const payload = {
         ...values,
         price: Math.round(values.price),
+        offerPrice: values.offerPrice != null ? Math.round(values.offerPrice) : null,
         stock: Math.round(values.stock),
         sellerId: isAdmin ? values.sellerId : undefined,
         deckCards: values.type === "DECK" ? values.deckCards : [],
@@ -433,6 +439,35 @@ export function ListingForm({
                 )}
               </label>
 
+              <label className="block">
+                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
+                  Precio oferta CLP (opcional)
+                </span>
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  inputMode="numeric"
+                  value={values.offerPrice ?? ""}
+                  onChange={(e) =>
+                    set("offerPrice", e.target.value === "" ? null : Number(e.target.value))
+                  }
+                  placeholder="Sin oferta"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                />
+                {values.offerPrice != null && values.offerPrice > 0 && (
+                  <span
+                    className={`mt-1 block text-[11px] font-semibold ${
+                      values.offerPrice < values.price ? "text-emerald-500" : "text-red-500"
+                    }`}
+                  >
+                    {values.offerPrice < values.price
+                      ? `Se mostrará tachado ${clp(values.price)} → ${clp(values.offerPrice)}`
+                      : "Debe ser menor al precio normal"}
+                  </span>
+                )}
+              </label>
+
               {reference && (reference.priceClp || reference.priceClpFoil) && (
                 <div className="rounded-lg border border-ink-700 bg-ink-900 p-2.5 sm:col-span-2">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-ink-400">
@@ -582,9 +617,20 @@ export function ListingForm({
             <p className="mt-2 line-clamp-2 text-[12px] font-semibold text-ink-200">
               {values.title || "Sin título"}
             </p>
-            <p className="font-display text-lg font-bold text-accent-400">
-              {clp(values.price || 0)}
-            </p>
+            {values.offerPrice != null && values.offerPrice > 0 && values.offerPrice < values.price ? (
+              <p className="flex items-baseline gap-2">
+                <span className="text-xs font-medium text-ink-500 line-through">
+                  {clp(values.price || 0)}
+                </span>
+                <span className="font-display text-lg font-bold text-accent-400">
+                  {clp(values.offerPrice)}
+                </span>
+              </p>
+            ) : (
+              <p className="font-display text-lg font-bold text-accent-400">
+                {clp(values.price || 0)}
+              </p>
+            )}
           </div>
 
           <div className="rounded-2xl card-surface p-4">

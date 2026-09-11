@@ -10,6 +10,7 @@ import { GameChip } from "@/components/GameChip";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
 import { AddToCartPanel } from "@/components/cart/AddToCart";
+import { effectiveListingPrice } from "@/lib/order-pricing";
 
 export const revalidate = 30;
 
@@ -167,7 +168,8 @@ export default async function ProductPage({
             listingId={listing.id}
             slug={listing.slug}
             title={listing.title}
-            price={listing.price}
+            price={effectiveListingPrice(listing)}
+            originalPrice={listing.offerPrice != null ? listing.price : null}
             imageUrl={listing.imageUrl}
             game={listing.game}
             type={listing.type}

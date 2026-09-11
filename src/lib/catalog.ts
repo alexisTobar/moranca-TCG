@@ -10,6 +10,7 @@ export const LISTING_CARD_SELECT = {
   game: true,
   type: true,
   price: true,
+  offerPrice: true,
   imageUrl: true,
   condition: true,
   language: true,

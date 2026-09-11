@@ -33,6 +33,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         id: true,
         status: true,
         sellerId: true,
+        paymentMethod: true,
         items: { select: { listingId: true, quantity: true } },
       },
     });
@@ -48,6 +49,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
     }
     const next = parsed.data.status;
+
+    // Las órdenes pagadas con Mercado Pago solo pueden pasar a PAID vía el
+    // webhook verificado (firma HMAC + consulta a la API de MP). Permitir que
+    // el vendedor la confirme a mano rompería esa garantía: podría marcar
+    // como pagada una orden que nunca se pagó de verdad.
+    if (next === "PAID" && order.paymentMethod === "MP" && user.role !== "ADMIN") {
+      return NextResponse.json(
+        {
+          error:
+            "Las órdenes pagadas con Mercado Pago se confirman automáticamente. Si el pago ya se aprobó y no se refleja, contacta a soporte.",
+        },
+        { status: 409 }
+      );
+    }
 
     const allowed = ALLOWED_FROM[order.status] ?? [];
     if (!allowed.includes(next)) {

@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 async function loadOwned(id: string, userId: string, isAdmin: boolean) {
   const listing = await prisma.listing.findUnique({
     where: { id },
-    select: { id: true, sellerId: true },
+    select: { id: true, sellerId: true, price: true, offerPrice: true },
   });
   if (!listing) return { error: "Publicación no encontrada", status: 404 as const };
   if (!isAdmin && listing.sellerId !== userId) {
@@ -38,6 +38,15 @@ export async function PATCH(
       );
     }
     const data = parsed.data;
+
+    const nextPrice = data.price ?? owned.listing.price;
+    const nextOfferPrice = data.offerPrice !== undefined ? data.offerPrice : owned.listing.offerPrice;
+    if (nextOfferPrice != null && nextOfferPrice >= nextPrice) {
+      return NextResponse.json(
+        { error: "El precio de oferta debe ser menor al precio normal." },
+        { status: 400 }
+      );
+    }
 
     const updated = await prisma.$transaction(async (tx) => {
       if (data.deckCards) {
@@ -68,6 +77,7 @@ export async function PATCH(
           title: data.title,
           imageUrl: data.imageUrl,
           price: data.price,
+          offerPrice: data.offerPrice,
           stock: data.stock,
           condition: data.condition,
           language: data.language,

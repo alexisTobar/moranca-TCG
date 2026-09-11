@@ -2,21 +2,30 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, CreditCard, Landmark, MessageCircle } from "lucide-react";
+import { Banknote, CheckCircle2, CreditCard, Landmark, MessageCircle } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { clp } from "@/lib/format";
 import { REGIONS, comunasOf, PICKUP_POINT, type ShippingMethod } from "@/lib/regions";
 
-const TRANSFER_DISCOUNT_RATE = 0.02;
-type PayMethod = "TRANSFER" | "MP";
+type PayMethod = "TRANSFER" | "MP" | "CASH";
 
 interface OrderResult {
   orderId: string;
   sellerName: string;
   total: number;
   notice: string;
+}
+
+interface QuoteSeller {
+  sellerId: string;
+  subtotal: number;
+  couponDiscount: number;
+  paymentDiscount: number;
+  discount: number;
+  total: number;
+  shipCost: number;
 }
 
 export function CheckoutView({
@@ -51,13 +60,53 @@ export function CheckoutView({
   const mpAvailable = mpEnabled && singleSeller;
 
   const [payMethod, setPayMethod] = useState<PayMethod>("TRANSFER");
-  const effectivePayMethod: PayMethod = payMethod === "MP" && !mpAvailable ? "TRANSFER" : payMethod;
+  const effectivePayMethod: PayMethod =
+    payMethod === "MP" && !mpAvailable
+      ? "TRANSFER"
+      : payMethod === "CASH" && method !== "PICKUP"
+        ? "TRANSFER"
+        : payMethod;
 
   const comunas = useMemo(() => comunasOf(region), [region]);
-  const ship = 0; // todo despacho es por pagar directo al courier, no se cobra acá
-  const discount =
-    effectivePayMethod === "TRANSFER" ? Math.round(subtotal * TRANSFER_DISCOUNT_RATE) : 0;
-  const total = subtotal - discount + ship;
+
+  const [couponCode, setCouponCode] = useState("");
+  const [quote, setQuote] = useState<QuoteSeller[] | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (items.length === 0) {
+      setQuote([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/checkout/quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: items.map((i) => ({ listingId: i.listingId, quantity: i.quantity })),
+            shipMethod: method,
+            shipRegion: method === "SHIPPING" ? region : null,
+            paymentMethod: effectivePayMethod,
+            couponCode: couponCode.trim() || undefined,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setQuote(data.sellers as QuoteSeller[]);
+          setCouponError(data.couponError ?? null);
+        }
+      } catch {
+        /* la cotización es solo un preview; el checkout real recalcula todo */
+      }
+    }, 400);
+    return () => clearTimeout(handle);
+  }, [items, method, region, effectivePayMethod, couponCode]);
+
+  const ship = quote ? quote.reduce((a, s) => a + s.shipCost, 0) : 0;
+  const couponDiscount = quote ? quote.reduce((a, s) => a + s.couponDiscount, 0) : 0;
+  const paymentDiscount = quote ? quote.reduce((a, s) => a + s.paymentDiscount, 0) : 0;
+  const total = quote ? quote.reduce((a, s) => a + s.total, 0) : subtotal;
 
   if (!ready) {
     return <p className="px-4 py-16 text-sm text-ink-400">Cargando…</p>;
@@ -149,6 +198,7 @@ export function CheckoutView({
           shipAddress: method === "SHIPPING" ? form.get("shipAddress") : null,
           notes: form.get("notes"),
           paymentMethod: effectivePayMethod,
+          couponCode: couponCode.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -190,7 +240,7 @@ export function CheckoutView({
           {/* PAGO */}
           <section className="rounded-2xl card-surface p-5">
             <h2 className="text-sm font-semibold text-carbon">1 · Método de pago</h2>
-            <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+            <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
               <button
                 type="button"
                 onClick={() => setPayMethod("TRANSFER")}
@@ -207,12 +257,39 @@ export function CheckoutView({
                       effectivePayMethod === "TRANSFER" ? "text-accent-300" : "text-ink-200"
                     }`}
                   >
-                    Transferencia bancaria · -2% dcto
+                    Transferencia bancaria
                   </p>
                   <p className="mt-0.5 text-[11px] text-ink-400">
                     Te mostramos la cuenta de cada vendedor al confirmar (si tu
                     carrito tiene más de uno, se separa en una orden por cada
                     cual). Le mandas el comprobante desde <strong>Mi cuenta</strong>.
+                  </p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                disabled={method !== "PICKUP"}
+                onClick={() => setPayMethod("CASH")}
+                className={`flex items-start gap-3 rounded-xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                  effectivePayMethod === "CASH"
+                    ? "border-accent-500/60 bg-accent-500/10"
+                    : "border-ink-700 hover:border-ink-600"
+                }`}
+              >
+                <Banknote className="h-4 w-4 shrink-0 text-accent-400" strokeWidth={2} />
+                <div>
+                  <p
+                    className={`text-[13px] font-bold ${
+                      effectivePayMethod === "CASH" ? "text-accent-300" : "text-ink-200"
+                    }`}
+                  >
+                    Efectivo al retirar
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-ink-400">
+                    {method !== "PICKUP"
+                      ? "Solo disponible con retiro en persona."
+                      : "Pagas al retirar tu pedido en persona."}
                   </p>
                 </div>
               </button>
@@ -411,15 +488,43 @@ export function CheckoutView({
               ))}
             </ul>
 
-            <dl className="mt-5 space-y-2 border-t border-ink-800 pt-4 text-[13px]">
+            <div className="mt-4">
+              <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
+                Cupón de descuento
+              </label>
+              <input
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                placeholder="Código (opcional)"
+                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm uppercase text-ink-200 outline-none focus:border-accent-500/70"
+              />
+              {couponError && (
+                <p className="mt-1 text-[11px] text-brand-600">{couponError}</p>
+              )}
+              {!couponError && couponCode.trim() && couponDiscount > 0 && (
+                <p className="mt-1 text-[11px] text-emerald-700">
+                  Cupón aplicado: -{clp(couponDiscount)}
+                </p>
+              )}
+            </div>
+
+            <dl className="mt-4 space-y-2 border-t border-ink-800 pt-4 text-[13px]">
               <div className="flex justify-between">
                 <dt className="text-ink-400">Subtotal</dt>
                 <dd className="text-ink-200">{clp(subtotal)}</dd>
               </div>
-              {discount > 0 && (
+              {couponDiscount > 0 && (
                 <div className="flex justify-between">
-                  <dt className="text-emerald-700">Descuento transferencia (2%)</dt>
-                  <dd className="text-emerald-700">-{clp(discount)}</dd>
+                  <dt className="text-emerald-700">Cupón {couponCode.trim().toUpperCase()}</dt>
+                  <dd className="text-emerald-700">-{clp(couponDiscount)}</dd>
+                </div>
+              )}
+              {paymentDiscount > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-emerald-700">
+                    Descuento {effectivePayMethod === "CASH" ? "efectivo" : "transferencia"}
+                  </dt>
+                  <dd className="text-emerald-700">-{clp(paymentDiscount)}</dd>
                 </div>
               )}
               <div className="flex justify-between">
@@ -458,7 +563,9 @@ export function CheckoutView({
             <p className="mt-3 text-center text-[11px] leading-relaxed text-ink-400">
               {effectivePayMethod === "MP"
                 ? "Te llevamos al checkout seguro de Mercado Pago. Despachamos apenas se confirme el pago."
-                : "Te mostramos los datos de la cuenta al confirmar. Despachamos apenas confirmemos tu comprobante en el chat de la orden."}
+                : effectivePayMethod === "CASH"
+                  ? "Pagas al retirar en persona. El vendedor confirma la orden al recibir el efectivo."
+                  : "Te mostramos los datos de la cuenta al confirmar. Despachamos apenas confirmemos tu comprobante en el chat de la orden."}
             </p>
           </div>
         </aside>

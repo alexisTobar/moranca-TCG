@@ -3,14 +3,12 @@ import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { checkoutSchema } from "@/lib/validators";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
-import { shippingCost, zoneOf, comunasOf } from "@/lib/regions";
+import { shippingCost, zoneOf, comunasOf, PICKUP_POINT } from "@/lib/regions";
 import { mercadoPagoEnabled, createPreference } from "@/lib/mercadopago";
+import { effectiveListingPrice, computeSellerOrderTotals } from "@/lib/order-pricing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-/** Descuento por pagar con transferencia (único método disponible hoy). */
-const TRANSFER_DISCOUNT_RATE = 0.02;
 
 function bankNotice(
   total: number,
@@ -27,6 +25,10 @@ function bankNotice(
     return `Guardamos tu orden con ${seller.name}. Todavía no configuró su cuenta bancaria: te contactaremos por email para coordinar el pago de ${total.toLocaleString("es-CL")} CLP.`;
   }
   return `Transfiere ${total.toLocaleString("es-CL")} CLP a ${seller.name} — ${seller.bankName}, cuenta ${seller.bankAccountType} N° ${seller.bankAccountNumber}, RUT ${seller.bankRut}, a nombre de ${seller.bankHolderName}. Manda el comprobante por el chat de la orden.`;
+}
+
+function cashNotice(total: number, seller: { name: string }): string {
+  return `Prepara ${total.toLocaleString("es-CL")} CLP en efectivo: pagas al retirar tu pedido de ${seller.name} en ${PICKUP_POINT}.`;
 }
 
 export async function POST(req: Request) {
@@ -83,10 +85,25 @@ export async function POST(req: Request) {
     }
   }
 
+  if (data.paymentMethod === "CASH" && data.shipMethod !== "PICKUP") {
+    return NextResponse.json(
+      { error: "El pago en efectivo solo está disponible con retiro en persona." },
+      { status: 400 }
+    );
+  }
+
   // Los precios y el stock siempre se leen de la base de datos.
   const listings = await prisma.listing.findMany({
     where: { id: { in: data.items.map((i) => i.listingId) } },
-    select: { id: true, title: true, price: true, stock: true, status: true, sellerId: true },
+    select: {
+      id: true,
+      title: true,
+      price: true,
+      offerPrice: true,
+      stock: true,
+      status: true,
+      sellerId: true,
+    },
   });
 
   const byId = new Map(listings.map((l) => [l.id, l]));
@@ -115,7 +132,7 @@ export async function POST(req: Request) {
     group.push({
       listingId: listing.id,
       title: listing.title,
-      unitPrice: listing.price,
+      unitPrice: effectiveListingPrice(listing),
       quantity: item.quantity,
     });
     bySeller.set(listing.sellerId, group);
@@ -154,9 +171,34 @@ export async function POST(req: Request) {
       bankAccountNumber: true,
       bankHolderName: true,
       bankRut: true,
+      transferDiscountPct: true,
+      cashDiscountPct: true,
     },
   });
   const sellerById = new Map(sellers.map((s) => [s.id, s]));
+
+  // El cupón se resuelve contra los vendedores presentes en el carrito: solo
+  // aplica al subtotal del vendedor dueño del código, el resto no se ve
+  // afectado.
+  const couponBySeller = new Map<
+    string,
+    { id: string; type: "PERCENT" | "FIXED"; value: number; code: string }
+  >();
+  if (data.couponCode) {
+    const code = data.couponCode.trim().toUpperCase();
+    const matches = await prisma.coupon.findMany({
+      where: { code, active: true, sellerId: { in: [...bySeller.keys()] } },
+    });
+    if (matches.length === 0) {
+      return NextResponse.json(
+        { error: "El cupón no existe o no aplica a los vendedores de tu carrito." },
+        { status: 400 }
+      );
+    }
+    for (const c of matches) {
+      couponBySeller.set(c.sellerId, { id: c.id, type: c.type, value: c.value, code: c.code });
+    }
+  }
 
   // Un carrito con cartas de varios vendedores queda como una orden por
   // vendedor: cada uno tiene su propia cuenta bancaria y su propio chat.
@@ -165,13 +207,20 @@ export async function POST(req: Request) {
     const seller = sellerById.get(sellerId);
     if (!seller) continue;
 
-    const subtotal = items.reduce((a, i) => a + i.unitPrice * i.quantity, 0);
-    const ship = shippingCost(data.shipMethod, data.shipRegion ?? null, subtotal);
-    // El 2% de descuento es un incentivo para pagar por transferencia (evita
-    // la comisión de la pasarela); con Mercado Pago se cobra el precio lleno.
-    const discount =
-      data.paymentMethod === "TRANSFER" ? Math.round(subtotal * TRANSFER_DISCOUNT_RATE) : 0;
-    const total = subtotal - discount + ship;
+    const ship = shippingCost(
+      data.shipMethod,
+      data.shipRegion ?? null,
+      items.reduce((a, i) => a + i.unitPrice * i.quantity, 0)
+    );
+    const coupon = couponBySeller.get(sellerId) ?? null;
+    const totals = computeSellerOrderTotals({
+      items,
+      coupon,
+      paymentMethod: data.paymentMethod,
+      transferDiscountPct: seller.transferDiscountPct,
+      cashDiscountPct: seller.cashDiscountPct,
+      shipCost: ship,
+    });
 
     const order = await prisma.order.create({
       data: {
@@ -185,9 +234,13 @@ export async function POST(req: Request) {
         shipCity: data.shipCity ?? null,
         shipRegion: data.shipRegion ?? null,
         shipCost: ship,
-        discount,
-        subtotal,
-        total,
+        discount: totals.discount,
+        couponId: coupon?.id ?? null,
+        couponCode: coupon?.code ?? null,
+        couponDiscount: totals.couponDiscount,
+        paymentDiscountPct: totals.paymentDiscountPct,
+        subtotal: totals.subtotal,
+        total: totals.total,
         notes: data.notes ?? null,
         items: { create: items },
       },
@@ -234,8 +287,11 @@ export async function POST(req: Request) {
     orders.push({
       orderId: order.id,
       sellerName: seller.name,
-      total,
-      notice: bankNotice(total, seller),
+      total: totals.total,
+      notice:
+        data.paymentMethod === "CASH"
+          ? cashNotice(totals.total, seller)
+          : bankNotice(totals.total, seller),
     });
   }
 

@@ -1,4 +1,4 @@
-import { Landmark, CreditCard } from "lucide-react";
+import { Landmark, CreditCard, Banknote } from "lucide-react";
 import { clp } from "@/lib/format";
 import { OrderChatToggle } from "@/components/OrderChatToggle";
 
@@ -76,6 +76,14 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
               <p className="text-[11px] leading-relaxed text-ink-300">
                 Pagando con <strong className="text-ink-200">Mercado Pago</strong>. Si no
                 alcanzaste a completar el pago, vuelve a intentarlo desde el carrito.
+              </p>
+            </div>
+          ) : order.paymentMethod === "CASH" ? (
+            <div className="flex items-start gap-2">
+              <Banknote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-400" strokeWidth={2} />
+              <p className="text-[11px] leading-relaxed text-ink-300">
+                Pagas en <strong className="text-ink-200">efectivo al retirar</strong> tu
+                pedido en persona. El vendedor confirma la orden al recibir el pago.
               </p>
             </div>
           ) : order.bankTransfer ? (

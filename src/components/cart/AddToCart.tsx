@@ -20,6 +20,11 @@ export function AddToCartPanel(props: Props) {
   return (
     <div className="mt-5 rounded-2xl card-surface p-5">
       <div className="flex flex-wrap items-end gap-x-4 gap-y-1">
+        {props.originalPrice != null && props.originalPrice > props.price && (
+          <span className="text-lg font-medium text-ink-500 line-through">
+            {clp(props.originalPrice)}
+          </span>
+        )}
         <span className="font-display text-4xl font-bold text-accent-400">
           {clp(props.price)}
         </span>

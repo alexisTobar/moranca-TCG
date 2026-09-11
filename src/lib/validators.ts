@@ -42,6 +42,7 @@ export const listingBaseSchema = z.object({
     title: z.string().min(2).max(180),
     imageUrl: imagenUrl,
     price: z.number().int().min(1).max(99_999_999),
+    offerPrice: z.number().int().min(1).max(99_999_999).optional().nullable(),
     stock: z.number().int().min(0).max(9999).default(1),
     condition: z.string().max(10).optional().nullable(),
     language: z.string().max(10).optional().nullable(),
@@ -56,13 +57,15 @@ export const listingBaseSchema = z.object({
     deckCards: z.array(deckCardSchema).max(300).default([]),
 });
 
-export const listingSchema = listingBaseSchema.refine(
-  (data) => data.type !== "DECK" || data.deckCards.length > 0,
-  {
+export const listingSchema = listingBaseSchema
+  .refine((data) => data.type !== "DECK" || data.deckCards.length > 0, {
     message: "Un mazo debe incluir al menos una carta en su lista.",
     path: ["deckCards"],
-  }
-);
+  })
+  .refine((data) => data.offerPrice == null || data.offerPrice < data.price, {
+    message: "El precio de oferta debe ser menor al precio normal.",
+    path: ["offerPrice"],
+  });
 
 export const userSchema = z.object({
   name: z.string().min(2).max(80),
@@ -108,8 +111,49 @@ export const profileSchema = z.object({
   city: z.string().max(80).optional().nullable(),
 });
 
-/** Perfil + cuenta bancaria (la bancaria solo aplica si el rol es vendedor). */
-export const accountUpdateSchema = profileSchema.merge(bankAccountSchema.partial());
+/** Tasas de descuento que cada vendedor configura según método de pago (0-30%). */
+export const sellerDiscountRatesSchema = z.object({
+  transferDiscountPct: z.number().int().min(0).max(30),
+  cashDiscountPct: z.number().int().min(0).max(30),
+});
+
+/** Perfil + cuenta bancaria + tasas de descuento (bancaria/tasas solo aplican si el rol es vendedor). */
+export const accountUpdateSchema = profileSchema
+  .merge(bankAccountSchema.partial())
+  .merge(sellerDiscountRatesSchema.partial());
+
+/** Cupón de descuento que un vendedor crea para su propia tienda. */
+export const couponSchema = z
+  .object({
+    code: z
+      .string()
+      .trim()
+      .min(3)
+      .max(30)
+      .toUpperCase()
+      .regex(/^[A-Z0-9_-]+$/, "Solo letras, números, guiones y guion bajo"),
+    type: z.enum(["PERCENT", "FIXED"]),
+    value: z.number().int().min(1),
+    active: z.boolean().default(true),
+  })
+  .refine((d) => d.type !== "PERCENT" || d.value <= 100, {
+    message: "El porcentaje no puede superar 100%",
+    path: ["value"],
+  });
+
+export const couponUpdateSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .min(3)
+    .max(30)
+    .toUpperCase()
+    .regex(/^[A-Z0-9_-]+$/, "Solo letras, números, guiones y guion bajo")
+    .optional(),
+  type: z.enum(["PERCENT", "FIXED"]).optional(),
+  value: z.number().int().min(1).optional(),
+  active: z.boolean().optional(),
+});
 
 export const checkoutSchema = z.object({
   items: z
@@ -126,7 +170,8 @@ export const checkoutSchema = z.object({
   shipCity: z.string().max(80).optional().nullable(),
   shipRegion: z.string().max(80).optional().nullable(),
   notes: z.string().max(600).optional().nullable(),
-  paymentMethod: z.enum(["TRANSFER", "MP"]).default("TRANSFER"),
+  paymentMethod: z.enum(["TRANSFER", "MP", "CASH"]).default("TRANSFER"),
+  couponCode: z.string().trim().max(30).optional().nullable(),
 });
 
 export const orderMessageSchema = z.object({

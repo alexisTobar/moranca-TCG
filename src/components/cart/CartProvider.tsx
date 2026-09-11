@@ -16,6 +16,7 @@ export interface CartItem {
   slug: string;
   title: string;
   price: number;
+  originalPrice?: number | null;
   imageUrl: string | null;
   game: string;
   type: string;

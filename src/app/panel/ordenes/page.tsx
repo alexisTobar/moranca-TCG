@@ -21,6 +21,12 @@ const STATUS_LABEL: Record<string, string> = {
   SHIPPED: "Enviada",
 };
 
+const PAYMENT_LABEL: Record<string, string> = {
+  TRANSFER: "Transferencia",
+  MP: "Mercado Pago",
+  CASH: "Efectivo",
+};
+
 export default async function OrdersPage() {
   const user = await getCurrentUser();
   if (!user) return null;
@@ -60,6 +66,9 @@ export default async function OrdersPage() {
       shipCost: number;
       paymentMethod: string;
       discount: number;
+      couponCode: string | null;
+      couponDiscount: number;
+      paymentDiscountPct: number;
       subtotal: number;
       total: number;
       createdAt: Date;
@@ -103,7 +112,7 @@ export default async function OrdersPage() {
                 </span>
                 <span className="text-[12px] text-ink-400">{o.buyerName}</span>
                 <span className="rounded-full border border-ink-700 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-ink-400">
-                  {o.paymentMethod === "TRANSFER" ? "Transferencia" : "Mercado Pago"}
+                  {PAYMENT_LABEL[o.paymentMethod] ?? o.paymentMethod}
                 </span>
                 <span className="ml-auto font-display text-sm font-bold text-accent-400">
                   {clp(o.total)}
@@ -163,10 +172,23 @@ export default async function OrdersPage() {
                       <dt className="text-ink-400">Subtotal</dt>
                       <dd className="text-ink-300">{clp(o.subtotal || o.total - o.shipCost)}</dd>
                     </div>
-                    {o.discount > 0 && (
+                    {o.couponDiscount > 0 && (
                       <div className="flex justify-between">
-                        <dt className="text-emerald-700">Descuento transferencia</dt>
-                        <dd className="text-emerald-700">-{clp(o.discount)}</dd>
+                        <dt className="text-emerald-700">
+                          Cupón {o.couponCode ?? ""}
+                        </dt>
+                        <dd className="text-emerald-700">-{clp(o.couponDiscount)}</dd>
+                      </div>
+                    )}
+                    {o.discount - o.couponDiscount > 0 && (
+                      <div className="flex justify-between">
+                        <dt className="text-emerald-700">
+                          Descuento {o.paymentMethod === "CASH" ? "efectivo" : "transferencia"}
+                          {o.paymentDiscountPct > 0 ? ` (${o.paymentDiscountPct}%)` : ""}
+                        </dt>
+                        <dd className="text-emerald-700">
+                          -{clp(o.discount - o.couponDiscount)}
+                        </dd>
                       </div>
                     )}
                     <div className="flex justify-between">

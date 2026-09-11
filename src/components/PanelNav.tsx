@@ -7,6 +7,7 @@ import {
   PlusCircle,
   ListChecks,
   Package,
+  Percent,
   Users,
   UserCircle,
 } from "lucide-react";
@@ -23,6 +24,7 @@ const ITEMS: Array<{
   { href: "/panel/publicar", label: "Publicar", icon: PlusCircle },
   { href: "/panel/publicaciones", label: "Publicaciones", icon: ListChecks },
   { href: "/panel/ordenes", label: "Órdenes", icon: Package },
+  { href: "/panel/descuentos", label: "Descuentos", icon: Percent },
   { href: "/panel/perfil", label: "Mi perfil", icon: UserCircle },
   { href: "/panel/usuarios", label: "Vendedores", icon: Users, adminOnly: true },
 ];

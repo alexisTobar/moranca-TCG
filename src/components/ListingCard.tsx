@@ -12,6 +12,7 @@ export interface ListingCardData {
   game: string;
   type: string;
   price: number;
+  offerPrice: number | null;
   imageUrl: string | null;
   condition: string | null;
   language: string | null;
@@ -31,6 +32,8 @@ const TYPE_LABEL: Record<string, string> = {
 
 export function ListingCard({ listing }: { listing: ListingCardData }) {
   const isDeck = listing.type === "DECK";
+  const hasOffer = listing.offerPrice != null && listing.offerPrice < listing.price;
+  const effectivePrice = hasOffer ? listing.offerPrice! : listing.price;
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl card-surface transition duration-200 hover:-translate-y-1 hover:border-accent-500/60 hover:shadow-[0_18px_40px_-20px_rgba(217,164,65,0.45)]">
@@ -88,8 +91,15 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
             {listing.language ? ` · ${listing.language}` : ""}
           </p>
           <div className="mt-auto flex items-end justify-between pt-2">
-            <span className="font-display text-lg font-bold text-accent-400">
-              {clp(listing.price)}
+            <span className="flex items-baseline gap-1.5">
+              {hasOffer && (
+                <span className="text-[11px] font-medium text-ink-500 line-through">
+                  {clp(listing.price)}
+                </span>
+              )}
+              <span className="font-display text-lg font-bold text-accent-400">
+                {clp(effectivePrice)}
+              </span>
             </span>
             <span className="max-w-[52%] truncate text-[10px] text-ink-400">
               {listing.seller.name}
@@ -103,7 +113,8 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
           listingId={listing.id}
           slug={listing.slug}
           title={listing.title}
-          price={listing.price}
+          price={effectivePrice}
+          originalPrice={hasOffer ? listing.price : null}
           imageUrl={listing.imageUrl}
           game={listing.game}
           type={listing.type}

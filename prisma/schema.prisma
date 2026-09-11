@@ -34,6 +34,11 @@ enum OrderStatus {
   SHIPPED
 }
 
+enum CouponType {
+  PERCENT
+  FIXED
+}
+
 model User {
   id        String    @id @default(cuid())
   email     String    @unique
@@ -58,6 +63,10 @@ model User {
   bankHolderName    String?
   bankRut           String?
 
+  // Descuentos configurables por el vendedor según método de pago (0-30%).
+  transferDiscountPct Int @default(2)
+  cashDiscountPct     Int @default(0)
+
   // Solicitud de comprador para pasar a vendedor.
   sellerRequestStatus  String?
   sellerRequestMessage String?
@@ -70,6 +79,7 @@ model User {
   sellerOrders   Order[]         @relation("SellerOrders")
   sentMessages   OrderMessage[]
   passwordResets PasswordReset[]
+  coupons        Coupon[]
 
   @@index([active])
 }
@@ -95,6 +105,7 @@ model Listing {
   slug        String        @unique
   imageUrl    String?
   price       Int
+  offerPrice  Int?
   stock       Int           @default(1)
   condition   String?
   language    String?
@@ -136,35 +147,57 @@ model DeckCard {
 }
 
 model Order {
-  id            String      @id @default(cuid())
-  status        OrderStatus @default(PENDING)
-  buyerId       String?
-  buyer         User?       @relation("BuyerOrders", fields: [buyerId], references: [id])
-  sellerId      String?
-  seller        User?       @relation("SellerOrders", fields: [sellerId], references: [id])
-  buyerName     String
-  buyerEmail    String
-  buyerPhone    String?
-  shipAddress   String?
-  shipCity      String?
-  shipRegion    String?
-  shipMethod    String      @default("SHIPPING")
-  shipCost      Int         @default(0)
-  paymentMethod String      @default("TRANSFER")
-  discount      Int         @default(0)
-  subtotal      Int         @default(0)
-  total         Int
-  preferenceId  String?
-  paymentId     String?
-  notes         String?
-  items         OrderItem[]
-  messages      OrderMessage[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id                 String      @id @default(cuid())
+  status             OrderStatus @default(PENDING)
+  buyerId            String?
+  buyer              User?       @relation("BuyerOrders", fields: [buyerId], references: [id])
+  sellerId           String?
+  seller             User?       @relation("SellerOrders", fields: [sellerId], references: [id])
+  buyerName          String
+  buyerEmail         String
+  buyerPhone         String?
+  shipAddress        String?
+  shipCity           String?
+  shipRegion         String?
+  shipMethod         String      @default("SHIPPING")
+  shipCost           Int         @default(0)
+  paymentMethod      String      @default("TRANSFER")
+  discount           Int         @default(0)
+  couponId           String?
+  coupon             Coupon?     @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  couponCode         String?
+  couponDiscount     Int         @default(0)
+  paymentDiscountPct Int         @default(0)
+  subtotal           Int         @default(0)
+  total              Int
+  preferenceId       String?
+  paymentId          String?
+  notes              String?
+  items              OrderItem[]
+  messages           OrderMessage[]
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
 
   @@index([status])
   @@index([buyerId])
   @@index([sellerId])
+  @@index([couponId])
+}
+
+model Coupon {
+  id        String     @id @default(cuid())
+  sellerId  String
+  seller    User       @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  code      String
+  type      CouponType @default(PERCENT)
+  value     Int
+  active    Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  orders    Order[]
+
+  @@unique([sellerId, code])
+  @@index([sellerId, active])
 }
 
 model OrderMessage {

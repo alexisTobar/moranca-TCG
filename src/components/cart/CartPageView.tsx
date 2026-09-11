@@ -117,6 +117,11 @@ export function CartPageView() {
               </div>
 
               <div className="shrink-0 text-right">
+                {item.originalPrice != null && item.originalPrice > item.price && (
+                  <p className="text-[11px] text-ink-500 line-through">
+                    {clp(item.originalPrice * item.quantity)}
+                  </p>
+                )}
                 <p className="font-display text-lg font-bold text-accent-400">
                   {clp(item.price * item.quantity)}
                 </p>
