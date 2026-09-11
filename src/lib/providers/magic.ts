@@ -8,12 +8,31 @@ interface ScryfallCard {
   collector_number?: string;
   rarity?: string;
   type_line?: string;
+  colors?: string[];
+  oracle_text?: string;
+  artist?: string;
   image_uris?: { normal?: string; large?: string; small?: string; png?: string };
   card_faces?: Array<{
     image_uris?: { normal?: string; large?: string; png?: string };
+    oracle_text?: string;
+    colors?: string[];
   }>;
   tcgplayer_id?: number;
   prices?: { usd?: string | null; usd_foil?: string | null };
+}
+
+/** WUBRG a nombres legibles, en el orden en que Scryfall entrega el array. */
+const COLOR_NAMES: Record<string, string> = {
+  W: "Blanco",
+  U: "Azul",
+  B: "Negro",
+  R: "Rojo",
+  G: "Verde",
+};
+
+function colorLabel(colors?: string[]): string | undefined {
+  if (!colors || colors.length === 0) return undefined;
+  return colors.map((c) => COLOR_NAMES[c] ?? c).join(" / ");
 }
 
 interface ScryfallList {
@@ -40,6 +59,10 @@ function toCardResult(c: ScryfallCard): CardResult {
     rarity: c.rarity,
     game: "magic",
     extra: c.type_line,
+    color: colorLabel(c.colors ?? c.card_faces?.[0]?.colors),
+    family: c.type_line,
+    description: c.oracle_text ?? c.card_faces?.[0]?.oracle_text,
+    illustrator: c.artist,
     priceUsd: num(c.prices?.usd),
     priceUsdFoil: num(c.prices?.usd_foil),
     priceSource: "TCGplayer vía Scryfall",

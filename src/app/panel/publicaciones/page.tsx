@@ -39,7 +39,7 @@ export default async function ListingsPage({
   const page = Math.max(1, Number(typeof sp.page === "string" ? sp.page : "1") || 1);
 
   const where: Prisma.ListingWhereInput = {
-    ...(user.role === "ADMIN" ? {} : { sellerId: user.id }),
+    sellerId: user.id,
     ...(status && ["ACTIVE", "DRAFT", "PAUSED", "SOLD"].includes(status)
       ? { status: status as Prisma.ListingWhereInput["status"] }
       : {}),
@@ -72,7 +72,6 @@ export default async function ListingsPage({
             status: true,
             imageUrl: true,
             createdAt: true,
-            seller: { select: { name: true } },
             _count: { select: { deckCards: true } },
           },
         }),
@@ -87,7 +86,6 @@ export default async function ListingsPage({
         status: string;
         imageUrl: string | null;
         createdAt: Date;
-        seller: { name: string };
         _count: { deckCards: number };
       }>
     ),
@@ -109,8 +107,7 @@ export default async function ListingsPage({
         <div>
           <h1 className="font-display text-3xl font-bold text-carbon">Publicaciones</h1>
           <p className="mt-1 text-[13px] text-ink-400">
-            {total} {total === 1 ? "publicación" : "publicaciones"}
-            {user.role === "ADMIN" ? " en toda la tienda" : " tuyas"}
+            {total} {total === 1 ? "publicación" : "publicaciones"} tuyas
           </p>
         </div>
         <Link
@@ -210,9 +207,6 @@ export default async function ListingsPage({
                   <span className="text-[10px] text-ink-400">
                     Stock {l.stock} · {timeAgo(l.createdAt)}
                   </span>
-                  {user.role === "ADMIN" && (
-                    <span className="text-[10px] text-ink-400">· {l.seller.name}</span>
-                  )}
                 </div>
               </div>
 

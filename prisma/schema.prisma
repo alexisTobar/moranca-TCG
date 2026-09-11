@@ -80,6 +80,8 @@ model User {
   sentMessages   OrderMessage[]
   passwordResets PasswordReset[]
   coupons        Coupon[]
+  receivedReviews Review[] @relation("SellerReviews")
+  writtenReviews  Review[] @relation("BuyerReviews")
 
   @@index([active])
 }
@@ -114,6 +116,9 @@ model Listing {
   setName     String?
   cardNumber  String?
   rarity      String?
+  color       String?
+  family      String?
+  illustrator String?
   externalId  String?
   featured    Boolean       @default(false)
   views       Int           @default(0)
@@ -175,6 +180,7 @@ model Order {
   notes              String?
   items              OrderItem[]
   messages           OrderMessage[]
+  review             Review?
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
 
@@ -182,6 +188,23 @@ model Order {
   @@index([buyerId])
   @@index([sellerId])
   @@index([couponId])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  orderId     String   @unique
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sellerId    String
+  seller      User     @relation("SellerReviews", fields: [sellerId], references: [id], onDelete: Cascade)
+  buyerId     String
+  buyer       User     @relation("BuyerReviews", fields: [buyerId], references: [id], onDelete: Cascade)
+  rating      Int
+  comment     String?
+  sellerReply String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sellerId, createdAt])
 }
 
 model Coupon {

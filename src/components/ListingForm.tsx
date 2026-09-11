@@ -42,6 +42,9 @@ export interface ListingFormValues {
   setName: string | null;
   cardNumber: string | null;
   rarity: string | null;
+  color: string | null;
+  family: string | null;
+  illustrator: string | null;
   externalId: string | null;
   featured: boolean;
   sellerId: string | null;
@@ -75,6 +78,9 @@ const EMPTY: ListingFormValues = {
   setName: null,
   cardNumber: null,
   rarity: null,
+  color: null,
+  family: null,
+  illustrator: null,
   externalId: null,
   featured: false,
   sellerId: null,
@@ -156,6 +162,11 @@ export function ListingForm({
       setName: card.setName ?? null,
       cardNumber: card.cardNumber ?? null,
       rarity: card.rarity ?? null,
+      color: card.color ?? null,
+      family: card.family ?? null,
+      illustrator: card.illustrator ?? null,
+      // La descripción no se pisa si ya escribiste algo a mano.
+      description: v.description?.trim() ? v.description : (card.description ?? null),
       externalId: card.externalId,
     }));
   }
@@ -561,6 +572,41 @@ export function ListingForm({
                 <input
                   value={values.setName ?? ""}
                   onChange={(e) => set("setName", e.target.value || null)}
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
+                  Color
+                </span>
+                <input
+                  value={values.color ?? ""}
+                  onChange={(e) => set("color", e.target.value || null)}
+                  placeholder="Ej: Rojo, Azul/Blanco…"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
+                  Familia / Tipo
+                </span>
+                <input
+                  value={values.family ?? ""}
+                  onChange={(e) => set("family", e.target.value || null)}
+                  placeholder="Ej: Whitebeard Pirates"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                />
+              </label>
+
+              <label className="block sm:col-span-2">
+                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
+                  Ilustrador
+                </span>
+                <input
+                  value={values.illustrator ?? ""}
+                  onChange={(e) => set("illustrator", e.target.value || null)}
                   className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
                 />
               </label>

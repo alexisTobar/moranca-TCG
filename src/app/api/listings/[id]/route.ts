@@ -86,6 +86,9 @@ export async function PATCH(
           setName: data.setName,
           cardNumber: data.cardNumber,
           rarity: data.rarity,
+          color: data.color,
+          family: data.family,
+          illustrator: data.illustrator,
           externalId: data.externalId,
           ...(user.role === "ADMIN" && data.featured !== undefined
             ? { featured: data.featured }

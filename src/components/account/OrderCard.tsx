@@ -1,4 +1,8 @@
-import { Landmark, CreditCard, Banknote } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Landmark, CreditCard, Banknote, Star } from "lucide-react";
 import { clp } from "@/lib/format";
 import { OrderChatToggle } from "@/components/OrderChatToggle";
 
@@ -24,6 +28,13 @@ export interface BankTransferInfo {
   rut: string | null;
 }
 
+export interface OrderReview {
+  id: string;
+  rating: number;
+  comment: string | null;
+  sellerReply: string | null;
+}
+
 export interface AccountOrder {
   id: string;
   status: string;
@@ -33,9 +44,41 @@ export interface AccountOrder {
   bankTransfer: BankTransferInfo | null;
   createdAt: string;
   items: Array<{ id: string; title: string; quantity: number; unitPrice: number }>;
+  review: OrderReview | null;
 }
 
+const REVIEWABLE_STATUSES = ["PAID", "SHIPPED"];
+
 export function OrderCard({ order, userId }: { order: AccountOrder; userId: string }) {
+  const router = useRouter();
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submitReview() {
+    if (rating < 1) {
+      setError("Elige una calificación de 1 a 5 estrellas.");
+      return;
+    }
+    setSending(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/orders/${order.id}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating, comment: comment.trim() || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "No se pudo guardar tu reseña");
+      router.refresh();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setSending(false);
+    }
+  }
+
   return (
     <div className="rounded-2xl card-surface p-4">
       <div className="flex flex-wrap items-center gap-3">
@@ -112,6 +155,72 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
             </div>
           )}
         </div>
+      )}
+
+      {order.review ? (
+        <div className="mt-3 rounded-lg border border-ink-800 bg-ink-900/60 p-3">
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-0.5 text-amber-500">
+              {Array.from({ length: 5 }, (_, i) => (
+                <Star
+                  key={i}
+                  className={`h-3.5 w-3.5 ${i < order.review!.rating ? "fill-current" : "fill-transparent text-ink-700"}`}
+                  strokeWidth={i < order.review!.rating ? 0 : 1.5}
+                />
+              ))}
+            </span>
+            <span className="text-[11px] font-semibold text-ink-300">Ya calificaste esta compra</span>
+          </div>
+          {order.review.comment && (
+            <p className="mt-1.5 text-[12px] text-ink-300">{order.review.comment}</p>
+          )}
+          {order.review.sellerReply && (
+            <p className="mt-1.5 rounded-md bg-ink-950 p-2 text-[11px] text-ink-400">
+              <strong className="text-ink-300">Respuesta del vendedor:</strong> {order.review.sellerReply}
+            </p>
+          )}
+        </div>
+      ) : (
+        REVIEWABLE_STATUSES.includes(order.status) && (
+          <div className="mt-3 rounded-lg border border-ink-800 bg-ink-900/60 p-3">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-ink-400">
+              Calificar vendedor
+            </p>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: 5 }, (_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setRating(i + 1)}
+                  aria-label={`${i + 1} estrellas`}
+                  className="p-0.5"
+                >
+                  <Star
+                    className={`h-5 w-5 transition ${i < rating ? "fill-amber-500 text-amber-500" : "fill-transparent text-ink-600 hover:text-amber-500/60"}`}
+                    strokeWidth={i < rating ? 0 : 1.5}
+                  />
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              rows={2}
+              maxLength={1000}
+              placeholder="Comentario (opcional)"
+              className="mt-2 w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-[12px] text-ink-200 outline-none focus:border-accent-500/70"
+            />
+            {error && <p className="mt-1.5 text-[11px] text-brand-600">{error}</p>}
+            <button
+              type="button"
+              disabled={sending}
+              onClick={submitReview}
+              className="mt-2 rounded-lg bg-brand-600 px-4 py-1.5 text-[12px] font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
+            >
+              {sending ? "Enviando…" : "Enviar reseña"}
+            </button>
+          </div>
+        )
       )}
 
       <OrderChatToggle orderId={order.id} currentUserId={userId} className="mt-3" />

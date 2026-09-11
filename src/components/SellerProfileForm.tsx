@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ImageUploader } from "./ImageUploader";
 
 export interface SellerProfileValues {
   name: string;
   phone: string | null;
   address: string | null;
   rut: string | null;
+  avatarUrl: string | null;
   bankName: string | null;
   bankAccountType: string | null;
   bankAccountNumber: string | null;
@@ -19,6 +21,7 @@ const ACCOUNT_TYPES = ["Cuenta Corriente", "Cuenta Vista", "Cuenta RUT", "Cuenta
 
 export function SellerProfileForm({ initial }: { initial: SellerProfileValues }) {
   const router = useRouter();
+  const [avatarUrl, setAvatarUrl] = useState(initial.avatarUrl);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -38,6 +41,7 @@ export function SellerProfileForm({ initial }: { initial: SellerProfileValues })
           phone: form.get("phone"),
           address: form.get("address"),
           rut: form.get("rut"),
+          avatarUrl,
           bankName: form.get("bankName") || undefined,
           bankAccountType: form.get("bankAccountType") || undefined,
           bankAccountNumber: form.get("bankAccountNumber") || undefined,
@@ -58,6 +62,12 @@ export function SellerProfileForm({ initial }: { initial: SellerProfileValues })
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      <ImageUploader
+        value={avatarUrl}
+        onChange={setAvatarUrl}
+        hint="Foto de perfil de tu tienda. Se muestra en tu perfil público y en tus reseñas."
+      />
+
       <div className="rounded-2xl card-surface p-5">
         <h3 className="mb-4 text-sm font-semibold text-carbon">Mis datos</h3>
         <div className="grid gap-4 sm:grid-cols-2">

@@ -32,6 +32,10 @@ export interface CardResult {
   rarity?: string;
   game: GameId;
   extra?: string;
+  color?: string;
+  family?: string;
+  description?: string;
+  illustrator?: string;
   priceUsd?: number | null;
   priceUsdFoil?: number | null;
   priceClp?: number | null;

@@ -27,7 +27,7 @@ async function getListing(slug: string) {
         where: { slug },
         include: {
           seller: {
-            select: { name: true, slug: true, city: true, bio: true, createdAt: true },
+            select: { name: true, slug: true, city: true, bio: true, createdAt: true, avatarUrl: true },
           },
           deckCards: { orderBy: { position: "asc" } },
         },
@@ -65,21 +65,84 @@ export default async function ProductPage({
   const listing = await getListing(slug);
   if (!listing || listing.status === "DRAFT") notFound();
 
-  const related = await safeQuery(
-    () =>
-      prisma.listing.findMany({
-        where: {
-          status: "ACTIVE",
-          game: listing.game,
-          id: { not: listing.id },
-          stock: { gt: 0 },
-        },
-        select: LISTING_CARD_SELECT,
-        take: 6,
-        orderBy: { createdAt: "desc" },
-      }),
-    [] as ListingCardData[]
+  const related = await safeQuery(async () => {
+    const baseWhere = { status: "ACTIVE" as const, game: listing.game, id: { not: listing.id }, stock: { gt: 0 } };
+    const sameSet = listing.setName
+      ? await prisma.listing.findMany({
+          where: { ...baseWhere, setName: listing.setName },
+          select: LISTING_CARD_SELECT,
+          take: 6,
+          orderBy: { createdAt: "desc" },
+        })
+      : [];
+    if (sameSet.length >= 6) return sameSet;
+    const fallback = await prisma.listing.findMany({
+      where: { ...baseWhere, id: { notIn: [listing.id, ...sameSet.map((l) => l.id)] } },
+      select: LISTING_CARD_SELECT,
+      take: 6 - sameSet.length,
+      orderBy: { createdAt: "desc" },
+    });
+    return [...sameSet, ...fallback];
+  }, [] as ListingCardData[]);
+
+  // Otros vendedores que tienen exactamente esta misma carta: por externalId si
+  // viene de un proveedor externo, si no por título+edición+juego.
+  const sameCardWhere = listing.externalId
+    ? { externalId: listing.externalId, game: listing.game, type: listing.type }
+    : {
+        title: listing.title,
+        game: listing.game,
+        type: listing.type,
+        ...(listing.setName ? { setName: listing.setName } : {}),
+      };
+
+  const sameCardListings =
+    listing.type === "SINGLE"
+      ? await safeQuery(
+          () =>
+            prisma.listing.findMany({
+              where: { ...sameCardWhere, status: "ACTIVE", stock: { gt: 0 } },
+              select: {
+                id: true,
+                slug: true,
+                price: true,
+                offerPrice: true,
+                stock: true,
+                condition: true,
+                language: true,
+                isFoil: true,
+                seller: { select: { name: true, slug: true, avatarUrl: true } },
+              },
+              orderBy: { price: "asc" },
+              take: 20,
+            }),
+          [] as Array<{
+            id: string;
+            slug: string;
+            price: number;
+            offerPrice: number | null;
+            stock: number;
+            condition: string | null;
+            language: string | null;
+            isFoil: boolean;
+            seller: { name: string; slug: string; avatarUrl: string | null };
+          }>
+        )
+      : [];
+
+  const otherSellerListings = sameCardListings.filter((l) => l.id !== listing.id);
+  const marketPrices = sameCardListings.map((l) =>
+    l.offerPrice != null && l.offerPrice < l.price ? l.offerPrice : l.price
   );
+  const priceStats =
+    marketPrices.length > 1
+      ? {
+          min: Math.min(...marketPrices),
+          max: Math.max(...marketPrices),
+          avg: Math.round(marketPrices.reduce((a, p) => a + p, 0) / marketPrices.length),
+          sellers: new Set(sameCardListings.map((l) => l.seller.slug)).size,
+        }
+      : null;
 
   const totalCards = listing.deckCards.reduce((a, c) => a + c.quantity, 0);
   const conditionLabel =
@@ -140,6 +203,9 @@ export default async function ProductPage({
             {listing.setName && <Spec label="Edición" value={listing.setName} />}
             {listing.cardNumber && <Spec label="Número" value={listing.cardNumber} />}
             {listing.rarity && <Spec label="Rareza" value={listing.rarity} />}
+            {listing.color && <Spec label="Color" value={listing.color} />}
+            {listing.family && <Spec label="Familia" value={listing.family} />}
+            {listing.illustrator && <Spec label="Ilustrador" value={listing.illustrator} />}
             {conditionLabel && <Spec label="Estado" value={conditionLabel} />}
             {languageLabel && <Spec label="Idioma" value={languageLabel} />}
             {listing.type === "DECK" && (
@@ -183,8 +249,19 @@ export default async function ProductPage({
             href={`/vendedor/${listing.seller.slug}`}
             className="mt-4 flex items-center gap-3 rounded-xl card-surface p-4 transition hover:border-accent-500/50"
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-lg font-bold text-paper">
-              {listing.seller.name.charAt(0).toUpperCase()}
+            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-lg font-bold text-paper">
+              {listing.seller.avatarUrl ? (
+                <Image
+                  src={listing.seller.avatarUrl}
+                  alt={listing.seller.name}
+                  fill
+                  sizes="44px"
+                  className="object-cover"
+                  unoptimized
+                />
+              ) : (
+                listing.seller.name.charAt(0).toUpperCase()
+              )}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-semibold text-ink-200">
@@ -197,6 +274,83 @@ export default async function ProductPage({
             </span>
             <span className="text-[12px] font-semibold text-accent-300">Ver perfil →</span>
           </Link>
+
+          {priceStats && (
+            <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl card-surface p-4 text-center">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-ink-400">Mínimo</p>
+                <p className="mt-0.5 text-sm font-bold text-emerald-600">{clp(priceStats.min)}</p>
+              </div>
+              <div className="border-x border-ink-800">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-ink-400">Promedio</p>
+                <p className="mt-0.5 text-sm font-bold text-ink-200">{clp(priceStats.avg)}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-ink-400">Máximo</p>
+                <p className="mt-0.5 text-sm font-bold text-ink-200">{clp(priceStats.max)}</p>
+              </div>
+              <p className="col-span-3 mt-1 text-[11px] text-ink-400">
+                Entre {priceStats.sellers} vendedores que tienen esta carta
+              </p>
+            </div>
+          )}
+
+          {otherSellerListings.length > 0 && (
+            <section className="mt-6">
+              <h2 className="mb-2 text-[11px] font-bold uppercase tracking-widest text-ink-300">
+                Otros vendedores con esta carta
+              </h2>
+              <ul className="divide-y divide-ink-800 overflow-hidden rounded-xl card-surface">
+                {otherSellerListings.map((l) => (
+                  <li key={l.id} className="flex items-center gap-3 p-3.5">
+                    <Link
+                      href={`/vendedor/${l.seller.slug}`}
+                      className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-[11px] font-bold text-paper"
+                    >
+                      {l.seller.avatarUrl ? (
+                        <Image
+                          src={l.seller.avatarUrl}
+                          alt={l.seller.name}
+                          fill
+                          sizes="32px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        l.seller.name.charAt(0).toUpperCase()
+                      )}
+                    </Link>
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/vendedor/${l.seller.slug}`}
+                        className="block truncate text-[12px] font-semibold text-ink-200 hover:text-accent-300"
+                      >
+                        {l.seller.name}
+                      </Link>
+                      <p className="text-[11px] text-ink-400">
+                        {[l.condition, l.language, l.isFoil ? "Foil" : null]
+                          .filter(Boolean)
+                          .join(" · ") || "—"}
+                        {" · "}
+                        {l.stock} {l.stock === 1 ? "unidad" : "unidades"}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="font-display text-sm font-bold text-accent-400">
+                        {clp(l.offerPrice != null && l.offerPrice < l.price ? l.offerPrice : l.price)}
+                      </p>
+                      <Link
+                        href={`/producto/${l.slug}`}
+                        className="text-[11px] font-semibold text-accent-300 hover:text-accent-400"
+                      >
+                        Ver →
+                      </Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {listing.description && (
             <section className="mt-6">

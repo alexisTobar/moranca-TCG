@@ -6,6 +6,8 @@ interface DotggCard {
   rarity?: string;
   cardType?: string;
   Color?: string;
+  Type?: string;
+  Effect?: string;
   set?: string;
   CardSets?: string;
   language?: string;
@@ -75,6 +77,9 @@ export const onePieceProvider: CardProvider = {
         rarity: c.rarity,
         game: "onepiece",
         extra: [c.cardType, c.Color].filter(Boolean).join(" · "),
+        color: c.Color,
+        family: c.Type,
+        description: c.Effect,
         priceUsd: num(c.price),
         priceUsdFoil: num(c.foilPrice),
         priceSource: "TCGplayer vía dotGG",

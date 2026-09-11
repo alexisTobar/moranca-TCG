@@ -15,6 +15,7 @@ export default async function SellerProfilePage() {
       phone: true,
       address: true,
       rut: true,
+      avatarUrl: true,
       bankName: true,
       bankAccountType: true,
       bankAccountNumber: true,

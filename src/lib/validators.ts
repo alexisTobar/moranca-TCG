@@ -51,6 +51,9 @@ export const listingBaseSchema = z.object({
     setName: z.string().max(160).optional().nullable(),
     cardNumber: z.string().max(40).optional().nullable(),
     rarity: z.string().max(60).optional().nullable(),
+    color: z.string().max(80).optional().nullable(),
+    family: z.string().max(160).optional().nullable(),
+    illustrator: z.string().max(120).optional().nullable(),
     externalId: z.string().max(120).optional().nullable(),
     featured: z.boolean().default(false),
     sellerId: z.string().max(60).optional().nullable(),
@@ -109,6 +112,7 @@ export const profileSchema = z.object({
   address: z.string().min(5).max(200).optional().nullable(),
   rut: rutSchema.optional().nullable(),
   city: z.string().max(80).optional().nullable(),
+  avatarUrl: imagenUrl,
 });
 
 /** Tasas de descuento que cada vendedor configura según método de pago (0-30%). */
@@ -177,6 +181,15 @@ export const checkoutSchema = z.object({
 export const orderMessageSchema = z.object({
   body: z.string().min(1).max(1000),
   attachmentUrl: imagenUrl,
+});
+
+export const reviewSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().max(1000).optional().nullable(),
+});
+
+export const reviewReplySchema = z.object({
+  sellerReply: z.string().min(1).max(1000),
 });
 
 export const sellerRequestSchema = z.object({

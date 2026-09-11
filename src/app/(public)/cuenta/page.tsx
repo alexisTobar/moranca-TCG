@@ -56,6 +56,7 @@ export default async function AccountPage() {
             },
           },
           items: { select: { id: true, title: true, quantity: true, unitPrice: true } },
+          review: { select: { id: true, rating: true, comment: true, sellerReply: true } },
         },
       }),
     []
@@ -78,6 +79,7 @@ export default async function AccountPage() {
       : null,
     createdAt: o.createdAt.toISOString(),
     items: o.items,
+    review: o.review,
   }));
 
   return (

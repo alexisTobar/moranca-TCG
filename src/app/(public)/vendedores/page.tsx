@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import { safeQuery } from "@/lib/catalog";
@@ -22,6 +23,7 @@ export default async function SellersPage() {
           city: true,
           bio: true,
           role: true,
+          avatarUrl: true,
           _count: { select: { listings: true } },
         },
         orderBy: { createdAt: "asc" },
@@ -33,6 +35,7 @@ export default async function SellersPage() {
       city: string | null;
       bio: string | null;
       role: string;
+      avatarUrl: string | null;
       _count: { listings: number };
     }>
   );
@@ -57,8 +60,12 @@ export default async function SellersPage() {
               className="rounded-2xl card-surface p-5 transition hover:-translate-y-1 hover:border-accent-500/50"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-xl font-bold text-paper">
-                  {s.name.charAt(0).toUpperCase()}
+                <span className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-xl font-bold text-paper">
+                  {s.avatarUrl ? (
+                    <Image src={s.avatarUrl} alt={s.name} fill sizes="48px" className="object-cover" unoptimized />
+                  ) : (
+                    s.name.charAt(0).toUpperCase()
+                  )}
                 </span>
                 <div className="min-w-0">
                   <p className="truncate font-semibold text-ink-200">{s.name}</p>

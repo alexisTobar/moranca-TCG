@@ -312,6 +312,8 @@ export const mylProvider: CardProvider = {
             extra: [c.type ? data.types.get(c.type) : null, data.formato]
               .filter(Boolean)
               .join(" · "),
+            family: c.type ? data.types.get(c.type) : undefined,
+            description: c.ability,
           },
         });
       }

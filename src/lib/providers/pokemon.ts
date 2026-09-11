@@ -13,9 +13,25 @@ interface PokeCard {
   number?: string;
   rarity?: string;
   supertype?: string;
+  artist?: string;
+  rules?: string[];
+  abilities?: Array<{ name?: string; text?: string }>;
+  attacks?: Array<{ name?: string; text?: string; damage?: string }>;
   images?: { small?: string; large?: string };
   set?: { name?: string; ptcgoCode?: string; id?: string; printedTotal?: number };
   tcgplayer?: { prices?: Record<string, TcgPlayerPrice> };
+}
+
+function describePokeCard(c: PokeCard): string | undefined {
+  const parts: string[] = [];
+  if (c.rules?.length) parts.push(...c.rules);
+  for (const a of c.abilities ?? []) {
+    if (a.name && a.text) parts.push(`${a.name}: ${a.text}`);
+  }
+  for (const a of c.attacks ?? []) {
+    if (a.name) parts.push(`${a.name}${a.damage ? ` (${a.damage})` : ""}${a.text ? ` — ${a.text}` : ""}`);
+  }
+  return parts.length ? parts.join("\n") : undefined;
 }
 
 interface TcgdexCard {
@@ -87,6 +103,9 @@ export const pokemonProvider: CardProvider = {
             rarity: c.rarity,
             game: "pokemon",
             extra: c.supertype,
+            family: c.supertype,
+            description: describePokeCard(c),
+            illustrator: c.artist,
             priceUsd: pick(c.tcgplayer?.prices, NORMAL_KEYS),
             priceUsdFoil: pick(c.tcgplayer?.prices, FOIL_KEYS),
             priceSource: "TCGplayer vía pokemontcg.io",

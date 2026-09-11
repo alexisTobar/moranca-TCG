@@ -30,6 +30,7 @@ export async function PATCH(req: Request) {
         ...(data.address !== undefined ? { address: data.address } : {}),
         ...(data.rut !== undefined ? { rut: data.rut } : {}),
         ...(data.city !== undefined ? { city: data.city } : {}),
+        ...(data.avatarUrl !== undefined ? { avatarUrl: data.avatarUrl } : {}),
         ...(canHaveBank && data.bankName !== undefined ? { bankName: data.bankName } : {}),
         ...(canHaveBank && data.bankAccountType !== undefined
           ? { bankAccountType: data.bankAccountType }
@@ -55,6 +56,7 @@ export async function PATCH(req: Request) {
         address: true,
         rut: true,
         city: true,
+        avatarUrl: true,
         bankName: true,
         bankAccountType: true,
         bankAccountNumber: true,

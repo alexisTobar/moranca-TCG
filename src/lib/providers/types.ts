@@ -13,6 +13,14 @@ export interface CardResult {
   rarity?: string;
   game: GameId;
   extra?: string;
+  /** Color(es) de la carta, cuando el juego lo maneja como dato propio (ej. One Piece, Magic). */
+  color?: string;
+  /** Familia/tipo de la carta (ej. "Whitebeard Pirates", "Legendary Creature — Human Wizard"). */
+  family?: string;
+  /** Texto de habilidad/efecto/reglas de la carta, tal como lo entrega el proveedor. */
+  description?: string;
+  /** Ilustrador, cuando el proveedor lo entrega (Magic, Pokémon). */
+  illustrator?: string;
   /** Precio referencial de mercado en USD (fuente: TCGplayer). */
   priceUsd?: number | null;
   /** Precio referencial de la versión foil/holo en USD. */
