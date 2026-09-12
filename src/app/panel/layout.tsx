@@ -27,10 +27,10 @@ export default async function PanelLayout({
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-50 border-b border-ink-800 bg-ink-950/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-4 px-4">
+      <header className="sticky top-0 z-50 border-b border-ink-800 bg-ink-200/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-20 max-w-[1400px] items-center gap-4 px-4">
           <Link href="/">
-            <Logo height={54} />
+            <Logo height={64} tone="light" />
           </Link>
           <span className="hidden rounded-full border border-accent-500/40 bg-accent-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-300 sm:inline">
             {isAdmin ? "Administrador" : "Vendedor"}
@@ -39,14 +39,14 @@ export default async function PanelLayout({
           <div className="ml-auto flex items-center gap-3">
             <Link
               href="/"
-              className="hidden text-[13px] text-ink-300 transition hover:text-accent-300 sm:block"
+              className="hidden text-[13px] text-white/80 transition hover:text-accent-300 sm:block"
             >
               Ver tienda ↗
             </Link>
-            <span className="hidden text-[13px] font-medium text-ink-200 md:block">
+            <span className="hidden text-[13px] font-medium text-white/80 md:block">
               {user.name}
             </span>
-            <LogoutButton />
+            <LogoutButton className="!border-white/20 !text-white/80" />
           </div>
         </div>
       </header>
