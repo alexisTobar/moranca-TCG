@@ -6,6 +6,7 @@ import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
 import { Search, ShieldCheck, PackageCheck, type LucideIcon } from "lucide-react";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { Reveal } from "@/components/Reveal";
+import { NewsSlider, type NewsSlide } from "@/components/NewsSlider";
 
 export const revalidate = 60;
 
@@ -66,7 +67,7 @@ const STEPS: Array<{ title: string; body: string; icon: LucideIcon }> = [
 ];
 
 export default async function HomePage() {
-  const [byGame, decks, sealed, sellers, counts] = await Promise.all([
+  const [byGame, decks, sealed, sellers, counts, news] = await Promise.all([
     // Se pide el top de cada juego por separado — si se pidiera un único top
     // global, un juego con muchas publicaciones (ej. Magic) desplazaría por
     // completo a los juegos con pocas, que quedarían sin mostrarse nunca.
@@ -134,7 +135,37 @@ export default async function HomePage() {
         }),
       [] as Array<{ game: string; _count: { _all: number } }>
     ),
+    safeQuery(
+      () =>
+        prisma.newsItem.findMany({
+          orderBy: { publishedAt: "desc" },
+          take: 8,
+          select: {
+            id: true,
+            category: true,
+            title: true,
+            excerpt: true,
+            imageUrl: true,
+            sourceName: true,
+            publishedAt: true,
+          },
+        }),
+      [] as Array<{
+        id: string;
+        category: string;
+        title: string;
+        excerpt: string;
+        imageUrl: string | null;
+        sourceName: string;
+        publishedAt: Date;
+      }>
+    ),
   ]);
+
+  const newsSlides: NewsSlide[] = news.map((n) => ({
+    ...n,
+    publishedAt: n.publishedAt.toISOString(),
+  }));
 
   const countByGame = new Map(counts.map((c) => [c.game, c._count._all]));
 
@@ -233,6 +264,20 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* NOTICIAS */}
+      {newsSlides.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 pt-14">
+          <SectionTitle
+            title="Noticias y torneos"
+            subtitle="Lo último de Magic, Pokémon y One Piece"
+            href="/noticias"
+          />
+          <div className="mt-6">
+            <NewsSlider items={newsSlides} />
+          </div>
+        </section>
+      )}
 
       {/* JUEGOS */}
       <section className="mx-auto max-w-7xl px-4 py-14">

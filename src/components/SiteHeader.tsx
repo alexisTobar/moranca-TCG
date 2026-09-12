@@ -13,6 +13,7 @@ const NAV = [
   { href: "/cartas?type=SEALED", label: "Sellados" },
   { href: "/cartas?type=DECK", label: "Mazos" },
   { href: "/vendedores", label: "Vendedores" },
+  { href: "/noticias", label: "Noticias" },
   { href: "/ayuda", label: "Ayuda" },
 ];
 
