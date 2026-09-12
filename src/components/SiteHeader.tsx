@@ -22,9 +22,9 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-ink-800 bg-ink-200/90 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4">
+      <div className="mx-auto flex h-20 max-w-7xl items-center gap-4 px-4">
         <Link href="/" aria-label="Win Condition TCG - inicio">
-          <Logo height={54} />
+          <Logo height={72} />
         </Link>
 
         <div className="ml-2 hidden flex-1 lg:block">
@@ -38,7 +38,7 @@ export async function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-lg px-3 py-2 text-[13px] font-medium text-ink-300 transition hover:bg-ink-850 hover:text-carbon"
+              className="rounded-lg px-3 py-2 text-[13px] font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
             >
               {item.label}
             </Link>
@@ -55,12 +55,12 @@ export async function SiteHeader() {
             </Link>
           ) : null}
           {user?.role === "BUYER" && (
-            <LogoutButton className="hidden !px-3.5 !py-2 !text-[13px] !font-medium sm:block" />
+            <LogoutButton className="hidden !border-white/20 !px-3.5 !py-2 !text-[13px] !font-medium !text-white/80 sm:block" />
           )}
           {!user && (
             <Link
               href="/ingresar"
-              className="hidden rounded-lg border border-ink-700 px-3.5 py-2 text-[13px] font-medium text-ink-200 transition hover:border-accent-500/60 hover:text-accent-300 sm:block"
+              className="hidden rounded-lg border border-white/20 px-3.5 py-2 text-[13px] font-medium text-white/80 transition hover:border-accent-500/60 hover:text-accent-300 sm:block"
             >
               Ingresar
             </Link>
@@ -76,11 +76,11 @@ export async function SiteHeader() {
         </div>
       </div>
 
-      <div className="border-t border-ink-850/80">
+      <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-1.5 no-scrollbar">
           <Link
             href="/cartas"
-            className="whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-ink-400 transition hover:text-accent-300"
+            className="whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/60 transition hover:text-accent-300"
           >
             Todos los juegos
           </Link>
@@ -88,7 +88,7 @@ export async function SiteHeader() {
             <Link
               key={g.id}
               href={`/cartas?game=${g.id}`}
-              className="flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-ink-400 transition hover:text-carbon"
+              className="flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/60 transition hover:text-white"
             >
               <span
                 className="h-1.5 w-1.5 rounded-full"
@@ -100,7 +100,7 @@ export async function SiteHeader() {
         </div>
       </div>
 
-      <div className="border-t border-ink-850/80 px-4 py-2 lg:hidden">
+      <div className="border-t border-white/10 px-4 py-2 lg:hidden">
         <div className="mx-auto max-w-7xl">
           <Suspense fallback={null}>
             <SearchBox />

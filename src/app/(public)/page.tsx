@@ -179,6 +179,14 @@ export default async function HomePage() {
             className="animate-pulse-slow absolute right-[-10%] bottom-[-30%] h-[420px] w-[420px] rounded-full bg-brand-500/12 blur-[120px]"
             style={{ animationDelay: "3s" }}
           />
+          <Image
+            src="/logo-mark.png"
+            alt=""
+            width={720}
+            height={293}
+            className="absolute left-0 top-1/2 hidden h-[520px] w-auto -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none opacity-[0.06] sm:block"
+            unoptimized
+          />
         </div>
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 lg:grid-cols-[1.05fr_1fr] lg:py-20">

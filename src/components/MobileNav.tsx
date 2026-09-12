@@ -25,7 +25,7 @@ export function MobileNav({
         onClick={() => setOpen((v) => !v)}
         aria-label="Abrir menú"
         aria-expanded={open}
-        className="rounded-lg border border-ink-700 p-2 text-ink-200 xl:hidden"
+        className="rounded-lg border border-white/20 p-2 text-white/80 xl:hidden"
       >
         <svg
           viewBox="0 0 24 24"

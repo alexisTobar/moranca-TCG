@@ -33,7 +33,7 @@ export function CartButton() {
       ref={btnRef}
       onClick={() => setOpen(true)}
       aria-label={`Abrir carrito (${count} productos)`}
-      className="relative rounded-lg border border-ink-700 px-3 py-2 text-[13px] font-medium text-ink-200 transition hover:border-accent-500/60 hover:text-accent-300"
+      className="relative rounded-lg border border-white/20 px-3 py-2 text-[13px] font-medium text-white/80 transition hover:border-accent-500/60 hover:text-accent-300"
     >
       <svg
         viewBox="0 0 24 24"
