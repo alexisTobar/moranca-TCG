@@ -200,12 +200,16 @@ export default async function ProductPage({
           <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
             <Spec label="Juego" value={gameName(listing.game)} />
             <Spec label="Tipo" value={TYPE_LABEL[listing.type] ?? listing.type} />
-            {listing.setName && <Spec label="Edición" value={listing.setName} />}
+            {listing.setName && (
+              <SpecWide label="Edición" value={listing.setName} />
+            )}
             {listing.cardNumber && <Spec label="Número" value={listing.cardNumber} />}
             {listing.rarity && <Spec label="Rareza" value={listing.rarity} />}
             {listing.color && <Spec label="Color" value={listing.color} />}
-            {listing.family && <Spec label="Familia" value={listing.family} />}
-            {listing.illustrator && <Spec label="Ilustrador" value={listing.illustrator} />}
+            {listing.family && <SpecWide label="Familia" value={listing.family} />}
+            {listing.illustrator && (
+              <SpecWide label="Ilustrador" value={listing.illustrator} />
+            )}
             {conditionLabel && <Spec label="Estado" value={conditionLabel} />}
             {languageLabel && <Spec label="Idioma" value={languageLabel} />}
             {listing.type === "DECK" && (
@@ -444,7 +448,19 @@ function Spec({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-ink-800 bg-ink-900/60 px-3 py-2">
       <p className="text-[10px] uppercase tracking-wider text-ink-400">{label}</p>
-      <p className="mt-0.5 truncate text-[12px] font-medium text-ink-200">{value}</p>
+      <p className="mt-0.5 line-clamp-2 text-[12px] font-medium leading-snug text-ink-200">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+/** Igual que Spec, pero ocupa toda la fila — para valores largos (edición, familia, ilustrador). */
+function SpecWide({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="col-span-2 rounded-lg border border-ink-800 bg-ink-900/60 px-3 py-2">
+      <p className="text-[10px] uppercase tracking-wider text-ink-400">{label}</p>
+      <p className="mt-0.5 text-[12px] font-medium leading-snug text-ink-200">{value}</p>
     </div>
   );
 }

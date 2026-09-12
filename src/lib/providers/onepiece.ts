@@ -1,5 +1,10 @@
 import { fetchJson, normalize, num, type CardProvider, type CardResult } from "./types";
 
+/** dotGG entrega el texto de habilidad con <br> literal en vez de saltos de línea. */
+function cleanEffect(text?: string): string | undefined {
+  return text?.replace(/<br\s*\/?>/gi, "\n");
+}
+
 interface DotggCard {
   id: string;
   name: string;
@@ -79,7 +84,7 @@ export const onePieceProvider: CardProvider = {
         extra: [c.cardType, c.Color].filter(Boolean).join(" · "),
         color: c.Color,
         family: c.Type,
-        description: c.Effect,
+        description: cleanEffect(c.Effect),
         priceUsd: num(c.price),
         priceUsdFoil: num(c.foilPrice),
         priceSource: "TCGplayer vía dotGG",
