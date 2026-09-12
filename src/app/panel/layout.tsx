@@ -30,7 +30,7 @@ export default async function PanelLayout({
       <header className="sticky top-0 z-50 border-b border-ink-800 bg-ink-950/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-4 px-4">
           <Link href="/">
-            <Logo />
+            <Logo height={54} />
           </Link>
           <span className="hidden rounded-full border border-accent-500/40 bg-accent-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-300 sm:inline">
             {isAdmin ? "Administrador" : "Vendedor"}

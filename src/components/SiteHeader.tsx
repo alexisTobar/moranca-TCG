@@ -24,7 +24,7 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-ink-800 bg-ink-950/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4">
         <Link href="/" aria-label="Win Condition TCG - inicio">
-          <Logo />
+          <Logo height={54} />
         </Link>
 
         <div className="ml-2 hidden flex-1 lg:block">

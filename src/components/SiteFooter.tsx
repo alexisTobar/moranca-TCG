@@ -7,7 +7,7 @@ export function SiteFooter() {
     <footer className="mt-20 border-t border-ink-800 bg-ink-900/60">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <Logo />
+          <Logo height={70} />
           <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-ink-400">
             Tienda chilena de cartas coleccionables. Singles, sellados y mazos
             armados, con envíos a todo Chile y pagos protegidos.

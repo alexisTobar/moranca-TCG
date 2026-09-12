@@ -4,7 +4,7 @@ import { Logo } from "@/components/Logo";
 export default function NotFound() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center px-4 text-center">
-      <Logo size={44} />
+      <Logo variant="full" height={120} />
       <p className="mt-10 font-display text-6xl font-bold text-ink-700">404</p>
       <h1 className="mt-2 font-display text-2xl font-bold text-carbon">
         Esta carta no está en el mazo

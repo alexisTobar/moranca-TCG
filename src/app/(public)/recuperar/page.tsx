@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
 
       <div className="relative w-full max-w-sm">
         <div className="mb-8 flex justify-center">
-          <Logo size={46} />
+          <Logo variant="full" height={120} />
         </div>
 
         <div className="rounded-2xl card-surface p-7">

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { parseFeed, excerptFrom, stripHtml } from "@/lib/news/feed-parser";
+import { translateToSpanish } from "@/lib/news/translate";
 import { NEWS_SOURCES } from "@/lib/news/sources";
 import { GAMES } from "@/lib/games";
 import type { NewsCategory } from "@prisma/client";
@@ -104,11 +105,16 @@ async function run() {
           continue;
         }
 
+        // Todas las fuentes son en inglés; se traduce antes de guardar para
+        // que el sitio (público chileno) muestre todo en español.
+        const titleEs = await translateToSpanish(stripHtml(item.title));
+        const excerptEs = await translateToSpanish(excerpt);
+
         await prisma.newsItem.create({
           data: {
             category,
-            title: stripHtml(item.title),
-            excerpt,
+            title: titleEs,
+            excerpt: excerptEs,
             imageUrl: item.imageUrl ?? FALLBACK_IMAGE[category],
             sourceUrl: item.link,
             sourceName: source.name,
