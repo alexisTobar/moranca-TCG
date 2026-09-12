@@ -180,11 +180,11 @@ export default async function HomePage() {
             style={{ animationDelay: "3s" }}
           />
           <Image
-            src="/logo-mark.png"
+            src="/logo-full.png"
             alt=""
-            width={720}
-            height={293}
-            className="absolute left-0 top-1/2 hidden h-[520px] w-auto -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none opacity-[0.06] sm:block"
+            width={738}
+            height={600}
+            className="absolute left-0 top-1/2 hidden h-[560px] w-auto -translate-x-1/2 -translate-y-1/2 -rotate-12 select-none opacity-[0.08] sm:block"
             unoptimized
           />
         </div>

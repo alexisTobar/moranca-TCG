@@ -11,13 +11,21 @@ const FULL_RATIO = 738 / 600;
 export function Logo({
   variant = "full",
   height,
+  tone = "dark",
 }: {
   variant?: "mark" | "full";
   height?: number;
+  /** "dark" = logo con texto oscuro/dorado (fondos claros); "light" = variante blanca (fondos oscuros, ej. navbar) */
+  tone?: "dark" | "light";
 }) {
   const h = height ?? (variant === "full" ? 120 : 44);
   const ratio = variant === "full" ? FULL_RATIO : MARK_RATIO;
-  const src = variant === "full" ? "/logo-full.png" : "/logo-mark.png";
+  const src =
+    variant === "full"
+      ? tone === "light"
+        ? "/logo-full-white.png"
+        : "/logo-full.png"
+      : "/logo-mark.png";
   const alt = "Win Condition TCG";
 
   return (
