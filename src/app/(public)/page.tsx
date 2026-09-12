@@ -57,7 +57,7 @@ const STEPS: Array<{ title: string; body: string; icon: LucideIcon }> = [
   },
   {
     title: "Paga protegido",
-    body: "Checkout con Mercado Pago: tarjetas, débito y transferencia. Tu dinero queda resguardado hasta la entrega.",
+    body: "Paga por transferencia bancaria o en efectivo si retiras en persona. Coordinamos el despacho apenas se confirme el pago.",
     icon: ShieldCheck,
   },
   {
@@ -151,11 +151,6 @@ export default async function HomePage() {
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-ink-800">
         <div className="pointer-events-none absolute inset-0">
-          <div className="animate-pulse-slow absolute left-1/2 top-[-20%] h-[560px] w-[900px] -translate-x-1/2 rounded-full bg-accent-500/10 blur-[130px]" />
-          <div
-            className="animate-pulse-slow absolute right-[-10%] bottom-[-30%] h-[420px] w-[420px] rounded-full bg-brand-500/12 blur-[120px]"
-            style={{ animationDelay: "3s" }}
-          />
           <Image
             src="/logo-full.png"
             alt=""
@@ -168,13 +163,13 @@ export default async function HomePage() {
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 lg:grid-cols-[1.05fr_1fr] lg:py-20">
           <div className="animate-fade-up">
-            <span className="inline-flex items-center gap-2 rounded-full border border-accent-500/40 bg-accent-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-accent-300">
+            <span className="inline-flex items-center gap-2 rounded-full border border-ink-700 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-ink-400">
               Tienda chilena de cartas
             </span>
             <h1 className="mt-5 font-display text-4xl font-bold leading-[1.08] text-carbon sm:text-5xl lg:text-6xl">
               Compra y vende cartas
               <br />
-              <span className="brand-text">de forma segura</span>
+              de forma segura
             </h1>
             <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-ink-300">
               Singles, sobres sellados y mazos armados de{" "}
@@ -188,13 +183,13 @@ export default async function HomePage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/cartas"
-                className="hover-pop rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-paper transition hover:bg-brand-500 hover:shadow-[0_10px_30px_-10px_rgba(217,164,65,0.7)]"
+                className="hover-pop rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-paper transition hover:bg-brand-500"
               >
                 Explorar catálogo
               </Link>
               <Link
                 href="/cartas?type=DECK"
-                className="hover-pop rounded-xl border border-ink-600 px-6 py-3 text-sm font-semibold text-ink-200 transition hover:border-accent-500/60 hover:text-accent-300"
+                className="hover-pop rounded-xl border border-ink-600 px-6 py-3 text-sm font-semibold text-ink-200 transition hover:border-carbon hover:text-carbon"
               >
                 Ver mazos armados
               </Link>
@@ -207,10 +202,10 @@ export default async function HomePage() {
                   String(counts.reduce((a, c) => a + c._count._all, 0)),
                   "Publicaciones activas",
                 ],
-                ["100%", "Pago protegido"],
+                ["100%", "Chileno"],
               ].map(([value, label]) => (
                 <div key={label}>
-                  <dt className="font-display text-2xl font-bold text-accent-400">
+                  <dt className="font-display text-2xl font-bold text-carbon">
                     {value}
                   </dt>
                   <dd className="text-[11px] uppercase tracking-wider text-ink-400">
@@ -275,7 +270,7 @@ export default async function HomePage() {
             <Link
               key={g.id}
               href={`/cartas?game=${g.id}`}
-              className="group overflow-hidden rounded-2xl border border-ink-700 bg-white transition hover:-translate-y-1 hover:border-brand-500 hover:shadow-[0_18px_40px_-20px_rgba(29,78,216,0.45)]"
+              className="group overflow-hidden rounded-2xl border border-ink-700 bg-white transition hover:-translate-y-1 hover:border-carbon hover:shadow-lg"
             >
               {/* Banner con arte real del juego */}
               <div
@@ -307,10 +302,6 @@ export default async function HomePage() {
               </div>
 
               <div className="p-5 pt-3">
-                <span
-                  className="mb-2 inline-block h-1 w-8 rounded-full"
-                  style={{ background: g.accent }}
-                />
                 <h3 className="sr-only">{g.short}</h3>
                 <div className="relative h-9 w-full">
                   <Image
@@ -388,7 +379,7 @@ export default async function HomePage() {
                   <span className="absolute right-5 top-4 font-display text-4xl font-bold text-ink-800">
                     0{i + 1}
                   </span>
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600/10 text-brand-600">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-ink-900 text-carbon">
                     <Icon className="h-5 w-5" strokeWidth={2} />
                   </span>
                   <h3 className="mt-3 font-semibold text-carbon">{s.title}</h3>
@@ -413,9 +404,9 @@ export default async function HomePage() {
               <Link
                 key={s.id}
                 href={`/vendedor/${s.slug}`}
-                className="hover-pop flex items-center gap-3 rounded-xl card-surface p-4 transition hover:border-accent-500/50"
+                className="hover-pop flex items-center gap-3 rounded-xl card-surface p-4 transition hover:border-carbon"
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-lg font-bold text-paper">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-carbon font-display text-lg font-bold text-paper">
                   {s.name.charAt(0).toUpperCase()}
                 </span>
                 <span className="min-w-0">
@@ -456,7 +447,7 @@ function SectionTitle({
       {href && (
         <Link
           href={href}
-          className="text-[13px] font-semibold text-accent-300 hover:text-accent-400"
+          className="text-[13px] font-semibold text-brand-600 hover:text-brand-700"
         >
           Ver todo →
         </Link>
@@ -486,7 +477,7 @@ function Showcase({
           </p>
           <Link
             href="/panel/publicar"
-            className="mt-3 inline-block text-[13px] font-semibold text-accent-300 hover:text-accent-400"
+            className="mt-3 inline-block text-[13px] font-semibold text-brand-600 hover:text-brand-700"
           >
             Publicar la primera →
           </Link>
@@ -516,10 +507,6 @@ function GameShowcase({
     <section className="border-t border-ink-800 bg-white py-10">
       <div className="mx-auto max-w-7xl px-4">
         <div className="mb-5 flex flex-wrap items-center gap-3">
-          <span
-            className="h-9 w-1.5 shrink-0 rounded-full"
-            style={{ background: game.accent }}
-          />
           <div className="min-w-0 flex-1">
             <h2 className="sr-only">{game.short}</h2>
             <div className="relative h-7 w-32 sm:h-8 sm:w-40">

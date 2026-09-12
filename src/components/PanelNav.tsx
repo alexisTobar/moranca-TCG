@@ -46,7 +46,7 @@ export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
                 href={item.href}
                 className={`flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-[13px] font-medium transition ${
                   active
-                    ? "border border-accent-500/40 bg-accent-500/10 text-accent-300"
+                    ? "border border-carbon bg-carbon text-paper"
                     : "border border-transparent text-ink-300 hover:bg-ink-850 hover:text-carbon"
                 }`}
               >

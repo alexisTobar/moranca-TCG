@@ -50,7 +50,7 @@ export function LoginForm() {
           type="email"
           required
           autoComplete="username"
-          className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none transition focus:border-accent-500/70 focus:ring-2 focus:ring-accent-500/20"
+          className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none transition focus:border-carbon"
         />
       </label>
 
@@ -59,7 +59,7 @@ export function LoginForm() {
           Contraseña
           <a
             href="/recuperar"
-            className="text-[11px] font-semibold normal-case text-accent-300 hover:text-accent-400"
+            className="text-[11px] font-semibold normal-case text-brand-600 hover:text-brand-700"
           >
             ¿Olvidaste tu clave?
           </a>
@@ -70,7 +70,7 @@ export function LoginForm() {
             type={showPassword ? "text" : "password"}
             required
             autoComplete="current-password"
-            className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 pr-10 text-sm text-ink-200 outline-none transition focus:border-accent-500/70 focus:ring-2 focus:ring-accent-500/20"
+            className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 pr-10 text-sm text-ink-200 outline-none transition focus:border-carbon"
           />
           <button
             type="button"
@@ -97,7 +97,7 @@ export function LoginForm() {
       </label>
 
       {error && (
-        <p className="rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-brand-600">
+        <p className="rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-rose-700">
           {error}
         </p>
       )}

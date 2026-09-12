@@ -33,7 +33,7 @@ export function CartButton() {
       ref={btnRef}
       onClick={() => setOpen(true)}
       aria-label={`Abrir carrito (${count} productos)`}
-      className="relative rounded-lg border border-white/20 px-3 py-2 text-[13px] font-medium text-white/80 transition hover:border-accent-500/60 hover:text-accent-300"
+      className="relative rounded-lg border border-white/20 px-3 py-2 text-[13px] font-medium text-white/80 transition hover:border-carbon hover:text-carbon"
     >
       <svg
         viewBox="0 0 24 24"
@@ -151,7 +151,7 @@ export function CartDrawer() {
                     <Link
                       href={`/producto/${item.slug}`}
                       onClick={() => setOpen(false)}
-                      className="line-clamp-2 text-[13px] font-semibold text-ink-200 hover:text-accent-300"
+                      className="line-clamp-2 text-[13px] font-semibold text-ink-200 hover:text-carbon"
                     >
                       {item.title}
                     </Link>
@@ -163,7 +163,7 @@ export function CartDrawer() {
                           onClick={() =>
                             setQuantity(item.listingId, item.quantity - 1)
                           }
-                          className="px-2 py-1 text-ink-300 transition hover:text-accent-300"
+                          className="px-2 py-1 text-ink-300 transition hover:text-carbon"
                           aria-label="Quitar una unidad"
                         >
                           −
@@ -176,7 +176,7 @@ export function CartDrawer() {
                             setQuantity(item.listingId, item.quantity + 1)
                           }
                           disabled={item.quantity >= item.maxStock}
-                          className="px-2 py-1 text-ink-300 transition hover:text-accent-300 disabled:opacity-30"
+                          className="px-2 py-1 text-ink-300 transition hover:text-carbon disabled:opacity-30"
                           aria-label="Agregar una unidad"
                         >
                           +
@@ -218,7 +218,7 @@ export function CartDrawer() {
               <Link
                 href="/carrito"
                 onClick={() => setOpen(false)}
-                className="mt-2 block rounded-xl border border-ink-700 py-2.5 text-center text-[13px] font-semibold text-ink-200 transition hover:border-accent-500/60"
+                className="mt-2 block rounded-xl border border-ink-700 py-2.5 text-center text-[13px] font-semibold text-ink-200 transition hover:border-carbon"
               >
                 Ver carrito completo
               </Link>

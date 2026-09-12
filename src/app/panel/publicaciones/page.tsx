@@ -14,7 +14,7 @@ const STATUS_STYLE: Record<string, string> = {
   ACTIVE: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
   DRAFT: "border-ink-600 bg-ink-800 text-ink-300",
   PAUSED: "border-amber-500/40 bg-amber-500/10 text-amber-700",
-  SOLD: "border-rose-500/40 bg-rose-500/10 text-brand-600",
+  SOLD: "border-rose-500/40 bg-rose-500/10 text-rose-700",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -124,7 +124,7 @@ export default async function ListingsPage({
           name="q"
           defaultValue={q}
           placeholder="Buscar por nombre o edición…"
-          className="w-full max-w-sm rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+          className="w-full max-w-sm rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-carbon"
         />
         <button className="rounded-lg bg-brand-600 px-4 py-2 text-[12px] font-bold text-paper transition hover:bg-brand-500">
           Buscar
@@ -152,7 +152,7 @@ export default async function ListingsPage({
             href={buildHref({ status: f.value, page: undefined })}
             className={`rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition ${
               status === f.value
-                ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                ? "border-carbon bg-carbon text-paper"
                 : "border-ink-700 text-ink-400 hover:text-ink-200"
             }`}
           >
@@ -217,14 +217,14 @@ export default async function ListingsPage({
               <div className="flex shrink-0 items-center gap-1.5">
                 <Link
                   href={`/producto/${l.slug}`}
-                  className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:text-accent-300"
+                  className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:text-carbon"
                   title="Ver en la tienda"
                 >
                   Ver
                 </Link>
                 <Link
                   href={`/panel/publicaciones/${l.id}`}
-                  className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:border-accent-500/60 hover:text-accent-300"
+                  className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:border-carbon hover:text-carbon"
                 >
                   Editar
                 </Link>
@@ -248,7 +248,7 @@ export default async function ListingsPage({
                   href={buildHref({ page: String(p) })}
                   className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
                     p === page
-                      ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                      ? "border-carbon bg-carbon text-paper"
                       : "border-ink-700 text-ink-300 hover:border-ink-600"
                   }`}
                 >

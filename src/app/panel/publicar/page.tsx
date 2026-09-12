@@ -37,7 +37,7 @@ export default async function PublishPage() {
         </div>
         <Link
           href="/panel/publicar/masivo"
-          className="rounded-lg border border-ink-700 px-3.5 py-2 text-[12px] font-semibold text-ink-200 transition hover:border-accent-500/70"
+          className="rounded-lg border border-ink-700 px-3.5 py-2 text-[12px] font-semibold text-ink-200 transition hover:border-carbon"
         >
           ¿Muchas cartas de Magic? Carga masiva desde .txt →
         </Link>

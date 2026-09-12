@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 const STATUS_STYLE: Record<string, string> = {
   PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-700",
   PAID: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
-  CANCELLED: "border-rose-500/40 bg-rose-500/10 text-brand-600",
+  CANCELLED: "border-rose-500/40 bg-rose-500/10 text-rose-700",
   SHIPPED: "border-sky-500/40 bg-sky-500/10 text-sky-700",
 };
 
@@ -133,7 +133,7 @@ export default async function OrdersPage() {
                   {o.buyerPhone && (
                     <p className="text-[12px] text-ink-400">{o.buyerPhone}</p>
                   )}
-                  <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-accent-300">
+                  <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-ink-300">
                     {o.shipMethod === "PICKUP" ? "Retiro en persona" : "Despacho a domicilio"}
                   </p>
                   {(o.shipAddress || o.shipCity) && (

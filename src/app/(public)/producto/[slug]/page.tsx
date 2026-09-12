@@ -153,15 +153,15 @@ export default async function ProductPage({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <nav className="mb-6 flex flex-wrap items-center gap-1.5 text-[12px] text-ink-400">
-        <Link href="/" className="hover:text-accent-300">
+        <Link href="/" className="hover:text-carbon">
           Inicio
         </Link>
         <span>/</span>
-        <Link href="/cartas" className="hover:text-accent-300">
+        <Link href="/cartas" className="hover:text-carbon">
           Catálogo
         </Link>
         <span>/</span>
-        <Link href={`/cartas?game=${listing.game}`} className="hover:text-accent-300">
+        <Link href={`/cartas?game=${listing.game}`} className="hover:text-carbon">
           {gameName(listing.game)}
         </Link>
         <span>/</span>
@@ -251,9 +251,9 @@ export default async function ProductPage({
           {/* VENDEDOR */}
           <Link
             href={`/vendedor/${listing.seller.slug}`}
-            className="mt-4 flex items-center gap-3 rounded-xl card-surface p-4 transition hover:border-accent-500/50"
+            className="mt-4 flex items-center gap-3 rounded-xl card-surface p-4 transition hover:border-carbon"
           >
-            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-lg font-bold text-paper">
+            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-carbon font-display text-lg font-bold text-paper">
               {listing.seller.avatarUrl ? (
                 <Image
                   src={listing.seller.avatarUrl}
@@ -276,7 +276,7 @@ export default async function ProductPage({
                 {listing.seller.city ? ` · ${listing.seller.city}` : ""}
               </span>
             </span>
-            <span className="text-[12px] font-semibold text-accent-300">Ver perfil →</span>
+            <span className="text-[12px] font-semibold text-brand-600">Ver perfil →</span>
           </Link>
 
           {priceStats && (
@@ -309,7 +309,7 @@ export default async function ProductPage({
                   <li key={l.id} className="flex items-center gap-3 p-3.5">
                     <Link
                       href={`/vendedor/${l.seller.slug}`}
-                      className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-[11px] font-bold text-paper"
+                      className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-carbon text-[11px] font-bold text-paper"
                     >
                       {l.seller.avatarUrl ? (
                         <Image
@@ -327,7 +327,7 @@ export default async function ProductPage({
                     <div className="min-w-0 flex-1">
                       <Link
                         href={`/vendedor/${l.seller.slug}`}
-                        className="block truncate text-[12px] font-semibold text-ink-200 hover:text-accent-300"
+                        className="block truncate text-[12px] font-semibold text-ink-200 hover:text-carbon"
                       >
                         {l.seller.name}
                       </Link>
@@ -345,7 +345,7 @@ export default async function ProductPage({
                       </p>
                       <Link
                         href={`/producto/${l.slug}`}
-                        className="text-[11px] font-semibold text-accent-300 hover:text-accent-400"
+                        className="text-[11px] font-semibold text-brand-600 hover:text-brand-700"
                       >
                         Ver →
                       </Link>
@@ -401,7 +401,7 @@ export default async function ProductPage({
                         </div>
                       )}
                       {card.quantity > 1 && (
-                        <span className="absolute right-1 top-1 rounded-md bg-ink-950/90 px-1.5 py-0.5 text-[10px] font-bold text-accent-300">
+                        <span className="absolute right-1 top-1 rounded-md bg-ink-950/90 px-1.5 py-0.5 text-[10px] font-bold text-paper">
                           ×{card.quantity}
                         </span>
                       )}

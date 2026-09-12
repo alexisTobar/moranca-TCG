@@ -67,12 +67,12 @@ export function OrderStatusActions({
         type="button"
         disabled={loading}
         onClick={() => setStatus("CANCELLED")}
-        className="flex items-center gap-1.5 rounded-lg border border-ink-700 px-3 py-1.5 text-[11px] font-semibold text-ink-400 transition hover:border-rose-500/40 hover:text-brand-600 disabled:opacity-50"
+        className="flex items-center gap-1.5 rounded-lg border border-ink-700 px-3 py-1.5 text-[11px] font-semibold text-ink-400 transition hover:border-rose-500/40 hover:text-rose-600 disabled:opacity-50"
       >
         <XCircle className="h-3.5 w-3.5" strokeWidth={2} />
         Cancelar
       </button>
-      {error && <p className="w-full text-[11px] text-brand-600">{error}</p>}
+      {error && <p className="w-full text-[11px] text-rose-700">{error}</p>}
     </div>
   );
 }

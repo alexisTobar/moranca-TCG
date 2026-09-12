@@ -102,7 +102,7 @@ export default async function PanelHome() {
       {isAdmin && pendingOrders > 0 && (
         <Link
           href="/panel/ordenes"
-          className="block rounded-xl border border-accent-500/40 bg-accent-500/10 p-4 text-[13px] text-accent-300 transition hover:bg-accent-500/15"
+          className="block rounded-xl border border-ink-700 bg-ink-900 p-4 text-[13px] text-ink-300 transition hover:bg-ink-850"
         >
           Tienes <strong>{pendingOrders}</strong>{" "}
           {pendingOrders === 1 ? "orden pendiente" : "órdenes pendientes"} por revisar →
@@ -114,7 +114,7 @@ export default async function PanelHome() {
           <Link
             key={s.label}
             href={s.href}
-            className="rounded-2xl card-surface p-5 transition hover:border-accent-500/40"
+            className="rounded-2xl card-surface p-5 transition hover:border-carbon"
           >
             <p className="text-[11px] uppercase tracking-widest text-ink-400">
               {s.label}
@@ -131,7 +131,7 @@ export default async function PanelHome() {
           </h2>
           <Link
             href="/panel/publicaciones"
-            className="text-[12px] font-semibold text-accent-300 hover:text-accent-400"
+            className="text-[12px] font-semibold text-brand-600 hover:text-brand-700"
           >
             Ver todas →
           </Link>

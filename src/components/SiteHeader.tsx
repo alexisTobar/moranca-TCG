@@ -49,7 +49,7 @@ export async function SiteHeader() {
           {user ? (
             <Link
               href={user.role === "BUYER" ? "/cuenta" : "/panel"}
-              className="hidden rounded-lg border border-accent-500/50 bg-accent-500/10 px-3.5 py-2 text-[13px] font-semibold text-accent-300 transition hover:bg-accent-500/20 sm:block"
+              className="hidden rounded-lg border border-white/20 bg-white/10 px-3.5 py-2 text-[13px] font-semibold text-white/90 transition hover:bg-white/15 sm:block"
             >
               {user.role === "BUYER" ? "Mi cuenta" : "Mi panel"}
             </Link>
@@ -60,7 +60,7 @@ export async function SiteHeader() {
           {!user && (
             <Link
               href="/ingresar"
-              className="hidden rounded-lg border border-white/20 px-3.5 py-2 text-[13px] font-medium text-white/80 transition hover:border-accent-500/60 hover:text-accent-300 sm:block"
+              className="hidden rounded-lg border border-white/20 px-3.5 py-2 text-[13px] font-medium text-white/80 transition hover:border-carbon hover:text-carbon sm:block"
             >
               Ingresar
             </Link>
@@ -80,7 +80,7 @@ export async function SiteHeader() {
         <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-1.5 no-scrollbar">
           <Link
             href="/cartas"
-            className="whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/60 transition hover:text-accent-300"
+            className="whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/60 transition hover:text-white"
           >
             Todos los juegos
           </Link>
@@ -88,12 +88,8 @@ export async function SiteHeader() {
             <Link
               key={g.id}
               href={`/cartas?game=${g.id}`}
-              className="flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/60 transition hover:text-white"
+              className="whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white/60 transition hover:text-white"
             >
-              <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ background: g.accent }}
-              />
               {g.short}
             </Link>
           ))}

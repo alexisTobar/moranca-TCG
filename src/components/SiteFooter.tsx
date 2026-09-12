@@ -7,10 +7,10 @@ export function SiteFooter() {
     <footer className="mt-20 border-t border-ink-800 bg-ink-900/60">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <Logo height={70} />
+          <Logo height={92} />
           <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-ink-400">
             Tienda chilena de cartas coleccionables. Singles, sellados y mazos
-            armados, con envíos a todo Chile y pagos protegidos.
+            armados, con despacho a todo Chile.
           </p>
         </div>
 
@@ -21,7 +21,7 @@ export function SiteFooter() {
           <ul className="space-y-2 text-[13px] text-ink-400">
             {GAME_LIST.map((g) => (
               <li key={g.id}>
-                <Link href={`/cartas?game=${g.id}`} className="hover:text-accent-300">
+                <Link href={`/cartas?game=${g.id}`} className="hover:text-carbon">
                   {g.name}
                 </Link>
               </li>
@@ -35,27 +35,27 @@ export function SiteFooter() {
           </h4>
           <ul className="space-y-2 text-[13px] text-ink-400">
             <li>
-              <Link href="/cartas" className="hover:text-accent-300">
+              <Link href="/cartas" className="hover:text-carbon">
                 Catálogo completo
               </Link>
             </li>
             <li>
-              <Link href="/cartas?type=SINGLE" className="hover:text-accent-300">
+              <Link href="/cartas?type=SINGLE" className="hover:text-carbon">
                 Singles
               </Link>
             </li>
             <li>
-              <Link href="/cartas?type=SEALED" className="hover:text-accent-300">
+              <Link href="/cartas?type=SEALED" className="hover:text-carbon">
                 Sellados
               </Link>
             </li>
             <li>
-              <Link href="/cartas?type=DECK" className="hover:text-accent-300">
+              <Link href="/cartas?type=DECK" className="hover:text-carbon">
                 Mazos armados
               </Link>
             </li>
             <li>
-              <Link href="/vendedores" className="hover:text-accent-300">
+              <Link href="/vendedores" className="hover:text-carbon">
                 Vendedores
               </Link>
             </li>
@@ -68,22 +68,22 @@ export function SiteFooter() {
           </h4>
           <ul className="space-y-2 text-[13px] text-ink-400">
             <li>
-              <Link href="/ayuda" className="hover:text-accent-300">
+              <Link href="/ayuda" className="hover:text-carbon">
                 Cómo comprar
               </Link>
             </li>
             <li>
-              <Link href="/ayuda#envios" className="hover:text-accent-300">
+              <Link href="/ayuda#envios" className="hover:text-carbon">
                 Envíos
               </Link>
             </li>
             <li>
-              <Link href="/ayuda#estados" className="hover:text-accent-300">
+              <Link href="/ayuda#estados" className="hover:text-carbon">
                 Estados de carta
               </Link>
             </li>
             <li>
-              <Link href="/ingresar" className="hover:text-accent-300">
+              <Link href="/ingresar" className="hover:text-carbon">
                 Acceso vendedores
               </Link>
             </li>

@@ -23,7 +23,7 @@ const STATES: Record<
   error: {
     title: "No pudimos procesar el pago",
     body: "El pago fue rechazado o cancelado. Tu reserva sigue guardada: puedes intentarlo nuevamente desde la publicación.",
-    tone: "border-rose-500/40 bg-rose-500/10 text-brand-600",
+    tone: "border-rose-500/40 bg-rose-500/10 text-rose-700",
     icon: XCircle,
   },
 };
@@ -54,7 +54,7 @@ export default async function PurchaseStatePage({
       <p className="mt-3 text-[14px] leading-relaxed text-ink-400">{state.body}</p>
       {order && (
         <p className="mt-4 rounded-lg border border-ink-700 bg-ink-900 px-4 py-2 text-[12px] text-ink-300">
-          Orden <strong className="text-accent-300">#{order.slice(-6).toUpperCase()}</strong>
+          Orden <strong className="text-carbon">#{order.slice(-6).toUpperCase()}</strong>
         </p>
       )}
       <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -66,7 +66,7 @@ export default async function PurchaseStatePage({
         </Link>
         <Link
           href="/"
-          className="rounded-xl border border-ink-600 px-6 py-3 text-sm font-semibold text-ink-200 transition hover:border-accent-500/60"
+          className="rounded-xl border border-ink-600 px-6 py-3 text-sm font-semibold text-ink-200 transition hover:border-carbon"
         >
           Volver al inicio
         </Link>

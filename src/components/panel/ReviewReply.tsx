@@ -67,14 +67,14 @@ export function ReviewReply({ orderId, review }: { orderId: string; review: Revi
             rows={2}
             maxLength={1000}
             placeholder="Responder a esta reseña (opcional)"
-            className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-[12px] text-ink-200 outline-none focus:border-accent-500/70"
+            className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-[12px] text-ink-200 outline-none focus:border-carbon"
           />
           {error && <p className="mt-1.5 text-[11px] text-brand-600">{error}</p>}
           <button
             type="button"
             disabled={sending || !reply.trim()}
             onClick={submit}
-            className="mt-1.5 rounded-lg border border-ink-600 px-3 py-1.5 text-[11px] font-semibold text-ink-200 transition hover:border-accent-500/60 hover:text-accent-300 disabled:opacity-60"
+            className="mt-1.5 rounded-lg border border-ink-600 px-3 py-1.5 text-[11px] font-semibold text-ink-200 transition hover:border-carbon hover:text-carbon disabled:opacity-60"
           >
             {sending ? "Enviando…" : "Responder"}
           </button>

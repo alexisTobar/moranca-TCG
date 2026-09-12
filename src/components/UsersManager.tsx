@@ -128,7 +128,7 @@ export function UsersManager({
               <select
                 name="role"
                 defaultValue="SELLER"
-                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
               >
                 <option value="SELLER">Vendedor</option>
                 <option value="ADMIN">Administrador</option>
@@ -143,13 +143,13 @@ export function UsersManager({
               <textarea
                 name="bio"
                 rows={2}
-                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
               />
             </label>
           </div>
 
           {error && (
-            <p className="mt-4 rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-brand-600">
+            <p className="mt-4 rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-rose-700">
               {error}
             </p>
           )}
@@ -166,7 +166,7 @@ export function UsersManager({
       <ul className="divide-y divide-ink-800 overflow-hidden rounded-2xl card-surface">
         {users.map((u) => (
           <li key={u.id} className="flex flex-wrap items-center gap-4 p-4">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-lg font-bold text-paper">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-carbon font-display text-lg font-bold text-paper">
               {u.name.charAt(0).toUpperCase()}
             </span>
 
@@ -178,14 +178,14 @@ export function UsersManager({
                 <span
                   className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
                     u.role === "ADMIN"
-                      ? "border-accent-500/40 bg-accent-500/10 text-accent-300"
+                      ? "border-carbon bg-carbon text-paper"
                       : "border-ink-600 text-ink-400"
                   }`}
                 >
                   {u.role === "ADMIN" ? "Admin" : "Vendedor"}
                 </span>
                 {!u.active && (
-                  <span className="rounded-full border border-rose-500/40 bg-rose-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-brand-600">
+                  <span className="rounded-full border border-rose-500/40 bg-rose-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-rose-700">
                     Inactivo
                   </span>
                 )}
@@ -199,7 +199,7 @@ export function UsersManager({
             <div className="flex shrink-0 flex-wrap items-center gap-1.5">
               <button
                 onClick={() => resetPassword(u.id, u.name)}
-                className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:text-accent-300"
+                className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:text-carbon"
               >
                 Clave
               </button>
@@ -207,7 +207,7 @@ export function UsersManager({
                 <>
                   <button
                     onClick={() => patch(u.id, { active: !u.active })}
-                    className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:text-accent-300"
+                    className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:text-carbon"
                   >
                     {u.active ? "Desactivar" : "Activar"}
                   </button>
@@ -217,7 +217,7 @@ export function UsersManager({
                         role: u.role === "ADMIN" ? "SELLER" : "ADMIN",
                       })
                     }
-                    className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:text-accent-300"
+                    className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:text-carbon"
                   >
                     {u.role === "ADMIN" ? "Quitar admin" : "Hacer admin"}
                   </button>
@@ -248,14 +248,14 @@ function Field({
     <label className="block">
       <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
         {label}
-        {required && <span className="text-accent-400"> *</span>}
+        {required && <span className="text-carbon"> *</span>}
       </span>
       <input
         name={name}
         type={type}
         required={required}
         autoComplete="off"
-        className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+        className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
       />
       {hint && <span className="mt-1 block text-[10px] text-ink-400">{hint}</span>}
     </label>

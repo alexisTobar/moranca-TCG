@@ -60,7 +60,7 @@ export function DiscountRatesForm({ initial }: { initial: DiscountRatesValues })
             step={1}
             value={transferPct}
             onChange={(e) => setTransferPct(Math.max(0, Math.min(30, Number(e.target.value))))}
-            className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+            className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
           />
         </label>
         <label className="block">
@@ -74,7 +74,7 @@ export function DiscountRatesForm({ initial }: { initial: DiscountRatesValues })
             step={1}
             value={cashPct}
             onChange={(e) => setCashPct(Math.max(0, Math.min(30, Number(e.target.value))))}
-            className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+            className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
           />
         </label>
       </div>

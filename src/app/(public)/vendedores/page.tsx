@@ -57,10 +57,10 @@ export default async function SellersPage() {
             <Link
               key={s.id}
               href={`/vendedor/${s.slug}`}
-              className="rounded-2xl card-surface p-5 transition hover:-translate-y-1 hover:border-accent-500/50"
+              className="rounded-2xl card-surface p-5 transition hover:-translate-y-1 hover:border-carbon"
             >
               <div className="flex items-center gap-3">
-                <span className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-xl font-bold text-paper">
+                <span className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-carbon font-display text-xl font-bold text-paper">
                   {s.avatarUrl ? (
                     <Image src={s.avatarUrl} alt={s.name} fill sizes="48px" className="object-cover" unoptimized />
                   ) : (
@@ -75,7 +75,7 @@ export default async function SellersPage() {
                   </p>
                 </div>
                 {s.role === "ADMIN" && (
-                  <span className="ml-auto rounded-full border border-accent-500/40 bg-accent-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent-300">
+                  <span className="ml-auto rounded-full border border-carbon bg-carbon px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-paper">
                     Oficial
                   </span>
                 )}

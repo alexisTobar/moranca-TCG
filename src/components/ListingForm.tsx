@@ -258,13 +258,13 @@ export function ListingForm({
               onClick={() => set("type", t.value as ListingFormValues["type"])}
               className={`rounded-xl border p-4 text-left transition ${
                 values.type === t.value
-                  ? "border-accent-500/60 bg-accent-500/10"
+                  ? "border-carbon bg-carbon/5"
                   : "border-ink-700 hover:border-ink-600"
               }`}
             >
               <span
                 className={`block text-sm font-bold ${
-                  values.type === t.value ? "text-accent-300" : "text-ink-200"
+                  values.type === t.value ? "text-carbon" : "text-ink-200"
                 }`}
               >
                 {t.label}
@@ -305,7 +305,7 @@ export function ListingForm({
                 onClick={() => pickGame(g)}
                 className={`rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition ${
                   values.game === g
-                    ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                    ? "border-carbon bg-carbon text-paper"
                     : "border-ink-700 text-ink-400 hover:text-ink-200"
                 }`}
               >
@@ -345,7 +345,7 @@ export function ListingForm({
               <button
                 type="button"
                 onClick={() => set("deckCards", [])}
-                className="text-[11px] font-semibold text-brand-600 hover:text-brand-600"
+                className="text-[11px] font-semibold text-rose-700 hover:text-rose-600"
               >
                 Vaciar mazo
               </button>
@@ -374,7 +374,7 @@ export function ListingForm({
                         unoptimized
                       />
                     )}
-                    <span className="absolute right-1 top-1 rounded bg-ink-950/90 px-1.5 py-0.5 text-[10px] font-bold text-accent-300">
+                    <span className="absolute right-1 top-1 rounded bg-ink-950/90 px-1.5 py-0.5 text-[10px] font-bold text-paper">
                       ×{card.quantity}
                     </span>
                   </div>
@@ -385,7 +385,7 @@ export function ListingForm({
                     <button
                       type="button"
                       onClick={() => changeQty(i, -1)}
-                      className="flex-1 py-1 text-[12px] text-ink-400 transition hover:bg-rose-500/20 hover:text-brand-600"
+                      className="flex-1 py-1 text-[12px] text-ink-400 transition hover:bg-rose-500/20 hover:text-rose-600"
                       aria-label={`Quitar copia de ${card.name}`}
                     >
                       −
@@ -393,7 +393,7 @@ export function ListingForm({
                     <button
                       type="button"
                       onClick={() => changeQty(i, 1)}
-                      className="flex-1 border-l border-ink-800 py-1 text-[12px] text-ink-400 transition hover:bg-accent-500/20 hover:text-accent-300"
+                      className="flex-1 border-l border-ink-800 py-1 text-[12px] text-ink-400 transition hover:bg-ink-850 hover:text-carbon"
                       aria-label={`Agregar copia de ${card.name}`}
                     >
                       +
@@ -424,7 +424,7 @@ export function ListingForm({
                 required
                 maxLength={180}
                 placeholder="Ej: Charizard VMAX · Darkness Ablaze"
-                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
               />
             </label>
 
@@ -441,10 +441,10 @@ export function ListingForm({
                   value={values.price || ""}
                   onChange={(e) => set("price", Number(e.target.value))}
                   required
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 />
                 {values.price > 0 && (
-                  <span className="mt-1 block text-[11px] font-semibold text-brand-600">
+                  <span className="mt-1 block text-[11px] font-semibold text-rose-700">
                     {clp(values.price)}
                   </span>
                 )}
@@ -464,7 +464,7 @@ export function ListingForm({
                     set("offerPrice", e.target.value === "" ? null : Number(e.target.value))
                   }
                   placeholder="Sin oferta"
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 />
                 {values.offerPrice != null && values.offerPrice > 0 && (
                   <span
@@ -489,7 +489,7 @@ export function ListingForm({
                       <button
                         type="button"
                         onClick={() => set("price", reference.priceClp!)}
-                        className="rounded-md border border-ink-700 bg-white px-2.5 py-1 text-[11px] font-semibold text-ink-200 transition hover:border-brand-500 hover:text-brand-600"
+                        className="rounded-md border border-ink-700 bg-white px-2.5 py-1 text-[11px] font-semibold text-ink-200 transition hover:border-brand-500 hover:text-rose-600"
                       >
                         Normal {clp(reference.priceClp)}
                         <span className="ml-1 font-normal text-ink-400">
@@ -501,7 +501,7 @@ export function ListingForm({
                       <button
                         type="button"
                         onClick={() => set("price", reference.priceClpFoil!)}
-                        className="rounded-md border border-ink-700 bg-white px-2.5 py-1 text-[11px] font-semibold text-ink-200 transition hover:border-brand-500 hover:text-brand-600"
+                        className="rounded-md border border-ink-700 bg-white px-2.5 py-1 text-[11px] font-semibold text-ink-200 transition hover:border-brand-500 hover:text-rose-600"
                       >
                         Foil {clp(reference.priceClpFoil)}
                         <span className="ml-1 font-normal text-ink-400">
@@ -525,7 +525,7 @@ export function ListingForm({
                   min={0}
                   value={values.stock}
                   onChange={(e) => set("stock", Number(e.target.value))}
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 />
               </label>
 
@@ -536,7 +536,7 @@ export function ListingForm({
                 <select
                   value={values.condition ?? ""}
                   onChange={(e) => set("condition", e.target.value || null)}
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 >
                   <option value="">—</option>
                   {CONDITIONS.map((c) => (
@@ -554,7 +554,7 @@ export function ListingForm({
                 <select
                   value={values.language ?? ""}
                   onChange={(e) => set("language", e.target.value || null)}
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 >
                   <option value="">—</option>
                   {LANGUAGES.map((l) => (
@@ -572,7 +572,7 @@ export function ListingForm({
                 <input
                   value={values.setName ?? ""}
                   onChange={(e) => set("setName", e.target.value || null)}
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 />
               </label>
 
@@ -584,7 +584,7 @@ export function ListingForm({
                   value={values.color ?? ""}
                   onChange={(e) => set("color", e.target.value || null)}
                   placeholder="Ej: Rojo, Azul/Blanco…"
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 />
               </label>
 
@@ -596,7 +596,7 @@ export function ListingForm({
                   value={values.family ?? ""}
                   onChange={(e) => set("family", e.target.value || null)}
                   placeholder="Ej: Whitebeard Pirates"
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 />
               </label>
 
@@ -607,7 +607,7 @@ export function ListingForm({
                 <input
                   value={values.illustrator ?? ""}
                   onChange={(e) => set("illustrator", e.target.value || null)}
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 />
               </label>
             </div>
@@ -632,7 +632,7 @@ export function ListingForm({
                 rows={4}
                 maxLength={4000}
                 placeholder="Detalles del estado, si viene en sleeve, si acepta cambios…"
-                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
               />
             </label>
           </div>
@@ -689,7 +689,7 @@ export function ListingForm({
                 onChange={(e) =>
                   set("status", e.target.value as ListingFormValues["status"])
                 }
-                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-carbon"
               >
                 <option value="ACTIVE">Publicada</option>
                 <option value="DRAFT">Borrador</option>
@@ -707,7 +707,7 @@ export function ListingForm({
                   <select
                     value={values.sellerId ?? currentUserId}
                     onChange={(e) => set("sellerId", e.target.value)}
-                    className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                    className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-carbon"
                   >
                     {sellers.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -731,7 +731,7 @@ export function ListingForm({
           </div>
 
           {error && (
-            <p className="rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-brand-600">
+            <p className="rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-rose-700">
               {error}
             </p>
           )}

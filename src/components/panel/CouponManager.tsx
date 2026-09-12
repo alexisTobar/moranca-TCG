@@ -80,12 +80,12 @@ export function CouponManager({ initial }: { initial: CouponValue[] }) {
           onChange={(e) => setCode(e.target.value)}
           placeholder="CODIGO"
           maxLength={30}
-          className="rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm uppercase text-ink-200 outline-none focus:border-accent-500/70"
+          className="rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm uppercase text-ink-200 outline-none focus:border-carbon"
         />
         <select
           value={type}
           onChange={(e) => setType(e.target.value as "PERCENT" | "FIXED")}
-          className="rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+          className="rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
         >
           <option value="PERCENT">%</option>
           <option value="FIXED">CLP fijo</option>
@@ -96,7 +96,7 @@ export function CouponManager({ initial }: { initial: CouponValue[] }) {
           max={type === "PERCENT" ? 100 : undefined}
           value={value}
           onChange={(e) => setValue(Number(e.target.value))}
-          className="w-28 rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+          className="w-28 rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
         />
         <button
           disabled={creating}

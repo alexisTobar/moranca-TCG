@@ -63,20 +63,58 @@ export default async function CatalogPage({
   if (language) where.language = language;
   if (min || max) where.price = { ...(min ? { gte: min } : {}), ...(max ? { lte: max } : {}) };
 
-  const [listings, total] = await Promise.all([
-    safeQuery(
-      () =>
-        prisma.listing.findMany({
-          where,
-          select: LISTING_CARD_SELECT,
-          orderBy: SORTS[sort] ?? SORTS.recientes,
-          skip: (page - 1) * PAGE_SIZE,
-          take: PAGE_SIZE,
-        }),
-      [] as ListingCardData[]
-    ),
+  // Las publicaciones vendidas (stock agotado) siguen apareciendo en el
+  // catálogo con su badge "Vendido", pero no deben competir con las
+  // disponibles por posición: se arma la página en dos tramos — primero
+  // todo lo disponible con el orden elegido, y recién cuando eso se agota
+  // se completa con lo vendido, también en ese orden.
+  const availableWhere: Prisma.ListingWhereInput = { ...where, stock: { gt: 0 } };
+  const soldWhere: Prisma.ListingWhereInput = { ...where, stock: { lte: 0 } };
+  const orderBy = SORTS[sort] ?? SORTS.recientes;
+
+  const [availableCount, total] = await Promise.all([
+    safeQuery(() => prisma.listing.count({ where: availableWhere }), 0),
     safeQuery(() => prisma.listing.count({ where }), 0),
   ]);
+
+  const startIndex = (page - 1) * PAGE_SIZE;
+  const endIndex = startIndex + PAGE_SIZE;
+
+  const availableSkip = Math.min(startIndex, availableCount);
+  const availableTake = Math.max(0, Math.min(endIndex, availableCount) - availableSkip);
+  const soldSkip = Math.max(0, startIndex - availableCount);
+  const soldTake = PAGE_SIZE - availableTake;
+
+  const [availableListings, soldListings] = await Promise.all([
+    availableTake > 0
+      ? safeQuery(
+          () =>
+            prisma.listing.findMany({
+              where: availableWhere,
+              select: LISTING_CARD_SELECT,
+              orderBy,
+              skip: availableSkip,
+              take: availableTake,
+            }),
+          [] as ListingCardData[]
+        )
+      : Promise.resolve([] as ListingCardData[]),
+    soldTake > 0
+      ? safeQuery(
+          () =>
+            prisma.listing.findMany({
+              where: soldWhere,
+              select: LISTING_CARD_SELECT,
+              orderBy,
+              skip: soldSkip,
+              take: soldTake,
+            }),
+          [] as ListingCardData[]
+        )
+      : Promise.resolve([] as ListingCardData[]),
+  ]);
+
+  const listings = [...availableListings, ...soldListings];
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -101,7 +139,7 @@ export default async function CatalogPage({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <nav className="mb-4 text-[12px] text-ink-400">
-        <Link href="/" className="hover:text-accent-300">
+        <Link href="/" className="hover:text-carbon">
           Inicio
         </Link>
         <span className="mx-1.5">/</span>
@@ -200,7 +238,7 @@ export default async function CatalogPage({
                 min={0}
                 defaultValue={min}
                 placeholder="Mín"
-                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-2.5 py-1.5 text-xs text-ink-200 outline-none focus:border-accent-500/70"
+                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-2.5 py-1.5 text-xs text-ink-200 outline-none focus:border-carbon"
               />
               <input
                 name="max"
@@ -208,17 +246,17 @@ export default async function CatalogPage({
                 min={0}
                 defaultValue={max}
                 placeholder="Máx"
-                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-2.5 py-1.5 text-xs text-ink-200 outline-none focus:border-accent-500/70"
+                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-2.5 py-1.5 text-xs text-ink-200 outline-none focus:border-carbon"
               />
             </div>
-            <button className="w-full rounded-lg border border-ink-600 py-1.5 text-xs font-semibold text-ink-200 transition hover:border-accent-500/60 hover:text-accent-300">
+            <button className="w-full rounded-lg border border-ink-600 py-1.5 text-xs font-semibold text-ink-200 transition hover:border-carbon hover:text-carbon">
               Aplicar
             </button>
           </form>
 
           <Link
             href="/cartas"
-            className="block text-center text-[11px] font-semibold uppercase tracking-widest text-ink-400 hover:text-accent-300"
+            className="block text-center text-[11px] font-semibold uppercase tracking-widest text-ink-400 hover:text-carbon"
           >
             Limpiar filtros
           </Link>
@@ -236,7 +274,7 @@ export default async function CatalogPage({
                 href={buildHref({ sort: s, page: undefined })}
                 className={`rounded-full border px-3 py-1 text-[11px] font-semibold capitalize transition ${
                   sort === s
-                    ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                    ? "border-carbon bg-carbon text-paper"
                     : "border-ink-700 text-ink-400 hover:text-ink-200"
                 }`}
               >
@@ -279,7 +317,7 @@ export default async function CatalogPage({
                       href={buildHref({ page: String(p) })}
                       className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
                         p === page
-                          ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                          ? "border-carbon bg-carbon text-paper"
                           : "border-ink-700 text-ink-300 hover:border-ink-600"
                       }`}
                     >
@@ -326,7 +364,7 @@ function FilterPill({
       href={href}
       className={`rounded-lg border px-2.5 py-1 text-[11px] font-semibold transition ${
         active
-          ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+          ? "border-carbon bg-carbon text-paper"
           : "border-ink-700 text-ink-400 hover:border-ink-600 hover:text-ink-200"
       }`}
     >

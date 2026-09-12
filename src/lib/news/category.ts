@@ -11,8 +11,3 @@ export function newsCategoryLabel(category: string): string {
   if (category === "GENERAL") return "Torneos";
   return gameMeta(category)?.short ?? category;
 }
-
-export function newsCategoryColor(category: string): string {
-  if (category === "GENERAL") return "#d9a441";
-  return gameMeta(category)?.accent ?? "#d9a441";
-}

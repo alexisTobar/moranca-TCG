@@ -37,7 +37,7 @@ export function SellerRequestBox({
   return (
     <div className="rounded-2xl card-surface p-5">
       <div className="flex items-center gap-2">
-        <Store className="h-4 w-4 text-accent-400" strokeWidth={2} />
+        <Store className="h-4 w-4 text-ink-400" strokeWidth={2} />
         <h3 className="text-sm font-semibold text-carbon">¿Quieres vender en Win Condition?</h3>
       </div>
       <p className="mt-1 text-[12px] text-ink-400">
@@ -53,7 +53,7 @@ export function SellerRequestBox({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="mt-3 rounded-lg border border-accent-500/60 bg-accent-500/10 px-4 py-2 text-[12px] font-bold text-accent-300 transition hover:bg-accent-500/20"
+          className="mt-3 rounded-lg border border-carbon bg-carbon/5 px-4 py-2 text-[12px] font-bold text-carbon transition hover:bg-ink-850"
         >
           Quiero vender
         </button>
@@ -66,7 +66,7 @@ export function SellerRequestBox({
           onChange={(e) => setMessage(e.target.value)}
           rows={3}
           placeholder="Cuéntanos qué quieres vender (opcional)"
-          className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-[12px] text-ink-200 outline-none focus:border-accent-500/70"
+          className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-[12px] text-ink-200 outline-none focus:border-carbon"
         />
         {error && <p className="mt-1.5 text-[11px] text-brand-600">{error}</p>}
         <button

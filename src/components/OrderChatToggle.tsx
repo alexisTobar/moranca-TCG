@@ -20,7 +20,7 @@ export function OrderChatToggle({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-[12px] font-semibold text-accent-300 hover:text-accent-400"
+        className="flex items-center gap-1.5 text-[12px] font-semibold text-brand-600 hover:text-brand-700"
       >
         <MessageCircle className="h-3.5 w-3.5" strokeWidth={2} />
         {open ? "Ocultar conversación" : "Ver conversación / comprobante"}

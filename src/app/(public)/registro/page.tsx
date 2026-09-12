@@ -13,8 +13,6 @@ export const metadata: Metadata = {
 export default function RegisterPage() {
   return (
     <div className="relative flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4 py-12 sm:py-16">
-      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[420px] w-[600px] -translate-x-1/2 rounded-full bg-accent-500/10 blur-[120px]" />
-
       <div className="relative w-full max-w-sm">
         <div className="mb-8 flex justify-center">
           <Logo variant="full" height={120} />
@@ -33,7 +31,7 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-[12px] text-ink-400">
           ¿Ya tienes cuenta?{" "}
-          <Link href="/ingresar" className="font-semibold text-accent-300 hover:text-accent-400">
+          <Link href="/ingresar" className="font-semibold text-brand-600 hover:text-brand-700">
             Ingresa
           </Link>
         </p>

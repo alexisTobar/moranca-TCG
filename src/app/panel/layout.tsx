@@ -32,14 +32,14 @@ export default async function PanelLayout({
           <Link href="/">
             <Logo height={64} tone="light" />
           </Link>
-          <span className="hidden rounded-full border border-accent-500/40 bg-accent-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-300 sm:inline">
+          <span className="hidden rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white/80 sm:inline">
             {isAdmin ? "Administrador" : "Vendedor"}
           </span>
 
           <div className="ml-auto flex items-center gap-3">
             <Link
               href="/"
-              className="hidden text-[13px] text-white/80 transition hover:text-accent-300 sm:block"
+              className="hidden text-[13px] text-white/80 transition hover:text-carbon sm:block"
             >
               Ver tienda ↗
             </Link>

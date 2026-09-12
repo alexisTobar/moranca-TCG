@@ -80,7 +80,7 @@ export default async function EditListingPage({
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <nav className="text-[12px] text-ink-400">
-            <Link href="/panel/publicaciones" className="hover:text-accent-300">
+            <Link href="/panel/publicaciones" className="hover:text-carbon">
               Publicaciones
             </Link>
             <span className="mx-1.5">/</span>
@@ -92,7 +92,7 @@ export default async function EditListingPage({
         </div>
         <Link
           href={`/producto/${listing.slug}`}
-          className="rounded-lg border border-ink-700 px-4 py-2 text-[12px] font-semibold text-ink-300 transition hover:text-accent-300"
+          className="rounded-lg border border-ink-700 px-4 py-2 text-[12px] font-semibold text-ink-300 transition hover:text-carbon"
         >
           Ver en la tienda ↗
         </Link>

@@ -151,7 +151,7 @@ export default async function SellerPage({
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
       <nav className="mb-6 text-[12px] text-ink-400">
-        <Link href="/vendedores" className="hover:text-accent-300">
+        <Link href="/vendedores" className="hover:text-carbon">
           Vendedores
         </Link>
         <span className="mx-1.5">/</span>
@@ -159,7 +159,7 @@ export default async function SellerPage({
       </nav>
 
       <header className="flex flex-wrap items-center gap-5 rounded-2xl card-surface p-6">
-        <span className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-500 to-brand-700 font-display text-2xl font-bold text-paper">
+        <span className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-carbon font-display text-2xl font-bold text-paper">
           {seller.avatarUrl ? (
             <Image src={seller.avatarUrl} alt={seller.name} fill sizes="64px" className="object-cover" unoptimized />
           ) : (
@@ -170,7 +170,7 @@ export default async function SellerPage({
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="font-display text-2xl font-bold text-carbon">{seller.name}</h1>
             {seller.role === "ADMIN" && (
-              <span className="rounded-full border border-accent-500/40 bg-accent-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent-300">
+              <span className="rounded-full border border-carbon bg-carbon px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-paper">
                 Oficial
               </span>
             )}
@@ -208,7 +208,7 @@ export default async function SellerPage({
               name="q"
               defaultValue={q}
               placeholder="Buscar en las cartas de este vendedor…"
-              className="w-full max-w-sm rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+              className="w-full max-w-sm rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-carbon"
             />
             <button className="rounded-lg bg-brand-600 px-4 py-2 text-[12px] font-bold text-paper transition hover:bg-brand-500">
               Buscar
@@ -228,7 +228,7 @@ export default async function SellerPage({
               href={buildHref({ game: undefined, page: undefined })}
               className={`rounded-lg border px-2.5 py-1 text-[11px] font-semibold transition ${
                 !game
-                  ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                  ? "border-carbon bg-carbon text-paper"
                   : "border-ink-700 text-ink-400 hover:text-ink-200"
               }`}
             >
@@ -240,7 +240,7 @@ export default async function SellerPage({
                 href={buildHref({ game: g.id, page: undefined })}
                 className={`rounded-lg border px-2.5 py-1 text-[11px] font-semibold transition ${
                   game === g.id
-                    ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                    ? "border-carbon bg-carbon text-paper"
                     : "border-ink-700 text-ink-400 hover:text-ink-200"
                 }`}
               >
@@ -280,7 +280,7 @@ export default async function SellerPage({
                   href={buildHref({ page: String(p) })}
                   className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
                     p === page
-                      ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                      ? "border-carbon bg-carbon text-paper"
                       : "border-ink-700 text-ink-300 hover:border-ink-600"
                   }`}
                 >

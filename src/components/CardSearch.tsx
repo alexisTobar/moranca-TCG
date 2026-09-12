@@ -151,14 +151,10 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
             }}
             className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition ${
               game === g.id
-                ? "border-brand-500 bg-brand-500/10 text-brand-600"
+                ? "border-carbon bg-carbon text-paper"
                 : "border-ink-700 text-ink-400 hover:border-ink-600 hover:text-ink-200"
             }`}
           >
-            <span
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ background: g.accent }}
-            />
             {g.short}
           </button>
         ))}
@@ -176,7 +172,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
               onClick={() => setColor("")}
               className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold transition ${
                 color === ""
-                  ? "border-brand-500 bg-brand-500/10 text-brand-600"
+                  ? "border-carbon bg-carbon text-paper"
                   : "border-ink-700 text-ink-400 hover:text-ink-200"
               }`}
             >
@@ -189,7 +185,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
                 onClick={() => setColor(c.value)}
                 className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold transition ${
                   color === c.value
-                    ? "border-brand-500 bg-brand-500/10 text-brand-600"
+                    ? "border-carbon bg-carbon text-paper"
                     : "border-ink-700 text-ink-400 hover:text-ink-200"
                 }`}
               >
@@ -205,7 +201,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
             <select
               value={edition}
               onChange={(e) => setEdition(e.target.value)}
-              className="rounded-md border border-ink-700 bg-white px-2 py-1 text-[11px] font-semibold text-ink-200 outline-none focus:border-brand-500"
+              className="rounded-md border border-ink-700 bg-white px-2 py-1 text-[11px] font-semibold text-ink-200 outline-none focus:border-carbon"
             >
               <option value="">Todas</option>
               {magicSets.map((s) => (
@@ -229,7 +225,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
             onClick={() => setFormato("")}
             className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold transition ${
               formato === ""
-                ? "border-brand-500 bg-brand-500/10 text-brand-600"
+                ? "border-carbon bg-carbon text-paper"
                 : "border-ink-700 text-ink-400 hover:text-ink-200"
             }`}
           >
@@ -242,7 +238,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
               onClick={() => setFormato(f)}
               className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold transition ${
                 formato === f
-                  ? "border-brand-500 bg-brand-500/10 text-brand-600"
+                  ? "border-carbon bg-carbon text-paper"
                   : "border-ink-700 text-ink-400 hover:text-ink-200"
               }`}
             >
@@ -261,11 +257,11 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
               ? "Nombre de la carta. Ej: Arturo, Excalibur…"
               : "Nombre o código. Ej: Luffy, OP01-024, Charizard…"
           }
-          className="w-full rounded-lg border border-ink-700 bg-white px-3 py-2.5 pr-24 text-sm text-ink-200 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+          className="w-full rounded-lg border border-ink-700 bg-white px-3 py-2.5 pr-24 text-sm text-ink-200 outline-none transition focus:border-carbon"
         />
         {loading && (
-          <span className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1.5 text-[11px] font-semibold text-brand-600">
-            <span className="animate-spin-slow h-3 w-3 rounded-full border-2 border-brand-600 border-t-transparent" />
+          <span className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1.5 text-[11px] font-semibold text-ink-400">
+            <span className="animate-spin-slow h-3 w-3 rounded-full border-2 border-ink-400 border-t-transparent" />
             buscando…
           </span>
         )}
@@ -298,7 +294,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
                 key={`${card.externalId}-${i}`}
                 type="button"
                 onClick={() => onPick(card)}
-                className="group flex flex-col overflow-hidden rounded-lg border border-ink-700 bg-white text-left transition hover:-translate-y-0.5 hover:border-brand-500 hover:shadow-md"
+                className="group flex flex-col overflow-hidden rounded-lg border border-ink-700 bg-white text-left transition hover:-translate-y-0.5 hover:border-carbon hover:shadow-md"
                 title={`${card.name}${card.code ? ` — ${card.code}` : ""}`}
               >
                 <span className="relative block aspect-[63/88] bg-ink-900">
@@ -315,7 +311,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
                       {card.rarity}
                     </span>
                   )}
-                  <span className="absolute inset-0 flex items-center justify-center bg-brand-600/0 text-[11px] font-bold text-white opacity-0 transition group-hover:bg-brand-600/85 group-hover:opacity-100">
+                  <span className="absolute inset-0 flex items-center justify-center bg-carbon/0 text-[11px] font-bold text-white opacity-0 transition group-hover:bg-carbon/85 group-hover:opacity-100">
                     Seleccionar
                   </span>
                 </span>
@@ -338,7 +334,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
                   {MYL_FORMATOS.filter((f) => card.extra?.includes(f)).map((f) => (
                     <span
                       key={f}
-                      className="w-fit rounded bg-brand-500/10 px-1.5 py-0.5 text-[9px] font-bold text-brand-600"
+                      className="w-fit rounded bg-ink-900 px-1.5 py-0.5 text-[9px] font-bold text-ink-300"
                     >
                       {f}
                     </span>
@@ -371,7 +367,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
             <button
               type="button"
               onClick={() => setVisible((v) => v + STEP * 2)}
-              className="mt-3 w-full rounded-lg border border-ink-700 py-2 text-[12px] font-semibold text-ink-300 transition hover:border-brand-500 hover:text-brand-600"
+              className="mt-3 w-full rounded-lg border border-ink-700 py-2 text-[12px] font-semibold text-ink-300 transition hover:border-carbon hover:text-carbon"
             >
               Mostrar más versiones ({results.length - visible} restantes)
             </button>
@@ -411,7 +407,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
                         key={s.game}
                         type="button"
                         onClick={() => onGameChange(s.game)}
-                        className="flex items-center gap-2 rounded-lg border border-brand-500 bg-brand-500/10 px-3 py-2 text-[12px] font-semibold text-brand-600 transition hover:bg-brand-500/20"
+                        className="flex items-center gap-2 rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-[12px] font-semibold text-ink-300 transition hover:border-carbon hover:text-carbon"
                       >
                         {s.sample && (
                           <Image

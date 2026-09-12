@@ -97,7 +97,7 @@ export function SellerProfileForm({ initial }: { initial: SellerProfileValues })
             <select
               name="bankAccountType"
               defaultValue={initial.bankAccountType ?? ""}
-              className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+              className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
             >
               <option value="">—</option>
               {ACCOUNT_TYPES.map((t) => (
@@ -164,7 +164,7 @@ function Field({
         defaultValue={defaultValue}
         required={required}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+        className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
       />
     </label>
   );

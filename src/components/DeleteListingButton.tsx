@@ -45,7 +45,7 @@ export function DeleteListingButton({ id, title }: { id: string; title: string }
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-400 transition hover:border-rose-500/50 hover:text-brand-600"
+      className="rounded-lg border border-ink-700 px-2.5 py-1.5 text-[11px] font-semibold text-ink-400 transition hover:border-rose-500/50 hover:text-rose-600"
     >
       Borrar
     </button>

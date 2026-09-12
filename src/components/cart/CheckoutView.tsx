@@ -139,7 +139,7 @@ export function CheckoutView({
               <p className="mt-2 text-[13px] leading-relaxed text-ink-300">{o.notice}</p>
               <Link
                 href="/cuenta"
-                className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold text-accent-300 hover:text-accent-400"
+                className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold text-brand-600 hover:text-brand-700"
               >
                 <MessageCircle className="h-3.5 w-3.5" strokeWidth={2} />
                 Mandar el comprobante en Mi cuenta →
@@ -223,7 +223,7 @@ export function CheckoutView({
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <nav className="mb-4 text-[12px] text-ink-400">
-        <Link href="/carrito" className="hover:text-accent-300">
+        <Link href="/carrito" className="hover:text-carbon">
           Carrito
         </Link>
         <span className="mx-1.5">/</span>
@@ -246,15 +246,15 @@ export function CheckoutView({
                 onClick={() => setPayMethod("TRANSFER")}
                 className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${
                   effectivePayMethod === "TRANSFER"
-                    ? "border-accent-500/60 bg-accent-500/10"
+                    ? "border-carbon bg-carbon/5"
                     : "border-ink-700 hover:border-ink-600"
                 }`}
               >
-                <Landmark className="h-4 w-4 shrink-0 text-accent-400" strokeWidth={2} />
+                <Landmark className="h-4 w-4 shrink-0 text-ink-400" strokeWidth={2} />
                 <div>
                   <p
                     className={`text-[13px] font-bold ${
-                      effectivePayMethod === "TRANSFER" ? "text-accent-300" : "text-ink-200"
+                      effectivePayMethod === "TRANSFER" ? "text-carbon" : "text-ink-200"
                     }`}
                   >
                     Transferencia bancaria
@@ -273,15 +273,15 @@ export function CheckoutView({
                 onClick={() => setPayMethod("CASH")}
                 className={`flex items-start gap-3 rounded-xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
                   effectivePayMethod === "CASH"
-                    ? "border-accent-500/60 bg-accent-500/10"
+                    ? "border-carbon bg-carbon/5"
                     : "border-ink-700 hover:border-ink-600"
                 }`}
               >
-                <Banknote className="h-4 w-4 shrink-0 text-accent-400" strokeWidth={2} />
+                <Banknote className="h-4 w-4 shrink-0 text-ink-400" strokeWidth={2} />
                 <div>
                   <p
                     className={`text-[13px] font-bold ${
-                      effectivePayMethod === "CASH" ? "text-accent-300" : "text-ink-200"
+                      effectivePayMethod === "CASH" ? "text-carbon" : "text-ink-200"
                     }`}
                   >
                     Efectivo al retirar
@@ -294,34 +294,34 @@ export function CheckoutView({
                 </div>
               </button>
 
-              <button
-                type="button"
-                disabled={!mpAvailable}
-                onClick={() => setPayMethod("MP")}
-                className={`flex items-start gap-3 rounded-xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                  effectivePayMethod === "MP"
-                    ? "border-accent-500/60 bg-accent-500/10"
-                    : "border-ink-700 hover:border-ink-600"
-                }`}
-              >
-                <CreditCard className="h-4 w-4 shrink-0 text-accent-400" strokeWidth={2} />
-                <div>
-                  <p
-                    className={`text-[13px] font-bold ${
-                      effectivePayMethod === "MP" ? "text-accent-300" : "text-ink-200"
-                    }`}
-                  >
-                    Mercado Pago
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-ink-400">
-                    {!mpEnabled
-                      ? "No disponible por ahora."
-                      : !singleSeller
+              {mpEnabled && (
+                <button
+                  type="button"
+                  disabled={!mpAvailable}
+                  onClick={() => setPayMethod("MP")}
+                  className={`flex items-start gap-3 rounded-xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                    effectivePayMethod === "MP"
+                      ? "border-carbon bg-carbon/5"
+                      : "border-ink-700 hover:border-ink-600"
+                  }`}
+                >
+                  <CreditCard className="h-4 w-4 shrink-0 text-ink-400" strokeWidth={2} />
+                  <div>
+                    <p
+                      className={`text-[13px] font-bold ${
+                        effectivePayMethod === "MP" ? "text-carbon" : "text-ink-200"
+                      }`}
+                    >
+                      Mercado Pago
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-ink-400">
+                      {!singleSeller
                         ? "Solo cuando compras a un único vendedor."
                         : "Tarjetas, saldo en cuenta u otros medios de Mercado Pago. Precio sin descuento."}
-                  </p>
-                </div>
-              </button>
+                    </p>
+                  </div>
+                </button>
+              )}
             </div>
           </section>
 
@@ -335,13 +335,13 @@ export function CheckoutView({
                 onClick={() => setMethod("SHIPPING")}
                 className={`rounded-xl border p-4 text-left transition ${
                   method === "SHIPPING"
-                    ? "border-accent-500/60 bg-accent-500/10"
+                    ? "border-carbon bg-carbon/5"
                     : "border-ink-700 hover:border-ink-600"
                 }`}
               >
                 <span
                   className={`block text-[13px] font-bold ${
-                    method === "SHIPPING" ? "text-accent-300" : "text-ink-200"
+                    method === "SHIPPING" ? "text-carbon" : "text-ink-200"
                   }`}
                 >
                   Despacho a domicilio · Por pagar
@@ -356,13 +356,13 @@ export function CheckoutView({
                 onClick={() => setMethod("PICKUP")}
                 className={`rounded-xl border p-4 text-left transition ${
                   method === "PICKUP"
-                    ? "border-accent-500/60 bg-accent-500/10"
+                    ? "border-carbon bg-carbon/5"
                     : "border-ink-700 hover:border-ink-600"
                 }`}
               >
                 <span
                   className={`block text-[13px] font-bold ${
-                    method === "PICKUP" ? "text-accent-300" : "text-ink-200"
+                    method === "PICKUP" ? "text-carbon" : "text-ink-200"
                   }`}
                 >
                   Retiro en persona · gratis
@@ -389,7 +389,7 @@ export function CheckoutView({
 
                 <label className="block">
                   <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
-                    Región <span className="text-accent-400">*</span>
+                    Región <span className="text-carbon">*</span>
                   </span>
                   <select
                     value={region}
@@ -398,7 +398,7 @@ export function CheckoutView({
                       setComuna("");
                     }}
                     required
-                    className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                    className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                   >
                     <option value="">Selecciona tu región…</option>
                     {REGIONS.map((r) => (
@@ -411,14 +411,14 @@ export function CheckoutView({
 
                 <label className="block">
                   <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
-                    Comuna <span className="text-accent-400">*</span>
+                    Comuna <span className="text-carbon">*</span>
                   </span>
                   <select
                     value={comuna}
                     onChange={(e) => setComuna(e.target.value)}
                     required
                     disabled={!region}
-                    className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70 disabled:opacity-50"
+                    className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon disabled:opacity-50"
                   >
                     <option value="">
                       {region ? "Selecciona tu comuna…" : "Elige una región primero"}
@@ -448,7 +448,7 @@ export function CheckoutView({
               name="notes"
               rows={3}
               placeholder="Indicaciones para la entrega, horario de contacto, etc. (opcional)"
-              className="mt-3 w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+              className="mt-3 w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
             />
           </section>
         </div>
@@ -496,10 +496,10 @@ export function CheckoutView({
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
                 placeholder="Código (opcional)"
-                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm uppercase text-ink-200 outline-none focus:border-accent-500/70"
+                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm uppercase text-ink-200 outline-none focus:border-carbon"
               />
               {couponError && (
-                <p className="mt-1 text-[11px] text-brand-600">{couponError}</p>
+                <p className="mt-1 text-[11px] text-rose-700">{couponError}</p>
               )}
               {!couponError && couponCode.trim() && couponDiscount > 0 && (
                 <p className="mt-1 text-[11px] text-emerald-700">
@@ -544,7 +544,7 @@ export function CheckoutView({
             </dl>
 
             {error && (
-              <p className="mt-4 rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-brand-600">
+              <p className="mt-4 rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-rose-700">
                 {error}
               </p>
             )}
@@ -593,7 +593,7 @@ function Field({
     <label className={`block ${className}`}>
       <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
         {label}
-        {required && <span className="text-accent-400"> *</span>}
+        {required && <span className="text-carbon"> *</span>}
       </span>
       <input
         name={name}
@@ -601,7 +601,7 @@ function Field({
         required={required}
         placeholder={placeholder}
         autoComplete="off"
-        className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none transition focus:border-accent-500/70 focus:ring-2 focus:ring-accent-500/20"
+        className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none transition focus:border-carbon"
       />
     </label>
   );

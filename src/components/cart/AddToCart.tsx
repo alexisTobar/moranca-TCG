@@ -41,7 +41,7 @@ export function AddToCartPanel(props: Props) {
             {props.maxStock}{" "}
             {props.maxStock === 1 ? "unidad disponible" : "unidades disponibles"}
             {inCart > 0 && (
-              <span className="text-accent-400"> · {inCart} en tu carrito</span>
+              <span className="text-ink-400"> · {inCart} en tu carrito</span>
             )}
           </>
         )}
@@ -54,7 +54,7 @@ export function AddToCartPanel(props: Props) {
               <button
                 type="button"
                 onClick={() => setQty((v) => Math.max(1, v - 1))}
-                className="px-3 py-2 text-ink-300 transition hover:text-accent-300"
+                className="px-3 py-2 text-ink-300 transition hover:text-carbon"
                 aria-label="Restar unidad"
               >
                 −
@@ -65,7 +65,7 @@ export function AddToCartPanel(props: Props) {
               <button
                 type="button"
                 onClick={() => setQty((v) => Math.min(remaining || 1, v + 1))}
-                className="px-3 py-2 text-ink-300 transition hover:text-accent-300"
+                className="px-3 py-2 text-ink-300 transition hover:text-carbon"
                 aria-label="Sumar unidad"
               >
                 +
@@ -80,7 +80,7 @@ export function AddToCartPanel(props: Props) {
                 add(props, qty);
                 if (btnRef.current) flyToCart(props.imageUrl, btnRef.current);
               }}
-              className="flex-1 rounded-xl border border-accent-500/60 bg-accent-500/10 px-6 py-3 text-sm font-bold text-accent-300 transition hover:bg-accent-500/20 disabled:opacity-50"
+              className="flex-1 rounded-xl border border-carbon bg-carbon/5 px-6 py-3 text-sm font-bold text-carbon transition hover:bg-ink-850 disabled:opacity-50"
             >
               {remaining <= 0 ? "Ya tienes todo el stock" : "Agregar al carrito"}
             </button>
@@ -99,7 +99,7 @@ export function AddToCartPanel(props: Props) {
           </button>
 
           <p className="mt-3 text-center text-[11px] text-ink-400">
-            Pago protegido con Mercado Pago · Despacho a todo Chile
+            Transferencia o efectivo al retirar · Despacho a todo Chile
           </p>
         </>
       )}
@@ -119,7 +119,7 @@ export function AddToCartMini(props: Props) {
         flyToCart(props.imageUrl, e.currentTarget);
       }}
       disabled={props.maxStock <= 0}
-      className="w-full rounded-lg border border-ink-700 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:border-accent-500/60 hover:text-accent-300 disabled:opacity-40"
+      className="w-full rounded-lg border border-ink-700 py-1.5 text-[11px] font-semibold text-ink-300 transition hover:border-carbon hover:text-carbon disabled:opacity-40"
     >
       Agregar
     </button>

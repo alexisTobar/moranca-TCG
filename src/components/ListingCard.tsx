@@ -36,7 +36,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
   const effectivePrice = hasOffer ? listing.offerPrice! : listing.price;
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-xl card-surface transition duration-200 hover:-translate-y-1 hover:border-accent-500/60 hover:shadow-[0_18px_40px_-20px_rgba(217,164,65,0.45)]">
+    <div className="group flex flex-col overflow-hidden rounded-xl card-surface transition duration-200 hover:-translate-y-1 hover:border-carbon hover:shadow-lg">
       <Link href={`/producto/${listing.slug}`} className="flex flex-1 flex-col">
         <div className="relative aspect-[63/88] overflow-hidden bg-ink-950">
           {listing.imageUrl ? (
@@ -57,7 +57,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
           {listing.isFoil && <span className="foil-shimmer" aria-hidden="true" />}
 
           <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2">
-            <span className="rounded-md bg-ink-950/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-400 backdrop-blur">
+            <span className="rounded-md bg-ink-950/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink-200 backdrop-blur">
               {TYPE_LABEL[listing.type] ?? listing.type}
             </span>
             {listing.isFoil && (

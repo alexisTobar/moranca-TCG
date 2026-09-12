@@ -148,12 +148,12 @@ export function OrderChat({
       </div>
 
       {attachmentUrl && (
-        <div className="mt-2 flex items-center gap-2 rounded-lg border border-accent-500/40 bg-accent-500/10 px-2.5 py-1.5 text-[11px] text-accent-300">
+        <div className="mt-2 flex items-center gap-2 rounded-lg border border-ink-700 bg-ink-900 px-2.5 py-1.5 text-[11px] text-ink-300">
           <span className="flex-1 truncate">Comprobante listo para enviar</span>
           <button
             type="button"
             onClick={() => setAttachmentUrl(null)}
-            className="font-bold hover:text-accent-400"
+            className="font-bold hover:text-carbon"
           >
             Quitar
           </button>
@@ -178,7 +178,7 @@ export function OrderChat({
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={uploading}
-          className="shrink-0 rounded-lg border border-ink-700 p-2.5 text-ink-400 transition hover:border-accent-500/60 hover:text-accent-300 disabled:opacity-50"
+          className="shrink-0 rounded-lg border border-ink-700 p-2.5 text-ink-400 transition hover:border-carbon hover:text-carbon disabled:opacity-50"
           aria-label="Adjuntar comprobante"
         >
           {uploading ? (
@@ -198,7 +198,7 @@ export function OrderChat({
           }}
           rows={1}
           placeholder="Escribe un mensaje…"
-          className="min-h-[38px] flex-1 resize-none rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-[12px] text-ink-200 outline-none focus:border-accent-500/70"
+          className="min-h-[38px] flex-1 resize-none rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-[12px] text-ink-200 outline-none focus:border-carbon"
         />
         <button
           type="button"

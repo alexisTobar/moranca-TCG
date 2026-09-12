@@ -21,7 +21,7 @@ export default function NotFound() {
         </Link>
         <Link
           href="/cartas"
-          className="rounded-xl border border-ink-600 px-6 py-3 text-sm font-semibold text-ink-200 transition hover:border-accent-500/60"
+          className="rounded-xl border border-ink-600 px-6 py-3 text-sm font-semibold text-ink-200 transition hover:border-carbon"
         >
           Ver catálogo
         </Link>

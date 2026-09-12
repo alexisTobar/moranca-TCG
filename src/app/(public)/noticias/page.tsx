@@ -6,7 +6,7 @@ import { Newspaper } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { safeQuery } from "@/lib/catalog";
 import { timeAgo } from "@/lib/format";
-import { newsCategoryLabel, newsCategoryColor, NEWS_CATEGORIES } from "@/lib/news/category";
+import { newsCategoryLabel, NEWS_CATEGORIES } from "@/lib/news/category";
 
 export const metadata: Metadata = {
   title: "Noticias",
@@ -89,7 +89,7 @@ export default async function NoticiasPage({
           href={buildHref({ category: undefined, page: undefined })}
           className={`rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition ${
             !category
-              ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+              ? "border-carbon bg-carbon text-paper"
               : "border-ink-700 text-ink-400 hover:text-ink-200"
           }`}
         >
@@ -101,7 +101,7 @@ export default async function NoticiasPage({
             href={buildHref({ category: c, page: undefined })}
             className={`rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition ${
               category === c
-                ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                ? "border-carbon bg-carbon text-paper"
                 : "border-ink-700 text-ink-400 hover:text-ink-200"
             }`}
           >
@@ -121,7 +121,7 @@ export default async function NoticiasPage({
             <Link
               key={n.id}
               href={`/noticias/${n.id}`}
-              className="group overflow-hidden rounded-2xl card-surface transition hover:-translate-y-1 hover:border-accent-500/50"
+              className="group overflow-hidden rounded-2xl card-surface transition hover:-translate-y-1 hover:border-carbon"
             >
               <div className="relative h-40 overflow-hidden bg-ink-900">
                 {n.imageUrl ? (
@@ -138,10 +138,7 @@ export default async function NoticiasPage({
                     <Newspaper className="h-8 w-8" strokeWidth={1.5} />
                   </div>
                 )}
-                <span
-                  className="absolute left-2.5 top-2.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-paper"
-                  style={{ background: newsCategoryColor(n.category) }}
-                >
+                <span className="absolute left-2.5 top-2.5 rounded-full bg-carbon px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-paper">
                   {newsCategoryLabel(n.category)}
                 </span>
               </div>
@@ -172,7 +169,7 @@ export default async function NoticiasPage({
                   href={buildHref({ page: String(p) })}
                   className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
                     p === page
-                      ? "border-accent-500/60 bg-accent-500/10 text-accent-300"
+                      ? "border-carbon bg-carbon text-paper"
                       : "border-ink-700 text-ink-300 hover:border-ink-600"
                   }`}
                 >

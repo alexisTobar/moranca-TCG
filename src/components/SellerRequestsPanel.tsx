@@ -37,7 +37,7 @@ export function SellerRequestsPanel({ requests }: { requests: SellerRequestRow[]
   if (requests.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-accent-500/40 bg-accent-500/5 p-5">
+    <div className="rounded-2xl border border-carbon bg-carbon/5 p-5">
       <h2 className="text-sm font-semibold text-carbon">
         Solicitudes de vendedor ({requests.length})
       </h2>

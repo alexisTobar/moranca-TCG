@@ -74,7 +74,7 @@ export function CartPageView() {
               <div className="min-w-0 flex-1">
                 <Link
                   href={`/producto/${item.slug}`}
-                  className="line-clamp-2 text-[14px] font-semibold text-ink-200 hover:text-accent-300"
+                  className="line-clamp-2 text-[14px] font-semibold text-ink-200 hover:text-carbon"
                 >
                   {item.title}
                 </Link>
@@ -87,7 +87,7 @@ export function CartPageView() {
                   <div className="flex items-center rounded-lg border border-ink-700">
                     <button
                       onClick={() => setQuantity(item.listingId, item.quantity - 1)}
-                      className="px-2.5 py-1.5 text-ink-300 transition hover:text-accent-300"
+                      className="px-2.5 py-1.5 text-ink-300 transition hover:text-carbon"
                       aria-label="Quitar una unidad"
                     >
                       −
@@ -98,7 +98,7 @@ export function CartPageView() {
                     <button
                       onClick={() => setQuantity(item.listingId, item.quantity + 1)}
                       disabled={item.quantity >= item.maxStock}
-                      className="px-2.5 py-1.5 text-ink-300 transition hover:text-accent-300 disabled:opacity-30"
+                      className="px-2.5 py-1.5 text-ink-300 transition hover:text-carbon disabled:opacity-30"
                       aria-label="Agregar una unidad"
                     >
                       +
@@ -160,7 +160,7 @@ export function CartPageView() {
           </Link>
           <Link
             href="/cartas"
-            className="mt-2 block rounded-xl border border-ink-700 py-2.5 text-center text-[13px] font-semibold text-ink-200 transition hover:border-accent-500/60"
+            className="mt-2 block rounded-xl border border-ink-700 py-2.5 text-center text-[13px] font-semibold text-ink-200 transition hover:border-carbon"
           >
             Seguir comprando
           </Link>

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: "¿Cómo compro una carta?",
-    a: "Entra a la publicación, elige la cantidad y presiona Comprar ahora. Completa tus datos de despacho y serás redirigido a Mercado Pago para pagar con tarjeta, débito o transferencia.",
+    a: "Entra a la publicación, elige la cantidad y presiona Comprar ahora. Completa tus datos de despacho y elige cómo pagar: transferencia bancaria o efectivo si retiras en persona.",
   },
   {
     q: "¿Los precios incluyen envío?",
@@ -79,7 +79,7 @@ export default function HelpPage() {
             <tbody className="divide-y divide-ink-800">
               {CONDITIONS.map((c) => (
                 <tr key={c.value} className="bg-ink-900/40">
-                  <td className="px-4 py-2.5 font-bold text-accent-400">{c.value}</td>
+                  <td className="px-4 py-2.5 font-bold text-carbon">{c.value}</td>
                   <td className="px-4 py-2.5 text-ink-300">{c.label}</td>
                 </tr>
               ))}

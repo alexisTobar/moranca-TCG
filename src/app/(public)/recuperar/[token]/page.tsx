@@ -16,8 +16,6 @@ export default async function ResetPasswordPage({
 
   return (
     <div className="relative flex min-h-[80vh] items-center justify-center px-4 py-16">
-      <div className="pointer-events-none absolute left-1/2 top-1/3 h-[420px] w-[600px] -translate-x-1/2 rounded-full bg-accent-500/10 blur-[120px]" />
-
       <div className="relative w-full max-w-sm">
         <div className="mb-8 flex justify-center">
           <Logo variant="full" height={120} />

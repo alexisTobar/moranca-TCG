@@ -156,7 +156,7 @@ export function BulkImportForm({
           onChange={(e) => setText(e.target.value)}
           rows={8}
           placeholder={EXAMPLE}
-          className="mt-3 w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 font-mono text-[12px] text-ink-200 outline-none focus:border-accent-500/70"
+          className="mt-3 w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 font-mono text-[12px] text-ink-200 outline-none focus:border-carbon"
         />
 
         <div className="mt-3 flex flex-wrap items-center gap-2.5">
@@ -174,7 +174,7 @@ export function BulkImportForm({
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="rounded-lg border border-ink-700 px-3.5 py-2 text-[12px] font-semibold text-ink-200 transition hover:border-accent-500/70"
+            className="rounded-lg border border-ink-700 px-3.5 py-2 text-[12px] font-semibold text-ink-200 transition hover:border-carbon"
           >
             Subir archivo .txt
           </button>
@@ -204,7 +204,7 @@ export function BulkImportForm({
       </div>
 
       {error && (
-        <p className="rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-brand-600">
+        <p className="rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-rose-700">
           {error}
         </p>
       )}
@@ -249,7 +249,7 @@ export function BulkImportForm({
                 <select
                   value={condition}
                   onChange={(e) => setCondition(e.target.value)}
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-carbon"
                 >
                   {CONDITIONS.map((c) => (
                     <option key={c.value} value={c.value}>
@@ -265,7 +265,7 @@ export function BulkImportForm({
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-carbon"
                 >
                   {LANGUAGES.map((l) => (
                     <option key={l.value} value={l.value}>
@@ -281,7 +281,7 @@ export function BulkImportForm({
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as typeof status)}
-                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                  className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-carbon"
                 >
                   <option value="ACTIVE">Publicada</option>
                   <option value="DRAFT">Borrador</option>
@@ -296,7 +296,7 @@ export function BulkImportForm({
                   <select
                     value={sellerId}
                     onChange={(e) => setSellerId(e.target.value)}
-                    className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-accent-500/70"
+                    className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-carbon"
                   >
                     {sellers.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -360,7 +360,7 @@ export function BulkImportForm({
                         <p className="font-semibold text-ink-200">
                           {r.title}
                           {r.isFoil && (
-                            <span className="ml-1.5 rounded bg-accent-500/20 px-1.5 py-0.5 text-[9px] font-bold text-accent-300">
+                            <span className="ml-1.5 rounded bg-ink-900 px-1.5 py-0.5 text-[9px] font-bold text-ink-300">
                               FOIL
                             </span>
                           )}
@@ -379,7 +379,7 @@ export function BulkImportForm({
                           onChange={(e) =>
                             updateRow(i, { priceClp: Number(e.target.value) })
                           }
-                          className="w-full rounded-lg border border-ink-700 bg-ink-950 px-2 py-1.5 text-[12px] text-ink-200 outline-none focus:border-accent-500/70"
+                          className="w-full rounded-lg border border-ink-700 bg-ink-950 px-2 py-1.5 text-[12px] text-ink-200 outline-none focus:border-carbon"
                         />
                         {r.priceClp != null && r.priceClp > 0 && (
                           <span className="mt-0.5 block text-[10px] text-ink-400">

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Newspaper } from "lucide-react";
 import { timeAgo } from "@/lib/format";
-import { newsCategoryLabel, newsCategoryColor } from "@/lib/news/category";
+import { newsCategoryLabel } from "@/lib/news/category";
 
 export interface NewsSlide {
   id: string;
@@ -65,10 +65,7 @@ export function NewsSlider({ items }: { items: NewsSlide[] }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
         <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
-          <span
-            className="inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-paper"
-            style={{ background: newsCategoryColor(current.category) }}
-          >
+          <span className="inline-block rounded-full bg-carbon px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-paper">
             {newsCategoryLabel(current.category)}
           </span>
           <h3 className="mt-2 line-clamp-2 font-display text-lg font-bold text-white sm:text-2xl">

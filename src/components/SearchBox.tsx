@@ -37,7 +37,7 @@ export function SearchBox() {
         onChange={(e) => setValue(e.target.value)}
         placeholder="Busca una carta, mazo o sellado…"
         aria-label="Buscar publicaciones"
-        className="w-full rounded-lg border border-ink-700 bg-ink-900 py-2 pl-9 pr-20 text-sm text-ink-200 placeholder:text-ink-400 outline-none transition focus:border-accent-500/70 focus:ring-2 focus:ring-accent-500/20"
+        className="w-full rounded-lg border border-ink-700 bg-ink-900 py-2 pl-9 pr-20 text-sm text-ink-200 placeholder:text-ink-400 outline-none transition focus:border-carbon"
       />
       <button
         type="submit"

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s · Win Condition TCG",
   },
   description:
-    "Singles, sobres sellados y mazos armados de Magic, Pokémon, One Piece y Mitos y Leyendas. Envíos a todo Chile con pago protegido.",
+    "Singles, sobres sellados y mazos armados de Magic, Pokémon, One Piece y Mitos y Leyendas. Envíos a todo Chile.",
   keywords: [
     "cartas",
     "TCG Chile",

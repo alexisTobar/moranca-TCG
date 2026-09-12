@@ -16,7 +16,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_STYLE: Record<string, string> = {
   PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-700",
   PAID: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
-  CANCELLED: "border-rose-500/40 bg-rose-500/10 text-brand-600",
+  CANCELLED: "border-rose-500/40 bg-rose-500/10 text-rose-700",
   SHIPPED: "border-sky-500/40 bg-sky-500/10 text-sky-700",
 };
 
@@ -115,7 +115,7 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
         <div className="mt-3 rounded-lg border border-ink-800 bg-ink-900/60 p-3">
           {order.paymentMethod === "MP" ? (
             <div className="flex items-start gap-2">
-              <CreditCard className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-400" strokeWidth={2} />
+              <CreditCard className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-400" strokeWidth={2} />
               <p className="text-[11px] leading-relaxed text-ink-300">
                 Pagando con <strong className="text-ink-200">Mercado Pago</strong>. Si no
                 alcanzaste a completar el pago, vuelve a intentarlo desde el carrito.
@@ -123,7 +123,7 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
             </div>
           ) : order.paymentMethod === "CASH" ? (
             <div className="flex items-start gap-2">
-              <Banknote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-400" strokeWidth={2} />
+              <Banknote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-400" strokeWidth={2} />
               <p className="text-[11px] leading-relaxed text-ink-300">
                 Pagas en <strong className="text-ink-200">efectivo al retirar</strong> tu
                 pedido en persona. El vendedor confirma la orden al recibir el pago.
@@ -131,7 +131,7 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
             </div>
           ) : order.bankTransfer ? (
             <div className="flex items-start gap-2.5">
-              <Landmark className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-400" strokeWidth={2} />
+              <Landmark className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-400" strokeWidth={2} />
               <div className="min-w-0 flex-1">
                 <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-ink-400">
                   Transferir a
@@ -208,9 +208,9 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
               rows={2}
               maxLength={1000}
               placeholder="Comentario (opcional)"
-              className="mt-2 w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-[12px] text-ink-200 outline-none focus:border-accent-500/70"
+              className="mt-2 w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-[12px] text-ink-200 outline-none focus:border-carbon"
             />
-            {error && <p className="mt-1.5 text-[11px] text-brand-600">{error}</p>}
+            {error && <p className="mt-1.5 text-[11px] text-rose-700">{error}</p>}
             <button
               type="button"
               disabled={sending}
