@@ -57,7 +57,7 @@ export async function generateMetadata({
   const seller = await getSeller(slug);
   return {
     title: seller ? seller.name : "Vendedor",
-    description: seller?.bio ?? `Publicaciones de ${seller?.name ?? ""} en Dream Deck TCG.`,
+    description: seller?.bio ?? `Publicaciones de ${seller?.name ?? ""} en Win Condition TCG.`,
   };
 }
 

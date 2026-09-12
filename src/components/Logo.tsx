@@ -1,3 +1,6 @@
+const GOLD = "#D4A23D";
+const CRIMSON = "#C31C4D";
+
 export function Logo({ size = 34 }: { size?: number }) {
   return (
     <span className="flex items-center gap-2.5">
@@ -9,40 +12,50 @@ export function Logo({ size = 34 }: { size?: number }) {
         aria-hidden
         className="shrink-0"
       >
-        {/* Carta de atrás, apenas insinuada: el "deck" */}
-        <rect
-          x="6"
-          y="9"
-          width="22"
-          height="30"
-          rx="4"
-          transform="rotate(-9 17 24)"
-          fill="#eef2ff"
-          stroke="#1d4ed8"
-          strokeWidth="1.4"
-        />
-        {/* Carta de adelante, con la luna y la estrella: el "dream" */}
-        <rect
-          x="18"
-          y="8"
-          width="22"
-          height="30"
-          rx="4"
-          transform="rotate(8 29 23)"
-          fill="#1d4ed8"
+        {/* Cartas en abanico, insinuadas detrás de la carta central */}
+        <path
+          d="M14 10 L22 20 L11 29"
+          stroke={CRIMSON}
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
         />
         <path
-          transform="translate(21.5 12.5) scale(0.375)"
-          d="M9.528 1.718a.75.75 0 0 1 .162.819A8.97 8.97 0 0 0 9 6a9 9 0 0 0 9 9 8.97 8.97 0 0 0 3.463-.69.75.75 0 0 1 .981.98 10.503 10.503 0 0 1-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 0 1 .818.162Z"
-          fill="#eef2ff"
+          d="M34 10 L26 20 L37 29"
+          stroke={CRIMSON}
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
         />
-        <path d="M33 26 34.12 28.88 37 30 34.12 31.12 33 34 31.88 31.12 29 30 31.88 28.88Z" fill="#eef2ff" />
+        <path d="M9 30 L11.5 35" stroke={CRIMSON} strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M39 30 L36.5 35" stroke={CRIMSON} strokeWidth="1.6" strokeLinecap="round" />
+
+        {/* Carta central con esquinas dobladas, y una corona */}
+        <path
+          d="M15 8h13l5 5v22a2 2 0 0 1-2 2h-8l-5-5V10a2 2 0 0 1 2-2Z"
+          fill="none"
+          stroke={GOLD}
+          strokeWidth="2.2"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M18.5 21 21 24l3-4 3 4 2.5-3v6.5h-11Z"
+          fill={GOLD}
+        />
       </svg>
       <span className="leading-none">
-        <span className="block font-semibold tracking-[0.14em] text-[13px] text-ink-200">
-          DREAM DECK
+        <span
+          className="block font-semibold tracking-[0.12em] text-[12px] text-ink-200"
+          style={{ color: GOLD }}
+        >
+          WIN CONDITION
         </span>
-        <span className="block brand-text font-display text-[15px] font-bold tracking-[0.34em]">
+        <span
+          className="block font-display text-[15px] font-bold tracking-[0.34em]"
+          style={{ color: CRIMSON }}
+        >
           TCG
         </span>
       </span>

@@ -48,7 +48,7 @@ export async function generateMetadata({
     title: listing.title,
     description:
       listing.description ??
-      `${listing.title} — ${gameName(listing.game)} en Dream Deck TCG por ${clp(listing.price)}.`,
+      `${listing.title} — ${gameName(listing.game)} en Win Condition TCG por ${clp(listing.price)}.`,
     openGraph: {
       images: listing.imageUrl ? [listing.imageUrl] : undefined,
       title: listing.title,
@@ -272,7 +272,7 @@ export default async function ProductPage({
                 {listing.seller.name}
               </span>
               <span className="block text-[11px] text-ink-400">
-                Vendedor en Dream Deck
+                Vendedor en Win Condition
                 {listing.seller.city ? ` · ${listing.seller.city}` : ""}
               </span>
             </span>

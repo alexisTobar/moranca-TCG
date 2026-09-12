@@ -389,7 +389,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-14">
         <div className="rounded-3xl border border-ink-700 bg-ink-900/60 p-8 sm:p-12">
           <SectionTitle
-            title="Comprar en Dream Deck es simple"
+            title="Comprar en Win Condition es simple"
             subtitle="Tres pasos y tus cartas van en camino"
           />
           <Reveal className="stagger mt-8 grid gap-6 md:grid-cols-3">
@@ -419,7 +419,7 @@ export default async function HomePage() {
       {sellers.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-16">
           <SectionTitle
-            title="Vendedores de Dream Deck"
+            title="Vendedores de Win Condition"
             subtitle="Tiendas y coleccionistas verificados"
             href="/vendedores"
           />

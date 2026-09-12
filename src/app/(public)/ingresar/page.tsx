@@ -6,7 +6,7 @@ import { LoginForm } from "@/components/LoginForm";
 
 export const metadata: Metadata = {
   title: "Ingresar",
-  description: "Acceso al panel de administración de Dream Deck TCG.",
+  description: "Acceso al panel de administración de Win Condition TCG.",
   robots: { index: false, follow: false },
 };
 

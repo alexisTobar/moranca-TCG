@@ -744,7 +744,7 @@ export function ListingForm({
               ? "Guardando…"
               : isEdit
                 ? "Guardar cambios"
-                : "Publicar en Dream Deck"}
+                : "Publicar en Win Condition"}
           </button>
         </div>
       </div>

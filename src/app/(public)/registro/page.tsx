@@ -6,7 +6,7 @@ import { RegisterForm } from "@/components/RegisterForm";
 
 export const metadata: Metadata = {
   title: "Crear cuenta",
-  description: "Regístrate para comprar en Dream Deck TCG.",
+  description: "Regístrate para comprar en Win Condition TCG.",
   robots: { index: false, follow: false },
 };
 
@@ -23,7 +23,7 @@ export default function RegisterPage() {
         <div className="rounded-2xl card-surface p-7">
           <h1 className="font-display text-2xl font-bold text-carbon">Crear cuenta</h1>
           <p className="mt-1 text-[13px] text-ink-400">
-            Solo los compradores registrados pueden comprar en Dream Deck.
+            Solo los compradores registrados pueden comprar en Win Condition.
           </p>
 
           <Suspense fallback={null}>

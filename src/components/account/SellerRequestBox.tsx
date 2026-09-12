@@ -38,7 +38,7 @@ export function SellerRequestBox({
     <div className="rounded-2xl card-surface p-5">
       <div className="flex items-center gap-2">
         <Store className="h-4 w-4 text-accent-400" strokeWidth={2} />
-        <h3 className="text-sm font-semibold text-carbon">¿Quieres vender en Dream Deck?</h3>
+        <h3 className="text-sm font-semibold text-carbon">¿Quieres vender en Win Condition?</h3>
       </div>
       <p className="mt-1 text-[12px] text-ink-400">
         Manda una solicitud y el equipo la revisa para habilitarte a publicar.

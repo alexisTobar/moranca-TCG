@@ -16,7 +16,7 @@ export async function sendEmail({
   html: string;
 }): Promise<{ sent: boolean }> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM_EMAIL || "Dream Deck TCG <onboarding@resend.dev>";
+  const from = process.env.RESEND_FROM_EMAIL || "Win Condition TCG <onboarding@resend.dev>";
 
   if (!apiKey) {
     console.warn(
