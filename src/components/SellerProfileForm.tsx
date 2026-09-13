@@ -22,9 +22,36 @@ const ACCOUNT_TYPES = ["Cuenta Corriente", "Cuenta Vista", "Cuenta RUT", "Cuenta
 export function SellerProfileForm({ initial }: { initial: SellerProfileValues }) {
   const router = useRouter();
   const [avatarUrl, setAvatarUrl] = useState(initial.avatarUrl);
+  const [savingAvatar, setSavingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+
+  // La imagen ya queda subida al servidor apenas se elige (ImageUploader la
+  // sube de inmediato), así que también guardamos la referencia en el perfil
+  // al toque. Si esto quedara pendiente hasta el botón "Guardar cambios" del
+  // formulario completo, alguien que suba su foto y no note ese botón se
+  // queda con la foto huérfana: subida, pero nunca asociada a su perfil.
+  async function handleAvatarChange(url: string | null) {
+    setAvatarUrl(url);
+    setSavingAvatar(true);
+    setAvatarError(null);
+    try {
+      const res = await fetch("/api/account/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "No se pudo guardar la foto");
+      router.refresh();
+    } catch (err) {
+      setAvatarError((err as Error).message);
+    } finally {
+      setSavingAvatar(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -64,9 +91,11 @@ export function SellerProfileForm({ initial }: { initial: SellerProfileValues })
     <form onSubmit={onSubmit} className="space-y-6">
       <ImageUploader
         value={avatarUrl}
-        onChange={setAvatarUrl}
+        onChange={handleAvatarChange}
         hint="Foto de perfil de tu tienda. Se muestra en tu perfil público y en tus reseñas."
       />
+      {savingAvatar && <p className="-mt-3 text-[11px] text-ink-400">Guardando foto…</p>}
+      {avatarError && <p className="-mt-3 text-[11px] text-brand-600">{avatarError}</p>}
 
       <div className="rounded-2xl card-surface p-5">
         <h3 className="mb-4 text-sm font-semibold text-carbon">Mis datos</h3>

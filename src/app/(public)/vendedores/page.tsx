@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { Star } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { safeQuery } from "@/lib/catalog";
 
@@ -25,6 +26,7 @@ export default async function SellersPage() {
           role: true,
           avatarUrl: true,
           _count: { select: { listings: true } },
+          receivedReviews: { select: { rating: true } },
         },
         orderBy: { createdAt: "asc" },
       }),
@@ -37,6 +39,7 @@ export default async function SellersPage() {
       role: string;
       avatarUrl: string | null;
       _count: { listings: number };
+      receivedReviews: Array<{ rating: number }>;
     }>
   );
 
@@ -53,40 +56,56 @@ export default async function SellersPage() {
         </p>
       ) : (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sellers.map((s) => (
-            <Link
-              key={s.id}
-              href={`/vendedor/${s.slug}`}
-              className="rounded-2xl card-surface p-5 transition hover:-translate-y-1 hover:border-carbon"
-            >
-              <div className="flex items-center gap-3">
-                <span className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-carbon font-display text-xl font-bold text-paper">
-                  {s.avatarUrl ? (
-                    <Image src={s.avatarUrl} alt={s.name} fill sizes="48px" className="object-cover" unoptimized />
-                  ) : (
-                    s.name.charAt(0).toUpperCase()
-                  )}
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate font-semibold text-ink-200">{s.name}</p>
-                  <p className="text-[11px] text-ink-400">
-                    {s._count.listings} publicaciones
-                    {s.city ? ` · ${s.city}` : ""}
-                  </p>
-                </div>
-                {s.role === "ADMIN" && (
-                  <span className="ml-auto rounded-full border border-carbon bg-carbon px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-paper">
-                    Oficial
+          {sellers.map((s) => {
+            const reviewCount = s.receivedReviews.length;
+            const avgRating =
+              reviewCount > 0
+                ? s.receivedReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+                : 0;
+            return (
+              <Link
+                key={s.id}
+                href={`/vendedor/${s.slug}`}
+                className="rounded-2xl card-surface p-5 transition hover:-translate-y-1 hover:border-carbon"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-carbon font-display text-xl font-bold text-paper">
+                    {s.avatarUrl ? (
+                      <Image src={s.avatarUrl} alt={s.name} fill sizes="48px" className="object-cover" unoptimized />
+                    ) : (
+                      s.name.charAt(0).toUpperCase()
+                    )}
                   </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-ink-200">{s.name}</p>
+                    <p className="text-[11px] text-ink-400">
+                      {s._count.listings} publicaciones
+                      {s.city ? ` · ${s.city}` : ""}
+                    </p>
+                    {reviewCount > 0 && (
+                      <span className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-amber-500">
+                        <Star className="h-3 w-3 fill-current" strokeWidth={0} />
+                        {avgRating.toFixed(1)}
+                        <span className="font-normal text-ink-400">
+                          ({reviewCount})
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                  {s.role === "ADMIN" && (
+                    <span className="ml-auto rounded-full border border-carbon bg-carbon px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-paper">
+                      Oficial
+                    </span>
+                  )}
+                </div>
+                {s.bio && (
+                  <p className="mt-3 line-clamp-3 text-[12px] leading-relaxed text-ink-400">
+                    {s.bio}
+                  </p>
                 )}
-              </div>
-              {s.bio && (
-                <p className="mt-3 line-clamp-3 text-[12px] leading-relaxed text-ink-400">
-                  {s.bio}
-                </p>
-              )}
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
