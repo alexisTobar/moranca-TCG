@@ -13,6 +13,7 @@ const STATUS_STYLE: Record<string, string> = {
   PAID: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
   CANCELLED: "border-rose-500/40 bg-rose-500/10 text-rose-700",
   SHIPPED: "border-sky-500/40 bg-sky-500/10 text-sky-700",
+  DELIVERED: "border-violet-500/40 bg-violet-500/10 text-violet-700",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -20,6 +21,7 @@ const STATUS_LABEL: Record<string, string> = {
   PAID: "Pagada",
   CANCELLED: "Cancelada",
   SHIPPED: "Enviada",
+  DELIVERED: "Recibida",
 };
 
 const PAYMENT_LABEL: Record<string, string> = {

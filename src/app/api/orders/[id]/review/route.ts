@@ -8,7 +8,7 @@ import { memoryRateLimit, clientKey } from "@/lib/rate-limit";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const REVIEWABLE_STATUSES = ["PAID", "SHIPPED"];
+const REVIEWABLE_STATUSES = ["DELIVERED"];
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -30,7 +30,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
     if (!REVIEWABLE_STATUSES.includes(order.status)) {
       return NextResponse.json(
-        { error: "Solo puedes calificar órdenes pagadas o enviadas" },
+        { error: "Solo puedes calificar pedidos que ya confirmaste como recibidos" },
         { status: 409 }
       );
     }

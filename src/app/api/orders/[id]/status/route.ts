@@ -7,18 +7,23 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const schema = z.object({
-  status: z.enum(["PAID", "SHIPPED", "CANCELLED"]),
+  status: z.enum(["PAID", "SHIPPED", "DELIVERED", "CANCELLED"]),
 });
 
 /** Qué estados puede seguir cada estado actual. */
 const ALLOWED_FROM: Record<string, string[]> = {
   PENDING: ["PAID", "CANCELLED"],
   PAID: ["SHIPPED", "CANCELLED"],
+  SHIPPED: ["DELIVERED"],
 };
+
+/** La transición a DELIVERED la dispara el comprador, no el vendedor. */
+const BUYER_ONLY_STATUSES = ["DELIVERED"];
 
 const SYSTEM_MESSAGE: Record<string, string> = {
   PAID: "✅ Pago confirmado por el vendedor. Preparando tu pedido.",
   SHIPPED: "📦 Pedido enviado / listo para retiro.",
+  DELIVERED: "📬 El comprador confirmó la recepción del pedido.",
   CANCELLED: "❌ Pedido cancelado.",
 };
 
@@ -32,6 +37,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       select: {
         id: true,
         status: true,
+        buyerId: true,
         sellerId: true,
         paymentMethod: true,
         items: { select: { listingId: true, quantity: true } },
@@ -40,15 +46,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (!order) {
       return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
     }
-    if (user.role !== "ADMIN" && order.sellerId !== user.id) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-    }
 
     const parsed = schema.safeParse(await req.json());
     if (!parsed.success) {
       return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
     }
     const next = parsed.data.status;
+
+    const isAuthorized =
+      user.role === "ADMIN" ||
+      (BUYER_ONLY_STATUSES.includes(next) ? order.buyerId === user.id : order.sellerId === user.id);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
 
     // Las órdenes pagadas con Mercado Pago solo pueden pasar a PAID vía el
     // webhook verificado (firma HMAC + consulta a la API de MP). Permitir que

@@ -32,6 +32,7 @@ enum OrderStatus {
   PAID
   CANCELLED
   SHIPPED
+  DELIVERED
 }
 
 enum CouponType {

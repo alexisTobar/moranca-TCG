@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Landmark, CreditCard, Banknote, Star } from "lucide-react";
+import { Landmark, CreditCard, Banknote, Star, PackageCheck } from "lucide-react";
 import { clp } from "@/lib/format";
 import { OrderChatToggle } from "@/components/OrderChatToggle";
 
@@ -11,6 +11,7 @@ const STATUS_LABEL: Record<string, string> = {
   PAID: "Pagada",
   CANCELLED: "Cancelada",
   SHIPPED: "Enviada",
+  DELIVERED: "Recibida",
 };
 
 const STATUS_STYLE: Record<string, string> = {
@@ -18,6 +19,7 @@ const STATUS_STYLE: Record<string, string> = {
   PAID: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
   CANCELLED: "border-rose-500/40 bg-rose-500/10 text-rose-700",
   SHIPPED: "border-sky-500/40 bg-sky-500/10 text-sky-700",
+  DELIVERED: "border-violet-500/40 bg-violet-500/10 text-violet-700",
 };
 
 export interface BankTransferInfo {
@@ -47,7 +49,7 @@ export interface AccountOrder {
   review: OrderReview | null;
 }
 
-const REVIEWABLE_STATUSES = ["PAID", "SHIPPED"];
+const REVIEWABLE_STATUSES = ["DELIVERED"];
 
 export function OrderCard({ order, userId }: { order: AccountOrder; userId: string }) {
   const router = useRouter();
@@ -55,6 +57,8 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
   const [comment, setComment] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
 
   async function submitReview() {
     if (rating < 1) {
@@ -76,6 +80,25 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
       setError((err as Error).message);
     } finally {
       setSending(false);
+    }
+  }
+
+  async function confirmReceived() {
+    setConfirming(true);
+    setConfirmError(null);
+    try {
+      const res = await fetch(`/api/orders/${order.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "DELIVERED" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "No se pudo confirmar la recepción");
+      router.refresh();
+    } catch (err) {
+      setConfirmError((err as Error).message);
+    } finally {
+      setConfirming(false);
     }
   }
 
@@ -154,6 +177,26 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {order.status === "SHIPPED" && (
+        <div className="mt-3 rounded-lg border border-sky-600/30 bg-sky-500/5 p-3">
+          <div className="flex items-start gap-2">
+            <PackageCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-700" strokeWidth={2} />
+            <p className="text-[11px] leading-relaxed text-ink-300">
+              ¿Ya te llegó tu pedido? Confírmalo para poder calificar al vendedor.
+            </p>
+          </div>
+          {confirmError && <p className="mt-1.5 text-[11px] text-rose-700">{confirmError}</p>}
+          <button
+            type="button"
+            disabled={confirming}
+            onClick={confirmReceived}
+            className="mt-2 rounded-lg bg-sky-600 px-4 py-1.5 text-[12px] font-bold text-paper transition hover:bg-sky-500 disabled:opacity-60"
+          >
+            {confirming ? "Confirmando…" : "Confirmar recepción"}
+          </button>
         </div>
       )}
 
