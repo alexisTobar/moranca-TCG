@@ -115,16 +115,17 @@ export const profileSchema = z.object({
   avatarUrl: imagenUrl,
 });
 
-/** Tasas de descuento que cada vendedor configura según método de pago (0-30%). */
-export const sellerDiscountRatesSchema = z.object({
+/** Configuración de pagos y descuentos que define solo el administrador. */
+export const siteSettingsSchema = z.object({
+  transferDiscountEnabled: z.boolean(),
   transferDiscountPct: z.number().int().min(0).max(30),
+  cashDiscountEnabled: z.boolean(),
   cashDiscountPct: z.number().int().min(0).max(30),
+  paymentWindowHours: z.number().int().min(1).max(168),
 });
 
-/** Perfil + cuenta bancaria + tasas de descuento (bancaria/tasas solo aplican si el rol es vendedor). */
-export const accountUpdateSchema = profileSchema
-  .merge(bankAccountSchema.partial())
-  .merge(sellerDiscountRatesSchema.partial());
+/** Perfil + cuenta bancaria (la bancaria solo aplica si el rol es vendedor). */
+export const accountUpdateSchema = profileSchema.merge(bankAccountSchema.partial());
 
 /** Cupón de descuento que un vendedor crea para su propia tienda. */
 export const couponSchema = z
@@ -174,7 +175,7 @@ export const checkoutSchema = z.object({
   shipCity: z.string().max(80).optional().nullable(),
   shipRegion: z.string().max(80).optional().nullable(),
   notes: z.string().max(600).optional().nullable(),
-  paymentMethod: z.enum(["TRANSFER", "MP", "CASH"]).default("TRANSFER"),
+  paymentMethod: z.enum(["TRANSFER", "CASH"]).default("TRANSFER"),
   couponCode: z.string().trim().max(30).optional().nullable(),
 });
 

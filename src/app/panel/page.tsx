@@ -93,7 +93,7 @@ export default async function PanelHome() {
         </div>
         <Link
           href="/panel/publicar"
-          className="rounded-xl bg-brand-600 px-5 py-2.5 text-[13px] font-bold text-paper transition hover:bg-brand-500"
+          className="btn btn-primary btn-sm"
         >
           + Nueva publicación
         </Link>
@@ -142,7 +142,7 @@ export default async function PanelHome() {
             <p className="text-sm text-ink-400">Todavía no has publicado nada.</p>
             <Link
               href="/panel/publicar"
-              className="mt-3 inline-block rounded-lg bg-brand-600 px-5 py-2 text-xs font-bold text-paper"
+              className="btn btn-primary btn-sm mt-3 inline-block"
             >
               Crear la primera publicación
             </Link>

@@ -170,7 +170,7 @@ export default async function ProductPage({
 
       <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
         {/* IMAGEN */}
-        <div className="lg:sticky lg:top-40 lg:h-fit">
+        <div className="lg:sticky lg:top-24 lg:h-fit">
           <div className="relative aspect-[63/88] overflow-hidden rounded-2xl border border-ink-700 bg-ink-950 tcg-card-shadow">
             {listing.imageUrl ? (
               <Image

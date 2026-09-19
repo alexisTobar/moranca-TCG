@@ -2,42 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { memoryRateLimit, clientKey } from "@/lib/rate-limit";
+import { IMAGE_SIGNATURES, detectSignature } from "@/lib/file-signature";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const MAX_BYTES = 4 * 1024 * 1024; // 4 MB
-
-/**
- * Tipos aceptados con su "número mágico" (los primeros bytes del archivo).
- * No basta con confiar en el mime que declara el navegador: cualquiera puede
- * renombrar un .exe a .png. Se valida el contenido real.
- */
-const FIRMAS: Array<{ mime: string; ext: string; test: (b: Buffer) => boolean }> = [
-  {
-    mime: "image/jpeg",
-    ext: "jpg",
-    test: (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
-  },
-  {
-    mime: "image/png",
-    ext: "png",
-    test: (b) =>
-      b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47,
-  },
-  {
-    mime: "image/webp",
-    ext: "webp",
-    test: (b) =>
-      b.subarray(0, 4).toString("ascii") === "RIFF" &&
-      b.subarray(8, 12).toString("ascii") === "WEBP",
-  },
-  {
-    mime: "image/gif",
-    ext: "gif",
-    test: (b) => b.subarray(0, 3).toString("ascii") === "GIF",
-  },
-];
 
 export async function POST(req: Request) {
   try {
@@ -73,7 +43,7 @@ export async function POST(req: Request) {
     }
 
     const bytes = Buffer.from(await file.arrayBuffer());
-    const firma = FIRMAS.find((f) => f.test(bytes));
+    const firma = detectSignature(bytes, IMAGE_SIGNATURES);
 
     if (!firma) {
       return NextResponse.json(

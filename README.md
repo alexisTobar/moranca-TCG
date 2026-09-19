@@ -8,7 +8,7 @@ cada juego; **los precios los pones tú**.
 
 - **Stack:** Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Prisma · PostgreSQL
 - **Despliegue:** listo para Vercel
-- **Pagos:** Mercado Pago (checkout + webhook firmado)
+- **Pagos:** transferencia bancaria directa al vendedor, con reserva de stock, código de referencia y comprobante
 
 ---
 
@@ -78,8 +78,7 @@ Abre <http://localhost:3000>.
 1. Sube el proyecto a GitHub e impórtalo en Vercel.
 2. En **Settings → Environment Variables** carga:
    `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `NEXT_PUBLIC_SITE_URL`,
-   `ADMIN_EMAIL`, `ADMIN_PASSWORD` y (cuando actives pagos) `MP_ACCESS_TOKEN`
-   y `MP_WEBHOOK_SECRET`.
+   `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `CRON_SECRET`.
 3. Deploy. Luego, una sola vez, crea las tablas y el admin:
 
 ```bash
@@ -194,20 +193,39 @@ renombrado a `.png` se rechaza igual.
 
 ## 5. Pago: transferencia bancaria
 
-El checkout **solo acepta transferencia** (2% de descuento incluido), no hay
-pasarela de por medio. Cada vendedor configura su propia cuenta en
-**Panel → Mi perfil**; sin esos datos el comprador solo ve un aviso de que se
-le va a contactar. El comprador manda el comprobante por el **chat de la
-orden** (ver sección 7) y tú confirmas el pago a mano desde
-**Panel → Órdenes**.
+No hay pasarela de por medio: el comprador transfiere directo a la cuenta del
+vendedor. Cada vendedor configura su cuenta en **Panel → Mi perfil**.
+
+**Flujo de una compra**
+
+1. Al confirmar, las cartas quedan **reservadas** (se descuentan del stock de
+   forma atómica, así dos compradores nunca se llevan la misma carta).
+2. La orden recibe un **código de referencia** único (`DD-XXXXXXXX`) y un
+   **plazo de pago** (48 h por defecto). El comprador ve la cuenta del vendedor
+   con botón de copiar, el monto exacto y el código para poner en el comentario.
+3. El comprador **sube su comprobante** (imagen o PDF). Solo lo ven el comprador,
+   el vendedor de esa orden y el admin.
+4. El vendedor revisa su cuenta bancaria y pulsa **Confirmar pago recibido**
+   en **Panel → Órdenes**.
+5. Si el plazo vence sin pago, la orden se **cancela sola** y el stock vuelve a
+   la tienda (cron diario `/api/cron/expire-orders` más una revisión al comprar
+   y al abrir *Mi cuenta*).
+
+Cada cambio queda en el historial de la orden (`OrderEvent`): quién, qué y cuándo.
+
+**Descuentos (los define el administrador)**
+
+En **Panel → Pagos y descuentos** (solo admin) se activa o desactiva el descuento
+por transferencia y por efectivo, se elige el porcentaje (0 a 30) y el plazo de
+pago. Aplica a toda la tienda y se refleja al instante en el checkout.
 
 Si un carrito trae cartas de más de un vendedor, el checkout lo separa
 automáticamente en **una orden por vendedor**, cada una con su propia cuenta
 y su propio chat.
 
-La integración con Mercado Pago (`src/lib/mercadopago.ts`,
-`src/app/api/mercadopago/webhook`) sigue en el código por si se reactiva más
-adelante, pero el checkout actual no la usa.
+> Las tablas nuevas se crean solas en cada deploy (`prisma db push` dentro de
+> `npm run build`). Solo agrega columnas y tablas; si un cambio fuera destructivo,
+> el deploy falla en vez de borrar datos.
 
 ---
 

@@ -10,6 +10,7 @@ import {
   Percent,
   Users,
   UserCircle,
+  ShieldCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -27,6 +28,7 @@ const ITEMS: Array<{
   { href: "/panel/descuentos", label: "Descuentos", icon: Percent },
   { href: "/panel/perfil", label: "Mi perfil", icon: UserCircle },
   { href: "/panel/usuarios", label: "Vendedores", icon: Users, adminOnly: true },
+  { href: "/panel/configuracion", label: "Pagos y descuentos", icon: ShieldCheck, adminOnly: true },
 ];
 
 export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
@@ -44,10 +46,10 @@ export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
             <li key={item.href} className="shrink-0">
               <Link
                 href={item.href}
-                className={`flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-[13px] font-medium transition ${
+                className={`flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-[13px] font-semibold transition ${
                   active
-                    ? "border border-carbon bg-carbon text-paper"
-                    : "border border-transparent text-ink-300 hover:bg-ink-850 hover:text-carbon"
+                    ? "bg-carbon text-paper shadow-lg shadow-carbon/20"
+                    : "text-ink-300 hover:bg-ink-850 hover:text-carbon"
                 }`}
               >
                 <Icon className="h-4 w-4" strokeWidth={2} />

@@ -4,32 +4,19 @@ import { AuthError, requireUser } from "@/lib/auth";
 import { checkoutSchema } from "@/lib/validators";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
 import { shippingCost, zoneOf, comunasOf, PICKUP_POINT } from "@/lib/regions";
-import { mercadoPagoEnabled, createPreference } from "@/lib/mercadopago";
 import { effectiveListingPrice, computeSellerOrderTotals } from "@/lib/order-pricing";
+import { getSiteSettings, discountPctFor } from "@/lib/site-settings";
+import {
+  expireOverdueOrders,
+  generatePaymentReference,
+  paymentDueDate,
+  recordOrderEvent,
+} from "@/lib/order-payments";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function bankNotice(
-  total: number,
-  seller: {
-    name: string;
-    bankName: string | null;
-    bankAccountType: string | null;
-    bankAccountNumber: string | null;
-    bankHolderName: string | null;
-    bankRut: string | null;
-  }
-): string {
-  if (!seller.bankName || !seller.bankAccountNumber) {
-    return `Guardamos tu orden con ${seller.name}. Todavía no configuró su cuenta bancaria: te contactaremos por email para coordinar el pago de ${total.toLocaleString("es-CL")} CLP.`;
-  }
-  return `Transfiere ${total.toLocaleString("es-CL")} CLP a ${seller.name} — ${seller.bankName}, cuenta ${seller.bankAccountType} N° ${seller.bankAccountNumber}, RUT ${seller.bankRut}, a nombre de ${seller.bankHolderName}. Manda el comprobante por el chat de la orden.`;
-}
-
-function cashNotice(total: number, seller: { name: string }): string {
-  return `Prepara ${total.toLocaleString("es-CL")} CLP en efectivo: pagas al retirar tu pedido de ${seller.name} en ${PICKUP_POINT}.`;
-}
+class StockError extends Error {}
 
 export async function POST(req: Request) {
   let user;
@@ -92,6 +79,13 @@ export async function POST(req: Request) {
     );
   }
 
+  // Libera primero el stock de órdenes vencidas, así no queda "reservado" por
+  // compradores que nunca pagaron.
+  await expireOverdueOrders();
+
+  const settings = await getSiteSettings();
+  const paymentDiscountPct = discountPctFor(settings, data.paymentMethod);
+
   // Los precios y el stock siempre se leen de la base de datos.
   const listings = await prisma.listing.findMany({
     where: { id: { in: data.items.map((i) => i.listingId) } },
@@ -138,29 +132,6 @@ export async function POST(req: Request) {
     bySeller.set(listing.sellerId, group);
   }
 
-  // Mercado Pago cobra a través de la cuenta del sitio, no de cada vendedor
-  // por separado, así que hoy solo se puede ofrecer cuando el carrito trae
-  // cartas de un único vendedor (si no, cada vendedor necesitaría su propia
-  // orden y su propio pago en Mercado Pago, cosa que la integración actual
-  // no soporta). Con más de un vendedor la única opción es transferencia.
-  if (data.paymentMethod === "MP") {
-    if (!mercadoPagoEnabled()) {
-      return NextResponse.json(
-        { error: "Mercado Pago no está disponible por ahora. Usa transferencia bancaria." },
-        { status: 400 }
-      );
-    }
-    if (bySeller.size > 1) {
-      return NextResponse.json(
-        {
-          error:
-            "Mercado Pago solo está disponible cuando compras a un solo vendedor. Usa transferencia bancaria o compra por separado.",
-        },
-        { status: 400 }
-      );
-    }
-  }
-
   const sellers = await prisma.user.findMany({
     where: { id: { in: [...bySeller.keys()] } },
     select: {
@@ -171,8 +142,6 @@ export async function POST(req: Request) {
       bankAccountNumber: true,
       bankHolderName: true,
       bankRut: true,
-      transferDiscountPct: true,
-      cashDiscountPct: true,
     },
   });
   const sellerById = new Map(sellers.map((s) => [s.id, s]));
@@ -200,104 +169,118 @@ export async function POST(req: Request) {
     }
   }
 
+  const dueAt = paymentDueDate(settings.paymentWindowHours);
+
   // Un carrito con cartas de varios vendedores queda como una orden por
   // vendedor: cada uno tiene su propia cuenta bancaria y su propio chat.
-  const orders = [];
-  for (const [sellerId, items] of bySeller) {
-    const seller = sellerById.get(sellerId);
-    if (!seller) continue;
+  // Todo ocurre en una sola transacción: o se reserva el stock y se crean
+  // todas las órdenes, o no se crea nada.
+  try {
+    const created = await prisma.$transaction(
+      async (tx) => {
+        const results = [];
+        for (const [sellerId, items] of bySeller) {
+          const seller = sellerById.get(sellerId);
+          if (!seller) continue;
 
-    const ship = shippingCost(
-      data.shipMethod,
-      data.shipRegion ?? null,
-      items.reduce((a, i) => a + i.unitPrice * i.quantity, 0)
-    );
-    const coupon = couponBySeller.get(sellerId) ?? null;
-    const totals = computeSellerOrderTotals({
-      items,
-      coupon,
-      paymentMethod: data.paymentMethod,
-      transferDiscountPct: seller.transferDiscountPct,
-      cashDiscountPct: seller.cashDiscountPct,
-      shipCost: ship,
-    });
+          // Reserva atómica: el descuento solo ocurre si todavía hay stock, así
+          // dos compradores a la vez nunca pueden llevarse la misma carta.
+          for (const item of items) {
+            const { count } = await tx.listing.updateMany({
+              where: { id: item.listingId, status: "ACTIVE", stock: { gte: item.quantity } },
+              data: { stock: { decrement: item.quantity } },
+            });
+            if (count === 0) {
+              throw new StockError(`"${item.title}" se acaba de agotar`);
+            }
+          }
 
-    const order = await prisma.order.create({
-      data: {
-        buyerId: user.id,
-        sellerId: seller.id,
-        buyerName: user.name,
-        buyerEmail: user.email,
-        paymentMethod: data.paymentMethod,
-        shipMethod: data.shipMethod,
-        shipAddress: data.shipAddress ?? null,
-        shipCity: data.shipCity ?? null,
-        shipRegion: data.shipRegion ?? null,
-        shipCost: ship,
-        discount: totals.discount,
-        couponId: coupon?.id ?? null,
-        couponCode: coupon?.code ?? null,
-        couponDiscount: totals.couponDiscount,
-        paymentDiscountPct: totals.paymentDiscountPct,
-        subtotal: totals.subtotal,
-        total: totals.total,
-        notes: data.notes ?? null,
-        items: { create: items },
+          const ship = shippingCost(
+            data.shipMethod,
+            data.shipRegion ?? null,
+            items.reduce((a, i) => a + i.unitPrice * i.quantity, 0)
+          );
+          const coupon = couponBySeller.get(sellerId) ?? null;
+          const totals = computeSellerOrderTotals({
+            items,
+            coupon,
+            paymentDiscountPct,
+            shipCost: ship,
+          });
+
+          const reference = generatePaymentReference();
+          const order = await tx.order.create({
+            data: {
+              buyerId: user.id,
+              sellerId: seller.id,
+              buyerName: user.name,
+              buyerEmail: user.email,
+              paymentMethod: data.paymentMethod,
+              shipMethod: data.shipMethod,
+              shipAddress: data.shipAddress ?? null,
+              shipCity: data.shipCity ?? null,
+              shipRegion: data.shipRegion ?? null,
+              shipCost: ship,
+              discount: totals.discount,
+              couponId: coupon?.id ?? null,
+              couponCode: coupon?.code ?? null,
+              couponDiscount: totals.couponDiscount,
+              paymentDiscountPct: totals.paymentDiscountPct,
+              subtotal: totals.subtotal,
+              total: totals.total,
+              notes: data.notes ?? null,
+              paymentReference: reference,
+              paymentDueAt: dueAt,
+              stockReserved: true,
+              items: { create: items },
+            },
+            select: { id: true },
+          });
+
+          await recordOrderEvent(
+            tx,
+            order.id,
+            user.id,
+            "CREATED",
+            `Orden creada (${data.paymentMethod === "CASH" ? "efectivo" : "transferencia"}), total ${totals.total}`
+          );
+
+          results.push({
+            orderId: order.id,
+            sellerName: seller.name,
+            total: totals.total,
+            method: data.paymentMethod,
+            reference,
+            dueAt: dueAt.toISOString(),
+            discountPct: totals.paymentDiscountPct,
+            pickupPoint: data.paymentMethod === "CASH" ? PICKUP_POINT : null,
+            bank:
+              data.paymentMethod === "TRANSFER" && seller.bankName && seller.bankAccountNumber
+                ? {
+                    bankName: seller.bankName,
+                    accountType: seller.bankAccountType,
+                    accountNumber: seller.bankAccountNumber,
+                    holderName: seller.bankHolderName,
+                    rut: seller.bankRut,
+                  }
+                : null,
+          });
+        }
+        return results;
       },
-      select: { id: true },
-    });
+      { maxWait: 10_000, timeout: 20_000 }
+    );
 
-    if (data.paymentMethod === "MP") {
-      try {
-        const preference = await createPreference({
-          orderId: order.id,
-          items: items.map((i) => ({
-            title: i.title,
-            quantity: i.quantity,
-            unit_price: i.unitPrice,
-          })),
-          payer: { name: user.name, email: user.email },
-        });
-        if (!preference) throw new Error("Mercado Pago no respondió con una preferencia");
-
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { preferenceId: preference.id },
-        });
-
-        // Solo puede haber una orden cuando se paga con Mercado Pago (carrito
-        // de un único vendedor), así que se corta acá y se manda a pagar.
-        return NextResponse.json({ ok: true, initPoint: preference.init_point });
-      } catch (err) {
-        // No dejamos una orden viva sin forma de pagarla: se cancela y el
-        // comprador puede reintentar (o usar transferencia) sin quedar con
-        // una orden fantasma pendiente para siempre.
-        await prisma.order.update({
-          where: { id: order.id },
-          data: { status: "CANCELLED" },
-        });
-        console.error("[checkout] Mercado Pago", err);
-        return NextResponse.json(
-          { error: "No se pudo iniciar el pago con Mercado Pago. Intenta de nuevo o usa transferencia." },
-          { status: 502 }
-        );
-      }
+    if (created.length === 0) {
+      return NextResponse.json({ error: "No se pudo procesar la orden" }, { status: 500 });
     }
 
-    orders.push({
-      orderId: order.id,
-      sellerName: seller.name,
-      total: totals.total,
-      notice:
-        data.paymentMethod === "CASH"
-          ? cashNotice(totals.total, seller)
-          : bankNotice(totals.total, seller),
-    });
-  }
-
-  if (orders.length === 0) {
+    return NextResponse.json({ ok: true, orders: created });
+  } catch (error) {
+    if (error instanceof StockError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
+    console.error("[checkout:POST]", error);
     return NextResponse.json({ error: "No se pudo procesar la orden" }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true, orders });
 }

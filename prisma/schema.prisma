@@ -202,16 +202,56 @@ model Order {
   preferenceId       String?
   paymentId          String?
   notes              String?
+
+  /// Código único que el comprador pone en el comentario de la transferencia.
+  paymentReference   String?     @unique
+  /// Plazo para pagar. Vencido este plazo la orden se cancela y devuelve el stock.
+  paymentDueAt       DateTime?
+  /// Comprobante subido por el comprador (id de Upload, solo visible para las partes).
+  receiptUploadId    String?
+  receiptUploadedAt  DateTime?
+  paidAt             DateTime?
+  /// El stock de la orden está reservado (se descuenta al crear la orden).
+  stockReserved      Boolean     @default(false)
+
   items              OrderItem[]
   messages           OrderMessage[]
+  events             OrderEvent[]
   review             Review?
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
 
   @@index([status])
+  @@index([status, paymentDueAt])
   @@index([buyerId])
   @@index([sellerId])
   @@index([couponId])
+}
+
+/// Historial de cada orden: quién hizo qué y cuándo (creación, comprobante, pago, envío, cancelación).
+model OrderEvent {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  actorId   String?
+  type      String
+  detail    String?
+  createdAt DateTime @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+/// Configuración global de la tienda (una sola fila, id = "site"). La edita el administrador.
+model SiteSetting {
+  id                      String   @id @default("site")
+  transferDiscountEnabled Boolean  @default(true)
+  transferDiscountPct     Int      @default(2)
+  cashDiscountEnabled     Boolean  @default(false)
+  cashDiscountPct         Int      @default(0)
+  /// Horas que tiene el comprador para pagar antes de que se cancele la orden.
+  paymentWindowHours      Int      @default(48)
+  updatedById             String?
+  updatedAt               DateTime @updatedAt
 }
 
 model Review {

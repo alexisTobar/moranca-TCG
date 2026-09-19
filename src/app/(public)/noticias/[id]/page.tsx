@@ -73,7 +73,7 @@ export default async function NoticiaPage({ params }: { params: Promise<{ id: st
         href={item.sourceUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-paper transition hover:bg-brand-500"
+        className="btn btn-primary btn-lg mt-8 inline-flex items-center gap-2"
       >
         Leer la nota completa en {item.sourceName}
         <ExternalLink className="h-4 w-4" strokeWidth={2} />

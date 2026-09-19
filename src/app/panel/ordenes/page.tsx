@@ -5,6 +5,8 @@ import { clp, timeAgo } from "@/lib/format";
 import { OrderChatToggle } from "@/components/OrderChatToggle";
 import { OrderStatusActions } from "@/components/OrderStatusActions";
 import { ReviewReply } from "@/components/panel/ReviewReply";
+import { expireOverdueOrders } from "@/lib/order-payments";
+import { FileCheck2, Hash, Timer } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -26,13 +28,15 @@ const STATUS_LABEL: Record<string, string> = {
 
 const PAYMENT_LABEL: Record<string, string> = {
   TRANSFER: "Transferencia",
-  MP: "Mercado Pago",
+  MP: "Mercado Pago (antiguo)",
   CASH: "Efectivo",
 };
 
 export default async function OrdersPage() {
   const user = await getCurrentUser();
   if (!user) return null;
+
+  await safeQuery(() => expireOverdueOrders(), 0);
 
   const orders = await safeQuery(
     () =>
@@ -73,6 +77,9 @@ export default async function OrdersPage() {
       couponCode: string | null;
       couponDiscount: number;
       paymentDiscountPct: number;
+      paymentReference: string | null;
+      paymentDueAt: Date | null;
+      receiptUploadedAt: Date | null;
       subtotal: number;
       total: number;
       createdAt: Date;
@@ -214,8 +221,46 @@ export default async function OrdersPage() {
                 </div>
               </div>
 
+              {o.status === "PENDING" && (
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-ink-800 pt-4 text-[12px]">
+                  {o.paymentReference && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-ink-900 px-3 py-1 font-semibold text-ink-300">
+                      <Hash className="h-3.5 w-3.5" strokeWidth={2} />
+                      Referencia <strong className="text-carbon">{o.paymentReference}</strong>
+                    </span>
+                  )}
+                  {o.paymentMethod === "TRANSFER" &&
+                    (o.receiptUploadedAt ? (
+                      <a
+                        href={`/api/orders/${o.id}/receipt`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-700 hover:bg-emerald-500/20"
+                      >
+                        <FileCheck2 className="h-3.5 w-3.5" strokeWidth={2} />
+                        Comprobante recibido, ver
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 font-semibold text-amber-800">
+                        Esperando comprobante
+                      </span>
+                    ))}
+                  {o.paymentDueAt && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-ink-900 px-3 py-1 font-semibold text-ink-300">
+                      <Timer className="h-3.5 w-3.5" strokeWidth={2} />
+                      Vence {o.paymentDueAt.toLocaleString("es-CL", { dateStyle: "short", timeStyle: "short", timeZone: "America/Santiago" })}
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div className="mt-4 border-t border-ink-800 pt-4">
-                <OrderStatusActions orderId={o.id} status={o.status} />
+                <OrderStatusActions
+                  orderId={o.id}
+                  status={o.status}
+                  reference={o.paymentReference}
+                  total={o.total}
+                />
               </div>
 
               {o.review && <ReviewReply orderId={o.id} review={o.review} />}

@@ -5,6 +5,7 @@ import { checkoutSchema } from "@/lib/validators";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
 import { shippingCost } from "@/lib/regions";
 import { effectiveListingPrice, computeSellerOrderTotals } from "@/lib/order-pricing";
+import { getSiteSettings, discountPctFor } from "@/lib/site-settings";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,8 +74,9 @@ export async function POST(req: Request) {
 
   const sellers = await prisma.user.findMany({
     where: { id: { in: [...bySeller.keys()] } },
-    select: { id: true, name: true, transferDiscountPct: true, cashDiscountPct: true },
+    select: { id: true, name: true },
   });
+  const paymentDiscountPct = discountPctFor(await getSiteSettings(), data.paymentMethod);
 
   let couponBySeller = new Map<
     string,
@@ -104,9 +106,7 @@ export async function POST(req: Request) {
     const totals = computeSellerOrderTotals({
       items,
       coupon,
-      paymentMethod: data.paymentMethod,
-      transferDiscountPct: seller.transferDiscountPct,
-      cashDiscountPct: seller.cashDiscountPct,
+      paymentDiscountPct,
       shipCost: ship,
     });
     return {

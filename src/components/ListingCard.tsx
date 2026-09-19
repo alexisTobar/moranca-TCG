@@ -36,16 +36,16 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
   const effectivePrice = hasOffer ? listing.offerPrice! : listing.price;
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-xl card-surface transition duration-200 hover:-translate-y-1 hover:border-carbon hover:shadow-lg">
+    <div className="group lift flex flex-col overflow-hidden rounded-2xl card-surface">
       <Link href={`/producto/${listing.slug}`} className="flex flex-1 flex-col">
-        <div className="relative aspect-[63/88] overflow-hidden bg-ink-950">
+        <div className="relative aspect-[63/88] overflow-hidden bg-gradient-to-b from-ink-900 to-ink-850">
           {listing.imageUrl ? (
             <Image
               src={listing.imageUrl}
               alt={listing.title}
               fill
               sizes="(max-width:640px) 45vw, (max-width:1024px) 22vw, 200px"
-              className="object-cover transition duration-300 group-hover:scale-[1.04]"
+              className="object-cover transition duration-500 group-hover:scale-[1.06]"
             unoptimized
           />
           ) : (
@@ -57,24 +57,24 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
           {listing.isFoil && <span className="foil-shimmer" aria-hidden="true" />}
 
           <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2">
-            <span className="rounded-md bg-ink-950/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink-200 backdrop-blur">
+            <span className="rounded-full bg-carbon/75 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur">
               {TYPE_LABEL[listing.type] ?? listing.type}
             </span>
             {listing.isFoil && (
-              <span className="rounded-md bg-gradient-to-r from-fuchsia-600 to-violet-600 px-1.5 py-0.5 text-[10px] font-bold uppercase text-paper">
+              <span className="rounded-full bg-gradient-to-r from-gold-300 to-gold-500 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-[#2a1d00] shadow">
                 Foil
               </span>
             )}
           </div>
 
           {isDeck && listing._count && (
-            <span className="absolute bottom-2 left-2 rounded-md bg-ink-950/85 px-2 py-0.5 text-[10px] font-semibold text-ink-200 backdrop-blur">
+            <span className="absolute bottom-2 left-2 rounded-full bg-carbon/75 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur">
               {listing._count.deckCards} cartas
             </span>
           )}
 
           {listing.stock <= 0 && (
-            <div className="absolute inset-0 flex items-center justify-center bg-ink-950/75 text-sm font-bold uppercase tracking-widest text-ink-300">
+            <div className="absolute inset-0 flex items-center justify-center bg-white/75 text-sm font-bold uppercase tracking-widest text-ink-300 backdrop-blur-[2px]">
               Vendido
             </div>
           )}
@@ -82,7 +82,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
 
         <div className="flex flex-1 flex-col gap-1.5 p-3 pb-2">
           <GameChip game={listing.game} />
-          <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-ink-200 group-hover:text-carbon">
+          <h3 className="line-clamp-2 text-[13px] font-semibold leading-snug text-ink-200 transition group-hover:text-brand-600">
             {listing.title}
           </h3>
           <p className="line-clamp-1 text-[11px] text-ink-400">
@@ -97,7 +97,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
                   {clp(listing.price)}
                 </span>
               )}
-              <span className="font-display text-lg font-bold text-accent-400">
+              <span className="font-display text-[17px] font-bold tracking-tight text-carbon">
                 {clp(effectivePrice)}
               </span>
             </span>

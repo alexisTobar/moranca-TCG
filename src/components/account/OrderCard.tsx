@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Landmark, CreditCard, Banknote, Star, PackageCheck } from "lucide-react";
+import { Star, PackageCheck } from "lucide-react";
 import { clp } from "@/lib/format";
+import { PICKUP_POINT } from "@/lib/regions";
 import { OrderChatToggle } from "@/components/OrderChatToggle";
+import { TransferInstructions, type BankInfo } from "./TransferInstructions";
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: "Pendiente",
@@ -22,13 +24,7 @@ const STATUS_STYLE: Record<string, string> = {
   DELIVERED: "border-violet-500/40 bg-violet-500/10 text-violet-700",
 };
 
-export interface BankTransferInfo {
-  bankName: string | null;
-  accountType: string | null;
-  accountNumber: string;
-  holderName: string | null;
-  rut: string | null;
-}
+export type BankTransferInfo = BankInfo;
 
 export interface OrderReview {
   id: string;
@@ -44,6 +40,9 @@ export interface AccountOrder {
   paymentMethod: string;
   sellerName: string;
   bankTransfer: BankTransferInfo | null;
+  paymentReference: string | null;
+  paymentDueAt: string | null;
+  receiptUploadedAt: string | null;
   createdAt: string;
   items: Array<{ id: string; title: string; quantity: number; unitPrice: number }>;
   review: OrderReview | null;
@@ -59,6 +58,28 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  async function cancelOrder() {
+    if (!confirm("¿Cancelar esta orden? Las cartas volverán a la tienda.")) return;
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      const res = await fetch(`/api/orders/${order.id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "No se pudo cancelar la orden");
+      router.refresh();
+    } catch (err) {
+      setCancelError((err as Error).message);
+    } finally {
+      setCancelling(false);
+    }
+  }
 
   async function submitReview() {
     if (rating < 1) {
@@ -135,48 +156,28 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
       </ul>
 
       {order.status === "PENDING" && (
-        <div className="mt-3 rounded-lg border border-ink-800 bg-ink-900/60 p-3">
-          {order.paymentMethod === "MP" ? (
-            <div className="flex items-start gap-2">
-              <CreditCard className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-400" strokeWidth={2} />
-              <p className="text-[11px] leading-relaxed text-ink-300">
-                Pagando con <strong className="text-ink-200">Mercado Pago</strong>. Si no
-                alcanzaste a completar el pago, vuelve a intentarlo desde el carrito.
-              </p>
-            </div>
-          ) : order.paymentMethod === "CASH" ? (
-            <div className="flex items-start gap-2">
-              <Banknote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-400" strokeWidth={2} />
-              <p className="text-[11px] leading-relaxed text-ink-300">
-                Pagas en <strong className="text-ink-200">efectivo al retirar</strong> tu
-                pedido en persona. El vendedor confirma la orden al recibir el pago.
-              </p>
-            </div>
-          ) : order.bankTransfer ? (
-            <div className="flex items-start gap-2.5">
-              <Landmark className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-400" strokeWidth={2} />
-              <div className="min-w-0 flex-1">
-                <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-ink-400">
-                  Transferir a
-                </p>
-                <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[12px]">
-                  <BankRow label="Banco" value={order.bankTransfer.bankName} />
-                  <BankRow label="Tipo de cuenta" value={order.bankTransfer.accountType} />
-                  <BankRow label="N° de cuenta" value={order.bankTransfer.accountNumber} strong />
-                  <BankRow label="RUT" value={order.bankTransfer.rut} />
-                  <BankRow label="Titular" value={order.bankTransfer.holderName} />
-                </dl>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-start gap-2">
-              <Landmark className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-500" strokeWidth={2} />
-              <p className="text-[11px] leading-relaxed text-ink-400">
-                El vendedor todavía no configura su cuenta bancaria. Te contactará por el
-                chat de la orden para coordinar el pago.
-              </p>
-            </div>
-          )}
+        <div className="mt-3 rounded-2xl border border-ink-800 bg-ink-900/60 p-4">
+          <TransferInstructions
+            payment={{
+              orderId: order.id,
+              method: order.paymentMethod,
+              total: order.total,
+              reference: order.paymentReference,
+              dueAt: order.paymentDueAt,
+              bank: order.bankTransfer,
+              pickupPoint: PICKUP_POINT,
+              receiptUploadedAt: order.receiptUploadedAt,
+            }}
+          />
+          {cancelError && <p className="mt-3 text-[12px] text-rose-700">{cancelError}</p>}
+          <button
+            type="button"
+            disabled={cancelling}
+            onClick={cancelOrder}
+            className="mt-3 text-[12px] font-semibold text-ink-400 transition hover:text-rose-700 disabled:opacity-60"
+          >
+            {cancelling ? "Cancelando…" : "Cancelar esta orden"}
+          </button>
         </div>
       )}
 
@@ -258,7 +259,7 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
               type="button"
               disabled={sending}
               onClick={submitReview}
-              className="mt-2 rounded-lg bg-brand-600 px-4 py-1.5 text-[12px] font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
+              className="btn btn-primary btn-sm mt-2"
             >
               {sending ? "Enviando…" : "Enviar reseña"}
             </button>
@@ -271,20 +272,3 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
   );
 }
 
-function BankRow({
-  label,
-  value,
-  strong = false,
-}: {
-  label: string;
-  value: string | null;
-  strong?: boolean;
-}) {
-  if (!value) return null;
-  return (
-    <>
-      <dt className="text-ink-400">{label}</dt>
-      <dd className={strong ? "font-bold text-ink-200" : "text-ink-300"}>{value}</dd>
-    </>
-  );
-}

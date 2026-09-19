@@ -81,7 +81,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
 
       <button
         disabled={loading}
-        className="w-full rounded-xl bg-brand-600 py-3 text-sm font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
+        className="btn btn-primary btn-lg w-full"
       >
         {loading ? "Guardando…" : "Cambiar contraseña"}
       </button>

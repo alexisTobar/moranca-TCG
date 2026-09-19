@@ -7,9 +7,13 @@ import { CheckCircle2, Truck, XCircle } from "lucide-react";
 export function OrderStatusActions({
   orderId,
   status,
+  reference,
+  total,
 }: {
   orderId: string;
   status: string;
+  reference?: string | null;
+  total?: number;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -17,6 +21,16 @@ export function OrderStatusActions({
 
   async function setStatus(next: "PAID" | "SHIPPED" | "CANCELLED") {
     if (next === "CANCELLED" && !confirm("¿Cancelar este pedido? Esto no se puede deshacer.")) {
+      return;
+    }
+    if (
+      next === "PAID" &&
+      !confirm(
+        `Confirma solo si el dinero ya está en tu cuenta bancaria${
+          total ? ` (${total.toLocaleString("es-CL")} CLP)` : ""
+        }${reference ? ` con la referencia ${reference}` : ""}. ¿Confirmar el pago?`
+      )
+    ) {
       return;
     }
     setLoading(true);
@@ -46,10 +60,10 @@ export function OrderStatusActions({
           type="button"
           disabled={loading}
           onClick={() => setStatus("PAID")}
-          className="flex items-center gap-1.5 rounded-lg border border-emerald-600/40 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-500/20 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-xl border border-emerald-600/40 bg-emerald-500/10 px-3.5 py-2 text-[12px] font-bold text-emerald-700 transition hover:bg-emerald-500/20 disabled:opacity-50"
         >
-          <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
-          Aceptar pedido (confirmar pago)
+          <CheckCircle2 className="h-4 w-4" strokeWidth={2} />
+          Confirmar pago recibido
         </button>
       )}
       {status === "PAID" && (
@@ -57,7 +71,7 @@ export function OrderStatusActions({
           type="button"
           disabled={loading}
           onClick={() => setStatus("SHIPPED")}
-          className="flex items-center gap-1.5 rounded-lg border border-sky-600/40 bg-sky-500/10 px-3 py-1.5 text-[11px] font-bold text-sky-700 transition hover:bg-sky-500/20 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-xl border border-sky-600/40 bg-sky-500/10 px-3.5 py-2 text-[12px] font-bold text-sky-700 transition hover:bg-sky-500/20 disabled:opacity-50"
         >
           <Truck className="h-3.5 w-3.5" strokeWidth={2} />
           Marcar como enviado
@@ -67,7 +81,7 @@ export function OrderStatusActions({
         type="button"
         disabled={loading}
         onClick={() => setStatus("CANCELLED")}
-        className="flex items-center gap-1.5 rounded-lg border border-ink-700 px-3 py-1.5 text-[11px] font-semibold text-ink-400 transition hover:border-rose-500/40 hover:text-rose-600 disabled:opacity-50"
+        className="flex items-center gap-1.5 rounded-xl border border-ink-700 px-3.5 py-2 text-[12px] font-semibold text-ink-400 transition hover:border-rose-500/40 hover:text-rose-600 disabled:opacity-50"
       >
         <XCircle className="h-3.5 w-3.5" strokeWidth={2} />
         Cancelar

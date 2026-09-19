@@ -11,9 +11,8 @@ export function effectiveListingPrice(listing: { price: number; offerPrice: numb
 export function computeSellerOrderTotals(input: {
   items: Array<{ unitPrice: number; quantity: number }>;
   coupon: { type: "PERCENT" | "FIXED"; value: number } | null;
-  paymentMethod: "TRANSFER" | "CASH" | "MP";
-  transferDiscountPct: number;
-  cashDiscountPct: number;
+  /** Descuento por método de pago (%), ya resuelto desde la configuración global. */
+  paymentDiscountPct: number;
   shipCost: number;
 }) {
   const subtotal = input.items.reduce((a, i) => a + i.unitPrice * i.quantity, 0);
@@ -28,12 +27,10 @@ export function computeSellerOrderTotals(input: {
   }
 
   const afterCoupon = subtotal - couponDiscount;
-  const paymentDiscountPct =
-    input.paymentMethod === "TRANSFER"
-      ? input.transferDiscountPct
-      : input.paymentMethod === "CASH"
-        ? input.cashDiscountPct
-        : 0;
+  const paymentDiscountPct = Math.max(
+    0,
+    Math.min(MAX_PAYMENT_DISCOUNT_PCT, Math.round(input.paymentDiscountPct))
+  );
   const paymentDiscount = Math.round(afterCoupon * (paymentDiscountPct / 100));
 
   const discount = couponDiscount + paymentDiscount;

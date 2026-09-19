@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ArrowRight, Menu, X } from "lucide-react";
 import { LogoutButton } from "./LogoutButton";
 
 export function MobileNav({
@@ -19,50 +20,67 @@ export function MobileNav({
 }) {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
   return (
     <>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(true)}
         aria-label="Abrir menú"
         aria-expanded={open}
-        className="rounded-lg border border-white/20 p-2 text-white/80 xl:hidden"
+        className="icon-btn xl:hidden"
       >
-        <svg
-          viewBox="0 0 24 24"
-          className="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          {open ? (
-            <path d="M6 6l12 12M18 6L6 18" />
-          ) : (
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          )}
-        </svg>
+        <Menu className="h-5 w-5" strokeWidth={2} />
       </button>
 
       {open && (
-        <div className="absolute inset-x-0 top-16 border-b border-ink-800 bg-ink-950/98 p-4 backdrop-blur-xl xl:hidden">
-          <div className="mx-auto flex max-w-7xl flex-col gap-1">
+        <div
+          className="animate-fade-up fixed inset-0 z-[70] flex flex-col bg-carbon/95 backdrop-blur-2xl xl:hidden"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="flex h-16 items-center justify-between px-4">
+            <span className="font-display text-sm font-bold uppercase tracking-widest text-gold-300">
+              Menú
+            </span>
+            <button onClick={() => setOpen(false)} aria-label="Cerrar menú" className="icon-btn">
+              <X className="h-5 w-5" strokeWidth={2} />
+            </button>
+          </div>
+
+          <div className="flex flex-1 flex-col gap-1 overflow-y-auto px-4 pb-8 pt-2">
             {nav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink-200 hover:bg-ink-850"
+                className="flex items-center justify-between rounded-2xl px-4 py-4 font-display text-xl font-semibold text-white transition hover:bg-white/10"
               >
                 {item.label}
+                <ArrowRight className="h-5 w-5 text-white/40" strokeWidth={2} />
               </Link>
             ))}
-            <Link
-              href={isLogged ? accountHref : "/ingresar"}
-              onClick={() => setOpen(false)}
-              className="mt-2 rounded-lg bg-brand-600 px-3 py-2.5 text-center text-sm font-bold text-paper"
-            >
-              {isLogged ? accountLabel : "Ingresar"}
-            </Link>
-            {showLogout && <LogoutButton className="mt-1 w-full" />}
+
+            <div className="mt-auto space-y-2 pt-6">
+              <Link
+                href={isLogged ? accountHref : "/ingresar"}
+                onClick={() => setOpen(false)}
+                className="btn btn-gold btn-lg w-full"
+              >
+                {isLogged ? accountLabel : "Ingresar"}
+              </Link>
+              {showLogout && <LogoutButton className="w-full !py-3 !text-white/80 !border-white/20" />}
+            </div>
           </div>
         </div>
       )}

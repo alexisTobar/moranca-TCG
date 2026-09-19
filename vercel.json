@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/news",
       "schedule": "0 9 */2 * *"
+    },
+    {
+      "path": "/api/cron/expire-orders",
+      "schedule": "0 6 * * *"
     }
   ]
 }

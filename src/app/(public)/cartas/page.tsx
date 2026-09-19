@@ -6,6 +6,8 @@ import { GAME_LIST, CONDITIONS, LANGUAGES, LISTING_TYPES, isGameId } from "@/lib
 import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { Reveal } from "@/components/Reveal";
+import { FilterDrawer } from "@/components/FilterDrawer";
+import { SearchX } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Catálogo de cartas",
@@ -147,7 +149,7 @@ export default async function CatalogPage({
       </nav>
 
       <header className="mb-6">
-        <h1 className="font-display text-3xl font-bold text-carbon">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-carbon sm:text-4xl">
           {q ? `Resultados para “${q}”` : "Catálogo"}
         </h1>
         <p className="mt-1 text-[13px] text-ink-400">
@@ -157,7 +159,7 @@ export default async function CatalogPage({
 
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         {/* FILTROS */}
-        <aside className="h-fit space-y-6 rounded-2xl card-surface p-5 lg:sticky lg:top-36">
+        <FilterDrawer activeCount={[game, type, condition, language, min, max].filter(Boolean).length}>
           <FilterGroup label="Juego">
             <FilterPill href={buildHref({ game: undefined, page: undefined })} active={!game}>
               Todos
@@ -238,7 +240,7 @@ export default async function CatalogPage({
                 min={0}
                 defaultValue={min}
                 placeholder="Mín"
-                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-2.5 py-1.5 text-xs text-ink-200 outline-none focus:border-carbon"
+                className="input !py-2 !text-xs"
               />
               <input
                 name="max"
@@ -246,12 +248,10 @@ export default async function CatalogPage({
                 min={0}
                 defaultValue={max}
                 placeholder="Máx"
-                className="w-full rounded-lg border border-ink-700 bg-ink-950 px-2.5 py-1.5 text-xs text-ink-200 outline-none focus:border-carbon"
+                className="input !py-2 !text-xs"
               />
             </div>
-            <button className="w-full rounded-lg border border-ink-600 py-1.5 text-xs font-semibold text-ink-200 transition hover:border-carbon hover:text-carbon">
-              Aplicar
-            </button>
+            <button className="btn btn-secondary btn-sm w-full">Aplicar</button>
           </form>
 
           <Link
@@ -260,7 +260,7 @@ export default async function CatalogPage({
           >
             Limpiar filtros
           </Link>
-        </aside>
+        </FilterDrawer>
 
         {/* RESULTADOS */}
         <div>
@@ -272,11 +272,8 @@ export default async function CatalogPage({
               <Link
                 key={s}
                 href={buildHref({ sort: s, page: undefined })}
-                className={`rounded-full border px-3 py-1 text-[11px] font-semibold capitalize transition ${
-                  sort === s
-                    ? "border-carbon bg-carbon text-paper"
-                    : "border-ink-700 text-ink-400 hover:text-ink-200"
-                }`}
+                data-active={sort === s}
+                className="pill capitalize"
               >
                 {s.replace("-", " ")}
               </Link>
@@ -284,15 +281,15 @@ export default async function CatalogPage({
           </div>
 
           {listings.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-ink-700 p-16 text-center">
-              <p className="font-display text-xl text-ink-300">Sin resultados</p>
-              <p className="mt-2 text-[13px] text-ink-400">
+            <div className="flex flex-col items-center rounded-3xl border border-dashed border-ink-700 px-6 py-16 text-center">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-850 text-ink-500">
+                <SearchX className="h-7 w-7" strokeWidth={1.5} />
+              </span>
+              <p className="mt-4 font-display text-xl font-bold text-carbon">Sin resultados</p>
+              <p className="mt-1.5 text-[13px] text-ink-400">
                 Prueba con otro término o quita algunos filtros.
               </p>
-              <Link
-                href="/cartas"
-                className="mt-4 inline-block rounded-lg bg-brand-600 px-5 py-2 text-xs font-bold text-paper"
-              >
+              <Link href="/cartas" className="btn btn-primary btn-sm mt-5">
                 Ver todo el catálogo
               </Link>
             </div>
@@ -315,11 +312,8 @@ export default async function CatalogPage({
                     )}
                     <Link
                       href={buildHref({ page: String(p) })}
-                      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
-                        p === page
-                          ? "border-carbon bg-carbon text-paper"
-                          : "border-ink-700 text-ink-300 hover:border-ink-600"
-                      }`}
+                      data-active={p === page}
+                      className="pill !min-w-9 !justify-center"
                     >
                       {p}
                     </Link>
@@ -362,11 +356,8 @@ function FilterPill({
   return (
     <Link
       href={href}
-      className={`rounded-lg border px-2.5 py-1 text-[11px] font-semibold transition ${
-        active
-          ? "border-carbon bg-carbon text-paper"
-          : "border-ink-700 text-ink-400 hover:border-ink-600 hover:text-ink-200"
-      }`}
+      data-active={active}
+      className="pill !px-3 !py-1"
     >
       {children}
     </Link>

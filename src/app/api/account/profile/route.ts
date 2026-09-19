@@ -42,12 +42,6 @@ export async function PATCH(req: Request) {
           ? { bankHolderName: data.bankHolderName }
           : {}),
         ...(canHaveBank && data.bankRut !== undefined ? { bankRut: data.bankRut } : {}),
-        ...(canHaveBank && data.transferDiscountPct !== undefined
-          ? { transferDiscountPct: data.transferDiscountPct }
-          : {}),
-        ...(canHaveBank && data.cashDiscountPct !== undefined
-          ? { cashDiscountPct: data.cashDiscountPct }
-          : {}),
       },
       select: {
         id: true,
@@ -62,8 +56,6 @@ export async function PATCH(req: Request) {
         bankAccountNumber: true,
         bankHolderName: true,
         bankRut: true,
-        transferDiscountPct: true,
-        cashDiscountPct: true,
       },
     });
 

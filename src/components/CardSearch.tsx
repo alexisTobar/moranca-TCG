@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { ImageOff, Search, X } from "lucide-react";
 import { GAME_LIST, type GameId } from "@/lib/games";
 import { clp } from "@/lib/format";
 import { MYL_FORMATOS } from "@/lib/providers/myl-formatos";
@@ -123,25 +123,26 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [query, game, formato, color, edition]);
+  }, [query, game, formato, color, edition, hasMagicFilters]);
 
   return (
-    <div className="rounded-2xl card-surface p-5">
+    <div className="rounded-3xl card-surface p-4 sm:p-6">
       <div>
-        <h3 className="text-sm font-semibold text-carbon">
+        <h3 className="font-display text-[17px] font-bold text-carbon">
           {label ?? "Buscar la carta"}
         </h3>
-        <p className="mt-0.5 text-[12px] text-ink-400">
+        <p className="mt-1 text-[13px] text-ink-400">
           {hint ??
             "Escribe el nombre y elige la impresión correcta. La imagen se toma del catálogo oficial."}
         </p>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-1.5">
+      <div className="no-scrollbar -mx-1 mt-4 flex gap-1.5 overflow-x-auto px-1 pb-1">
         {GAME_LIST.map((g) => (
           <button
             key={g.id}
             type="button"
+            data-active={game === g.id}
             onClick={() => {
               onGameChange(g.id);
               setResults([]);
@@ -149,11 +150,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
               setColor("");
               setEdition("");
             }}
-            className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition ${
-              game === g.id
-                ? "border-carbon bg-carbon text-paper"
-                : "border-ink-700 text-ink-400 hover:border-ink-600 hover:text-ink-200"
-            }`}
+            className="pill shrink-0"
           >
             {g.short}
           </button>
@@ -162,19 +159,16 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
 
       {/* Magic: filtro por color y edición */}
       {game === "magic" && (
-        <div className="mt-2 flex flex-wrap items-center gap-2.5">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-ink-400">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2.5">
+          <div className="no-scrollbar -mx-1 flex max-w-full items-center gap-1.5 overflow-x-auto px-1">
+            <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-ink-400">
               Color
             </span>
             <button
               type="button"
+              data-active={color === ""}
               onClick={() => setColor("")}
-              className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold transition ${
-                color === ""
-                  ? "border-carbon bg-carbon text-paper"
-                  : "border-ink-700 text-ink-400 hover:text-ink-200"
-              }`}
+              className="pill shrink-0 !px-3 !py-1"
             >
               Todos
             </button>
@@ -182,26 +176,23 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
               <button
                 key={c.value}
                 type="button"
+                data-active={color === c.value}
                 onClick={() => setColor(c.value)}
-                className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold transition ${
-                  color === c.value
-                    ? "border-carbon bg-carbon text-paper"
-                    : "border-ink-700 text-ink-400 hover:text-ink-200"
-                }`}
+                className="pill shrink-0 !px-3 !py-1"
               >
                 {c.label}
               </button>
             ))}
           </div>
 
-          <label className="flex items-center gap-1.5">
+          <label className="flex items-center gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-ink-400">
               Edición
             </span>
             <select
               value={edition}
               onChange={(e) => setEdition(e.target.value)}
-              className="rounded-md border border-ink-700 bg-white px-2 py-1 text-[11px] font-semibold text-ink-200 outline-none focus:border-carbon"
+              className="input !w-auto !py-1.5 !text-[12px] font-semibold"
             >
               <option value="">Todas</option>
               {magicSets.map((s) => (
@@ -216,18 +207,15 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
 
       {/* Mitos y Leyendas: filtro por formato competitivo */}
       {game === "myl" && (
-        <div className="mt-2 flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-ink-400">
+        <div className="no-scrollbar -mx-1 mt-3 flex items-center gap-1.5 overflow-x-auto px-1">
+          <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-ink-400">
             Formato
           </span>
           <button
             type="button"
+            data-active={formato === ""}
             onClick={() => setFormato("")}
-            className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold transition ${
-              formato === ""
-                ? "border-carbon bg-carbon text-paper"
-                : "border-ink-700 text-ink-400 hover:text-ink-200"
-            }`}
+            className="pill shrink-0 !px-3 !py-1"
           >
             Todos
           </button>
@@ -235,12 +223,9 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
             <button
               key={f}
               type="button"
+              data-active={formato === f}
               onClick={() => setFormato(f)}
-              className={`rounded-md border px-2.5 py-1 text-[11px] font-semibold transition ${
-                formato === f
-                  ? "border-carbon bg-carbon text-paper"
-                  : "border-ink-700 text-ink-400 hover:text-ink-200"
-              }`}
+              className="pill shrink-0 !px-3 !py-1"
             >
               {f}
             </button>
@@ -248,7 +233,12 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
         </div>
       )}
 
-      <div className="relative mt-3">
+      {/* Buscador */}
+      <div className="relative mt-4">
+        <Search
+          className="pointer-events-none absolute left-4 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-ink-500"
+          strokeWidth={2}
+        />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -257,27 +247,54 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
               ? "Nombre de la carta. Ej: Arturo, Excalibur…"
               : "Nombre o código. Ej: Luffy, OP01-024, Charizard…"
           }
-          className="w-full rounded-lg border border-ink-700 bg-white px-3 py-2.5 pr-24 text-sm text-ink-200 outline-none transition focus:border-carbon"
+          aria-label="Buscar carta"
+          enterKeyHint="search"
+          autoComplete="off"
+          className="input !rounded-full !py-3.5 !pl-11 !pr-24 !text-[15px] shadow-sm"
         />
-        {loading && (
-          <span className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1.5 text-[11px] font-semibold text-ink-400">
-            <span className="animate-spin-slow h-3 w-3 rounded-full border-2 border-ink-400 border-t-transparent" />
-            buscando…
-          </span>
-        )}
+        <span className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
+          {loading && (
+            <span className="animate-spin-slow h-4 w-4 rounded-full border-2 border-brand-500 border-t-transparent" />
+          )}
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label="Borrar búsqueda"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-850 text-ink-400 transition hover:bg-ink-800 hover:text-carbon"
+            >
+              <X className="h-3.5 w-3.5" strokeWidth={2.5} />
+            </button>
+          )}
+        </span>
       </div>
 
       {error && (
-        <p className="mt-3 rounded-lg border border-red-300 bg-red-50 p-2.5 text-[12px] text-red-700">
+        <p className="mt-3 rounded-xl border border-red-300 bg-red-50 p-3 text-[12px] text-red-700">
           {error}
         </p>
       )}
 
+      {/* Esqueletos mientras carga la primera búsqueda */}
+      {loading && results.length === 0 && (
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="overflow-hidden rounded-2xl border border-ink-800">
+              <div className="animate-pulse bg-ink-850" style={{ paddingTop: "139.68%" }} />
+              <div className="space-y-2 p-2.5">
+                <div className="h-3 w-4/5 animate-pulse rounded bg-ink-850" />
+                <div className="h-3 w-2/5 animate-pulse rounded bg-ink-850" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {results.length > 0 && (
         <>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-ink-800 pt-3">
-            <p className="text-[12px] text-ink-400">
-              <strong className="text-ink-200">{results.length}</strong>{" "}
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-ink-800 pt-4">
+            <p className="text-[13px] text-ink-400">
+              <strong className="text-carbon">{results.length}</strong>{" "}
               {results.length === 1 ? "versión encontrada" : "versiones encontradas"}
               {results.length > visible && <span> · mostrando {visible}</span>}
             </p>
@@ -288,62 +305,60 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
             )}
           </div>
 
-          <div className="mt-3 grid max-h-[520px] grid-cols-2 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-3 lg:grid-cols-5">
+          {/* En móvil scrollea la página; el scroll interno solo se usa en pantallas grandes */}
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:max-h-[560px] sm:grid-cols-3 sm:overflow-y-auto sm:pr-1 lg:grid-cols-5">
             {results.slice(0, visible).map((card, i) => (
               <button
                 key={`${card.externalId}-${i}`}
                 type="button"
                 onClick={() => onPick(card)}
-                className="group flex flex-col overflow-hidden rounded-lg border border-ink-700 bg-white text-left transition hover:-translate-y-0.5 hover:border-carbon hover:shadow-md"
+                className="group lift block overflow-hidden rounded-2xl border border-ink-800 bg-white text-left"
                 title={`${card.name}${card.code ? ` — ${card.code}` : ""}`}
               >
-                <span className="relative block aspect-[63/88] bg-ink-900">
-                  <Image
-                    src={card.imageUrl}
-                    alt={card.name}
-                    fill
-                    sizes="160px"
-                    className="object-cover"
-                    unoptimized
-                  />
+                {/* Proporción 63:88 con padding-top: funciona igual en todos los navegadores móviles */}
+                <span
+                  className="relative block w-full overflow-hidden bg-ink-850"
+                  style={{ paddingTop: "139.68%" }}
+                >
+                  <CardImage src={card.imageUrl} alt={card.name} />
                   {card.rarity && (
-                    <span className="absolute left-1 top-1 rounded bg-white/90 px-1.5 py-0.5 text-[9px] font-bold uppercase text-ink-300">
+                    <span className="absolute left-1.5 top-1.5 rounded-full bg-carbon/75 px-2 py-0.5 text-[9px] font-bold uppercase text-white backdrop-blur">
                       {card.rarity}
                     </span>
                   )}
-                  <span className="absolute inset-0 flex items-center justify-center bg-carbon/0 text-[11px] font-bold text-white opacity-0 transition group-hover:bg-carbon/85 group-hover:opacity-100">
+                  <span className="absolute inset-0 flex items-center justify-center bg-carbon/0 text-[12px] font-bold text-white opacity-0 transition group-hover:bg-carbon/70 group-hover:opacity-100">
                     Seleccionar
                   </span>
                 </span>
 
-                <span className="flex flex-1 flex-col gap-0.5 p-2">
-                  <span className="line-clamp-2 text-[11px] font-semibold leading-tight text-ink-200">
+                <span className="block space-y-1 p-2.5">
+                  <span className="line-clamp-2 block text-[12px] font-semibold leading-tight text-ink-200">
                     {card.name}
                   </span>
 
                   {card.code && (
-                    <span className="w-fit rounded bg-ink-850 px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-tight text-ink-300">
+                    <span className="block w-fit rounded bg-ink-850 px-1.5 py-0.5 font-mono text-[10px] font-bold tracking-tight text-ink-300">
                       {card.code}
                     </span>
                   )}
 
-                  <span className="line-clamp-1 text-[9px] text-ink-400">
+                  <span className="line-clamp-1 block text-[10px] text-ink-400">
                     {card.setName ?? ""}
                   </span>
 
                   {MYL_FORMATOS.filter((f) => card.extra?.includes(f)).map((f) => (
                     <span
                       key={f}
-                      className="w-fit rounded bg-ink-900 px-1.5 py-0.5 text-[9px] font-bold text-ink-300"
+                      className="mr-1 inline-block rounded bg-ink-900 px-1.5 py-0.5 text-[9px] font-bold text-ink-300"
                     >
                       {f}
                     </span>
                   ))}
 
                   {(card.priceClp || card.priceClpFoil) && (
-                    <span className="mt-auto block pt-1 text-[10px] leading-tight">
+                    <span className="block pt-0.5 text-[11px] leading-tight">
                       {card.priceClp && (
-                        <span className="block font-semibold text-brand-600">
+                        <span className="block font-bold text-brand-600">
                           {clp(card.priceClp)}
                           <span className="font-normal text-ink-400">
                             {" "}
@@ -352,9 +367,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
                         </span>
                       )}
                       {card.priceClpFoil && (
-                        <span className="block text-ink-400">
-                          Foil {clp(card.priceClpFoil)}
-                        </span>
+                        <span className="block text-ink-400">Foil {clp(card.priceClpFoil)}</span>
                       )}
                     </span>
                   )}
@@ -367,7 +380,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
             <button
               type="button"
               onClick={() => setVisible((v) => v + STEP * 2)}
-              className="mt-3 w-full rounded-lg border border-ink-700 py-2 text-[12px] font-semibold text-ink-300 transition hover:border-carbon hover:text-carbon"
+              className="btn btn-secondary mt-4 w-full"
             >
               Mostrar más versiones ({results.length - visible} restantes)
             </button>
@@ -380,12 +393,11 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
         !error &&
         results.length === 0 &&
         (query.trim().length >= 2 || hasMagicFilters) && (
-          <div className="mt-3 rounded-lg border border-ink-700 bg-ink-900 p-3">
-            <p className="text-[12px] text-ink-400">
+          <div className="mt-4 rounded-2xl border border-ink-800 bg-ink-900 p-4">
+            <p className="text-[13px] text-ink-400">
               {query.trim() ? (
                 <>
-                  Sin resultados para{" "}
-                  <strong className="text-ink-200">“{query}”</strong>{" "}
+                  Sin resultados para <strong className="text-ink-200">“{query}”</strong>{" "}
                 </>
               ) : (
                 "Sin resultados con esos filtros "
@@ -395,7 +407,7 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
 
             {suggestions.length > 0 ? (
               <>
-                <p className="mt-2 text-[12px] font-semibold text-ink-200">
+                <p className="mt-2 text-[13px] font-semibold text-ink-200">
                   Pero sí está en otro juego:
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -407,16 +419,18 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
                         key={s.game}
                         type="button"
                         onClick={() => onGameChange(s.game)}
-                        className="flex items-center gap-2 rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-[12px] font-semibold text-ink-300 transition hover:border-carbon hover:text-carbon"
+                        className="pill !py-1.5"
                       >
                         {s.sample && (
-                          <Image
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
                             src={s.sample}
                             alt=""
                             width={22}
                             height={31}
+                            loading="lazy"
+                            referrerPolicy="no-referrer"
                             className="rounded-sm object-cover"
-                            unoptimized
                           />
                         )}
                         Buscar en {meta.short}
@@ -430,12 +444,42 @@ export function CardSearch({ game, onGameChange, onPick, label, hint }: Props) {
                 </div>
               </>
             ) : (
-              <p className="mt-1 text-[12px] text-ink-400">
+              <p className="mt-1 text-[13px] text-ink-400">
                 Revisa la ortografía o prueba con el nombre en inglés.
               </p>
             )}
           </div>
         )}
     </div>
+  );
+}
+
+/**
+ * Imagen de carta con <img> nativo: se ve igual en cualquier navegador móvil y,
+ * si el catálogo remoto falla, muestra un recuadro en lugar de quedar en blanco.
+ */
+function CardImage({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-ink-500">
+        <ImageOff className="h-7 w-7" strokeWidth={1.5} />
+        <span className="text-[10px] font-medium">Sin imagen</span>
+      </span>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      onError={() => setFailed(true)}
+      className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+    />
   );
 }

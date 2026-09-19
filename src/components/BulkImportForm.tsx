@@ -182,7 +182,7 @@ export function BulkImportForm({
             type="button"
             disabled={analyzing || !text.trim()}
             onClick={analyze}
-            className="rounded-lg bg-brand-600 px-4 py-2 text-[12px] font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
+            className="btn btn-primary btn-sm"
           >
             {analyzing ? "Analizando…" : "Analizar"}
           </button>
@@ -410,7 +410,7 @@ export function BulkImportForm({
               type="button"
               disabled={!readyToPublish || publishing}
               onClick={publish}
-              className="mt-4 w-full rounded-xl bg-brand-600 py-3 text-sm font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
+              className="btn btn-primary btn-lg mt-4 w-full"
             >
               {publishing
                 ? "Publicando…"

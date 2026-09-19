@@ -26,7 +26,7 @@ export function CartPageView() {
         </p>
         <Link
           href="/cartas"
-          className="mt-8 rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-paper transition hover:bg-brand-500"
+          className="btn btn-primary btn-lg mt-8"
         >
           Explorar catálogo
         </Link>
@@ -133,7 +133,7 @@ export function CartPageView() {
           ))}
         </ul>
 
-        <aside className="h-fit rounded-2xl card-surface p-5 lg:sticky lg:top-40">
+        <aside className="h-fit rounded-2xl card-surface p-5 lg:sticky lg:top-24">
           <h2 className="text-sm font-semibold text-carbon">Resumen</h2>
 
           <dl className="mt-4 space-y-2 text-[13px]">
@@ -154,7 +154,7 @@ export function CartPageView() {
 
           <Link
             href="/checkout"
-            className="mt-5 block rounded-xl bg-brand-600 py-3 text-center text-sm font-bold text-paper transition hover:bg-brand-500"
+            className="btn btn-primary btn-lg mt-5 block text-center"
           >
             Continuar al pago
           </Link>

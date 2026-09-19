@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
+import { recordOrderEvent, releaseOrderStock } from "@/lib/order-payments";
 import { z } from "zod";
 
 export const runtime = "nodejs";
@@ -17,15 +18,17 @@ const ALLOWED_FROM: Record<string, string[]> = {
   SHIPPED: ["DELIVERED"],
 };
 
-/** La transición a DELIVERED la dispara el comprador, no el vendedor. */
-const BUYER_ONLY_STATUSES = ["DELIVERED"];
-
 const SYSTEM_MESSAGE: Record<string, string> = {
-  PAID: "✅ Pago confirmado por el vendedor. Preparando tu pedido.",
-  SHIPPED: "📦 Pedido enviado / listo para retiro.",
-  DELIVERED: "📬 El comprador confirmó la recepción del pedido.",
-  CANCELLED: "❌ Pedido cancelado.",
+  PAID: "Pago confirmado por el vendedor. Preparando tu pedido.",
+  SHIPPED: "Pedido enviado o listo para retiro.",
+  DELIVERED: "El comprador confirmó la recepción del pedido.",
+  CANCELLED: "Pedido cancelado.",
 };
+
+/** Estados en los que el inventario de la orden ya está descontado. */
+const STOCK_HELD_STATUSES = ["PAID", "SHIPPED", "DELIVERED"];
+
+class ConflictError extends Error {}
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -39,7 +42,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         status: true,
         buyerId: true,
         sellerId: true,
-        paymentMethod: true,
+        stockReserved: true,
         items: { select: { listingId: true, quantity: true } },
       },
     });
@@ -53,25 +56,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
     const next = parsed.data.status;
 
-    const isAuthorized =
-      user.role === "ADMIN" ||
-      (BUYER_ONLY_STATUSES.includes(next) ? order.buyerId === user.id : order.sellerId === user.id);
-    if (!isAuthorized) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-    }
+    const isAdmin = user.role === "ADMIN";
+    const isBuyer = order.buyerId === user.id;
+    const isSeller = order.sellerId === user.id;
 
-    // Las órdenes pagadas con Mercado Pago solo pueden pasar a PAID vía el
-    // webhook verificado (firma HMAC + consulta a la API de MP). Permitir que
-    // el vendedor la confirme a mano rompería esa garantía: podría marcar
-    // como pagada una orden que nunca se pagó de verdad.
-    if (next === "PAID" && order.paymentMethod === "MP" && user.role !== "ADMIN") {
-      return NextResponse.json(
-        {
-          error:
-            "Las órdenes pagadas con Mercado Pago se confirman automáticamente. Si el pago ya se aprobó y no se refleja, contacta a soporte.",
-        },
-        { status: 409 }
-      );
+    // Quién puede hacer cada cambio:
+    //  - Confirmar pago y marcar envío: solo el vendedor (o un admin). El
+    //    comprador nunca puede darse a sí mismo por pagada la orden.
+    //  - Confirmar recepción: solo el comprador (o un admin).
+    //  - Cancelar: el vendedor o un admin en cualquier momento; el comprador
+    //    solo mientras la orden siga pendiente de pago.
+    let authorized = isAdmin;
+    if (!authorized) {
+      if (next === "DELIVERED") authorized = isBuyer;
+      else if (next === "CANCELLED") authorized = isSeller || (isBuyer && order.status === "PENDING");
+      else authorized = isSeller;
+    }
+    if (!authorized) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
     const allowed = ALLOWED_FROM[order.status] ?? [];
@@ -82,41 +84,44 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       );
     }
 
+    const holdsStock = order.stockReserved || STOCK_HELD_STATUSES.includes(order.status);
+
     await prisma.$transaction(async (tx) => {
-      // Al aceptar el pedido (confirmar pago) recién se descuenta stock: antes
-      // de eso el producto sigue disponible para otros compradores, porque el
-      // checkout no reserva nada.
-      if (next === "PAID") {
+      // Cambio condicional: si otro proceso (o un doble clic) ya movió la
+      // orden, no pisamos nada ni tocamos el stock dos veces.
+      const data: Record<string, unknown> = { status: next };
+      if (next === "PAID") data.paidAt = new Date();
+      if (next === "CANCELLED") data.stockReserved = false;
+      if (next === "PAID" && !holdsStock) data.stockReserved = true;
+
+      const { count } = await tx.order.updateMany({
+        where: { id, status: order.status },
+        data,
+      });
+      if (count === 0) {
+        throw new ConflictError("La orden cambió mientras la editabas. Recarga la página.");
+      }
+
+      // Órdenes antiguas (creadas antes de reservar stock al comprar): el stock
+      // recién se descuenta al confirmar el pago.
+      if (next === "PAID" && !holdsStock) {
         for (const item of order.items) {
-          const listing = await tx.listing.findUnique({
-            where: { id: item.listingId },
-            select: { stock: true, title: true },
-          });
-          if (!listing || listing.stock < item.quantity) {
-            throw new Error(
-              `"${listing?.title ?? "una carta"}" ya no tiene stock suficiente`
-            );
-          }
-        }
-        for (const item of order.items) {
-          await tx.listing.update({
-            where: { id: item.listingId },
+          const { count: ok } = await tx.listing.updateMany({
+            where: { id: item.listingId, stock: { gte: item.quantity } },
             data: { stock: { decrement: item.quantity } },
           });
+          if (ok === 0) {
+            throw new ConflictError("Una de las cartas ya no tiene stock suficiente");
+          }
         }
       }
 
-      // Cancelar un pedido ya aceptado devuelve el stock que se había descontado.
-      if (next === "CANCELLED" && order.status === "PAID") {
-        for (const item of order.items) {
-          await tx.listing.update({
-            where: { id: item.listingId },
-            data: { stock: { increment: item.quantity } },
-          });
-        }
+      // Cancelar devuelve el stock reservado o ya descontado.
+      if (next === "CANCELLED" && holdsStock) {
+        await releaseOrderStock(tx, order.items);
       }
 
-      await tx.order.update({ where: { id }, data: { status: next } });
+      await recordOrderEvent(tx, id, user.id, next, `Cambio de ${order.status} a ${next}`);
       await tx.orderMessage.create({
         data: { orderId: id, senderId: user.id, body: SYSTEM_MESSAGE[next] },
       });
@@ -127,7 +132,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (error instanceof AuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
-    if (error instanceof Error && error.message.includes("stock suficiente")) {
+    if (error instanceof ConflictError) {
       return NextResponse.json({ error: error.message }, { status: 409 });
     }
     console.error("[orders/status:PATCH]", error);

@@ -90,7 +90,7 @@ export function SellerRequestBox({
               setLoading(false);
             }
           }}
-          className="mt-2 rounded-lg bg-brand-600 px-4 py-2 text-[12px] font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
+          className="btn btn-primary btn-sm mt-2"
         >
           {loading ? "Enviando…" : "Enviar solicitud"}
         </button>

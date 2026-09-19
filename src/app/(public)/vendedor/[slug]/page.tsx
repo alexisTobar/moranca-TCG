@@ -210,7 +210,7 @@ export default async function SellerPage({
               placeholder="Buscar en las cartas de este vendedor…"
               className="w-full max-w-sm rounded-lg border border-ink-700 bg-ink-950 px-3 py-2 text-sm text-ink-200 outline-none focus:border-carbon"
             />
-            <button className="rounded-lg bg-brand-600 px-4 py-2 text-[12px] font-bold text-paper transition hover:bg-brand-500">
+            <button className="btn btn-primary btn-sm">
               Buscar
             </button>
             {(q || game) && (

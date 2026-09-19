@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingBag, ShoppingCart } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { clp } from "@/lib/format";
 
@@ -33,22 +33,12 @@ export function CartButton() {
       ref={btnRef}
       onClick={() => setOpen(true)}
       aria-label={`Abrir carrito (${count} productos)`}
-      className="relative rounded-lg border border-white/20 px-3 py-2 text-[13px] font-medium text-white/80 transition hover:border-carbon hover:text-carbon"
+      className="icon-btn"
     >
-      <svg
-        viewBox="0 0 24 24"
-        className={`h-4 w-4 ${bump ? "animate-cart-bump" : ""}`}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      >
-        <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6" />
-        <circle cx="10" cy="20" r="1" />
-        <circle cx="18" cy="20" r="1" />
-      </svg>
+      <ShoppingBag className={`h-[18px] w-[18px] ${bump ? "animate-cart-bump" : ""}`} strokeWidth={2} />
       {ready && count > 0 && (
         <span
-          className={`absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-bold text-paper ${bump ? "animate-cart-bump" : ""}`}
+          className={`absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-gold-400 px-1 text-[10px] font-extrabold text-carbon ${bump ? "animate-cart-bump" : ""}`}
         >
           {count}
         </span>
@@ -120,7 +110,7 @@ export function CartDrawer() {
             <Link
               href="/cartas"
               onClick={() => setOpen(false)}
-              className="rounded-xl bg-brand-600 px-5 py-2.5 text-[13px] font-bold text-paper"
+              className="btn btn-primary btn-sm"
             >
               Explorar catálogo
             </Link>
@@ -211,7 +201,7 @@ export function CartDrawer() {
               <Link
                 href="/checkout"
                 onClick={() => setOpen(false)}
-                className="mt-4 block rounded-xl bg-brand-600 py-3 text-center text-sm font-bold text-paper transition hover:bg-brand-500"
+                className="btn btn-primary btn-lg mt-4 block text-center"
               >
                 Ir a pagar
               </Link>

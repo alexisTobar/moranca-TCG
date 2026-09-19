@@ -160,7 +160,7 @@ export function SellerProfileForm({ initial }: { initial: SellerProfileValues })
       {saved && <p className="text-[12px] text-emerald-700">Guardado.</p>}
       <button
         disabled={saving}
-        className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
+        className="btn btn-primary btn-sm"
       >
         {saving ? "Guardando…" : "Guardar cambios"}
       </button>

@@ -60,7 +60,7 @@ export function ForgotPasswordForm() {
 
       <button
         disabled={loading}
-        className="w-full rounded-xl bg-brand-600 py-3 text-sm font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
+        className="btn btn-primary btn-lg w-full"
       >
         {loading ? "Enviando…" : "Mandar link de recuperación"}
       </button>

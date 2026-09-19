@@ -100,7 +100,7 @@ export function CouponManager({ initial }: { initial: CouponValue[] }) {
         />
         <button
           disabled={creating}
-          className="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
+          className="btn btn-primary btn-sm"
         >
           {creating ? "Creando…" : "Crear cupón"}
         </button>

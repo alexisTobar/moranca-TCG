@@ -93,7 +93,7 @@ export function AddToCartPanel(props: Props) {
               if (remaining > 0) add(props, qty);
               router.push("/checkout");
             }}
-            className="mt-2.5 w-full rounded-xl bg-brand-600 py-3 text-sm font-bold text-paper transition hover:bg-brand-500 disabled:opacity-50"
+            className="btn btn-primary btn-lg mt-2.5 w-full"
           >
             Comprar ahora
           </button>

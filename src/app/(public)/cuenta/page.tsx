@@ -6,6 +6,7 @@ import { safeQuery } from "@/lib/catalog";
 import { AccountProfileForm } from "@/components/account/AccountProfileForm";
 import { SellerRequestBox } from "@/components/account/SellerRequestBox";
 import { OrderCard, type AccountOrder } from "@/components/account/OrderCard";
+import { expireOverdueOrders } from "@/lib/order-payments";
 
 export const metadata: Metadata = {
   title: "Mi cuenta",
@@ -33,6 +34,10 @@ export default async function AccountPage() {
   });
   if (!user) redirect("/ingresar?next=/cuenta");
 
+  // Así una orden vencida se ve cancelada en cuanto el comprador entra, sin
+  // esperar al cron diario.
+  await safeQuery(() => expireOverdueOrders(), 0);
+
   const rawOrders = await safeQuery(
     () =>
       prisma.order.findMany({
@@ -44,6 +49,9 @@ export default async function AccountPage() {
           status: true,
           total: true,
           paymentMethod: true,
+          paymentReference: true,
+          paymentDueAt: true,
+          receiptUploadedAt: true,
           createdAt: true,
           seller: {
             select: {
@@ -77,6 +85,9 @@ export default async function AccountPage() {
           rut: o.seller.bankRut,
         }
       : null,
+    paymentReference: o.paymentReference,
+    paymentDueAt: o.paymentDueAt?.toISOString() ?? null,
+    receiptUploadedAt: o.receiptUploadedAt?.toISOString() ?? null,
     createdAt: o.createdAt.toISOString(),
     items: o.items,
     review: o.review,

@@ -97,7 +97,7 @@ export function UsersManager({
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={() => setOpen((v) => !v)}
-          className="rounded-xl bg-brand-600 px-5 py-2.5 text-[13px] font-bold text-paper transition hover:bg-brand-500"
+          className="btn btn-primary btn-sm"
         >
           {open ? "Cancelar" : "+ Nuevo perfil"}
         </button>
@@ -156,7 +156,7 @@ export function UsersManager({
 
           <button
             disabled={saving}
-            className="mt-4 rounded-xl bg-brand-600 px-6 py-2.5 text-[13px] font-bold text-paper transition hover:bg-brand-500 disabled:opacity-60"
+            className="btn btn-primary btn-sm mt-4"
           >
             {saving ? "Creando…" : "Crear perfil"}
           </button>

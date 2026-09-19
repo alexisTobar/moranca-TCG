@@ -3,8 +3,7 @@ import "server-only";
 /**
  * Envío de correo vía Resend. Sin RESEND_API_KEY, el correo no se manda de
  * verdad: se deja el contenido en los logs del servidor para poder probar el
- * flujo igual (mismo patrón que Mercado Pago / la cuenta bancaria: la app
- * funciona sin la clave configurada, solo que degradada).
+ * flujo igual (la app funciona sin la clave configurada, solo que degradada).
  */
 export async function sendEmail({
   to,
