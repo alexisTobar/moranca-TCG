@@ -208,7 +208,17 @@ export async function POST(req: Request) {
             shipCost: ship,
           });
 
-          const reference = generatePaymentReference();
+          // El código se genera al azar y se verifica que nadie lo tenga ya
+          // (no es un @unique en la base para poder desplegar sin migración destructiva).
+          let reference = generatePaymentReference();
+          for (let attempt = 0; attempt < 5; attempt++) {
+            const taken = await tx.order.findFirst({
+              where: { paymentReference: reference },
+              select: { id: true },
+            });
+            if (!taken) break;
+            reference = generatePaymentReference();
+          }
           const order = await tx.order.create({
             data: {
               buyerId: user.id,

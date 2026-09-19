@@ -36,10 +36,14 @@ export interface PaymentInfo {
 function CopyRow({
   label,
   value,
+  display,
   strong = false,
 }: {
   label: string;
+  /** Lo que se copia al portapapeles. */
   value: string;
+  /** Lo que se muestra, si es distinto (ej. monto con formato $88.102). */
+  display?: string;
   strong?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
@@ -63,7 +67,7 @@ function CopyRow({
             strong ? "font-display text-[15px] font-bold text-carbon" : "text-[13px] font-medium text-ink-200"
           }`}
         >
-          {value}
+          {display ?? value}
         </p>
       </div>
       <button
@@ -98,7 +102,7 @@ function DueBadge({ dueAt }: { dueAt: string }) {
       return;
     }
     const hours = Math.floor(left / 3_600_000);
-    const days = Math.floor(hours / 24);
+    const days = Math.ceil(left / 86_400_000);
     setText(
       days >= 1
         ? `Paga antes del ${due.toLocaleDateString("es-CL", { day: "numeric", month: "long" })} (${days} ${days === 1 ? "día" : "días"})`
@@ -256,7 +260,12 @@ export function TransferInstructions({ payment }: { payment: PaymentInfo }) {
 
       {payment.bank ? (
         <div className="grid gap-2 sm:grid-cols-2">
-          <CopyRow label="Monto exacto" value={String(payment.total)} strong />
+          <CopyRow
+            label="Monto exacto"
+            value={String(payment.total)}
+            display={clp(payment.total)}
+            strong
+          />
           {payment.reference && (
             <CopyRow label="Referencia (ponla en el comentario)" value={payment.reference} strong />
           )}

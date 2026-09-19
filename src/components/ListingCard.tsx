@@ -90,7 +90,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
             {listing.condition ? ` · ${listing.condition}` : ""}
             {listing.language ? ` · ${listing.language}` : ""}
           </p>
-          <div className="mt-auto flex items-end justify-between pt-2">
+          <div className="mt-auto pt-2">
             <span className="flex items-baseline gap-1.5">
               {hasOffer && (
                 <span className="text-[11px] font-medium text-ink-500 line-through">
@@ -101,7 +101,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
                 {clp(effectivePrice)}
               </span>
             </span>
-            <span className="max-w-[52%] truncate text-[10px] text-ink-400">
+            <span className="mt-0.5 block truncate text-[11px] text-ink-400">
               {listing.seller.name}
             </span>
           </div>

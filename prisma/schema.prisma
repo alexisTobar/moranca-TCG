@@ -204,7 +204,7 @@ model Order {
   notes              String?
 
   /// Código único que el comprador pone en el comentario de la transferencia.
-  paymentReference   String?     @unique
+  paymentReference   String?
   /// Plazo para pagar. Vencido este plazo la orden se cancela y devuelve el stock.
   paymentDueAt       DateTime?
   /// Comprobante subido por el comprador (id de Upload, solo visible para las partes).
@@ -223,6 +223,7 @@ model Order {
 
   @@index([status])
   @@index([status, paymentDueAt])
+  @@index([paymentReference])
   @@index([buyerId])
   @@index([sellerId])
   @@index([couponId])
