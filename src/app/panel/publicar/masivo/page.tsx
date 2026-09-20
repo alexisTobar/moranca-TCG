@@ -26,7 +26,7 @@ export default async function BulkPublishPage() {
     <div className="space-y-6">
       <header>
         <h1 className="font-display text-3xl font-bold text-carbon">
-          Carga masiva · Magic
+          Carga masiva
         </h1>
         <p className="mt-1 text-[13px] text-ink-400">
           Sube tu lista de colección en .txt y publica muchas cartas de una vez,

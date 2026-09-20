@@ -36,6 +36,46 @@ async function allCards(): Promise<DotggCard[]> {
   return cards;
 }
 
+function dotggToResult(c: DotggCard): CardResult {
+  return {
+    externalId: c.id,
+    name: c.name,
+    imageUrl: `https://static.dotgg.gg/onepiece/card/${c.id}.webp`,
+    imageLarge: `https://static.dotgg.gg/onepiece/card/${c.id}.webp`,
+    setName: c.CardSets ?? c.set,
+    setCode: c.set,
+    cardNumber: c.id,
+    code: c.id,
+    rarity: c.rarity,
+    game: "onepiece",
+    extra: [c.cardType, c.Color].filter(Boolean).join(" · "),
+    color: c.Color,
+    family: c.Type,
+    description: cleanEffect(c.Effect),
+    priceUsd: num(c.price),
+    priceUsdFoil: num(c.foilPrice),
+    priceSource: "TCGplayer vía dotGG",
+    tcgplayerId: Number(c.marketIds?.split(",")[0]) || null,
+  };
+}
+
+/** Busca cartas por su código exacto (ej. "OP01-024", "OP05-119_p1"). Devuelve las que existan. */
+export async function onePieceByCodes(codes: string[]): Promise<Map<string, CardResult>> {
+  const found = new Map<string, CardResult>();
+  let cards: DotggCard[];
+  try {
+    cards = await allCards();
+  } catch {
+    return found;
+  }
+  const byId = new Map(cards.map((c) => [c.id.toLowerCase(), c]));
+  for (const code of codes) {
+    const c = byId.get(code.toLowerCase());
+    if (c) found.set(code.toLowerCase(), dotggToResult(c));
+  }
+  return found;
+}
+
 /**
  * One Piece Card Game — catálogo dotGG (público, sin API key).
  * Incluye el precio de mercado de TCGplayer por carta.
@@ -70,26 +110,7 @@ export const onePieceProvider: CardProvider = {
       if (results.length >= limit) break;
       if (seen.has(c.id)) continue;
       seen.add(c.id);
-      results.push({
-        externalId: c.id,
-        name: c.name,
-        imageUrl: `https://static.dotgg.gg/onepiece/card/${c.id}.webp`,
-        imageLarge: `https://static.dotgg.gg/onepiece/card/${c.id}.webp`,
-        setName: c.CardSets ?? c.set,
-        setCode: c.set,
-        cardNumber: c.id,
-        code: c.id,
-        rarity: c.rarity,
-        game: "onepiece",
-        extra: [c.cardType, c.Color].filter(Boolean).join(" · "),
-        color: c.Color,
-        family: c.Type,
-        description: cleanEffect(c.Effect),
-        priceUsd: num(c.price),
-        priceUsdFoil: num(c.foilPrice),
-        priceSource: "TCGplayer vía dotGG",
-        tcgplayerId: Number(c.marketIds?.split(",")[0]) || null,
-      });
+      results.push(dotggToResult(c));
     }
     return results;
   },

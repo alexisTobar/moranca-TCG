@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { bulkCreateSchema } from "@/lib/validators";
 import { uniqueSlug } from "@/lib/catalog";
+import { normalizeExternalId } from "@/lib/external-id";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
           setName: item.setName ?? null,
           cardNumber: item.cardNumber ?? null,
           rarity: item.rarity ?? null,
-          externalId: item.externalId ?? null,
+          externalId: normalizeExternalId(data.game, item.externalId),
           sellerId,
         },
         select: { id: true },

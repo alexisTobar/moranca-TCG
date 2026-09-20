@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { accountUpdateSchema } from "@/lib/validators";
+import { REGIONS } from "@/lib/regions";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,6 +23,20 @@ export async function PATCH(req: Request) {
     // Los campos bancarios solo tienen sentido para vendedores/admin.
     const canHaveBank = user.role === "SELLER" || user.role === "ADMIN";
 
+    if (data.region && !REGIONS.some((r) => r.name === data.region)) {
+      return NextResponse.json({ error: "La región no es válida" }, { status: 400 });
+    }
+    if (
+      canHaveBank &&
+      data.offersShipping === false &&
+      data.offersPickup === false
+    ) {
+      return NextResponse.json(
+        { error: "Debes ofrecer al menos una forma de entrega: envío o retiro en persona." },
+        { status: 400 }
+      );
+    }
+
     const updated = await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -30,6 +45,13 @@ export async function PATCH(req: Request) {
         ...(data.address !== undefined ? { address: data.address } : {}),
         ...(data.rut !== undefined ? { rut: data.rut } : {}),
         ...(data.city !== undefined ? { city: data.city } : {}),
+        ...(data.region !== undefined ? { region: data.region } : {}),
+        ...(canHaveBank && data.offersShipping !== undefined
+          ? { offersShipping: data.offersShipping }
+          : {}),
+        ...(canHaveBank && data.offersPickup !== undefined
+          ? { offersPickup: data.offersPickup }
+          : {}),
         ...(data.avatarUrl !== undefined ? { avatarUrl: data.avatarUrl } : {}),
         ...(canHaveBank && data.bankName !== undefined ? { bankName: data.bankName } : {}),
         ...(canHaveBank && data.bankAccountType !== undefined

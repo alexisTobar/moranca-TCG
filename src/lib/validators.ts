@@ -112,6 +112,9 @@ export const profileSchema = z.object({
   address: z.string().min(5).max(200).optional().nullable(),
   rut: rutSchema.optional().nullable(),
   city: z.string().max(80).optional().nullable(),
+  region: z.string().max(60).optional().nullable(),
+  offersShipping: z.boolean().optional(),
+  offersPickup: z.boolean().optional(),
   avatarUrl: imagenUrl,
 });
 
@@ -207,8 +210,11 @@ export const sellerRequestSchema = z.object({
   message: z.string().max(400).optional().nullable(),
 });
 
+/** Juegos con carga masiva. Mitos y Leyendas no tiene un formato de lista estándar. */
+export const BULK_GAMES = ["magic", "pokemon", "onepiece"] as const;
+
 export const bulkPreviewSchema = z.object({
-  game: z.literal("magic"),
+  game: z.enum(BULK_GAMES),
   text: z.string().min(1),
 });
 
@@ -225,7 +231,7 @@ export const bulkListingItemSchema = z.object({
 });
 
 export const bulkCreateSchema = z.object({
-  game: z.literal("magic"),
+  game: z.enum(BULK_GAMES),
   status: z.enum(["DRAFT", "ACTIVE", "PAUSED"]).default("ACTIVE"),
   condition: z.string().max(10).optional().nullable(),
   language: z.string().max(10).optional().nullable(),

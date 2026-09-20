@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { listingBaseSchema } from "@/lib/validators";
+import { normalizeExternalId } from "@/lib/external-id";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -89,7 +90,10 @@ export async function PATCH(
           color: data.color,
           family: data.family,
           illustrator: data.illustrator,
-          externalId: data.externalId,
+          externalId:
+            data.externalId && data.game
+              ? (normalizeExternalId(data.game, data.externalId) ?? undefined)
+              : data.externalId,
           ...(user.role === "ADMIN" && data.featured !== undefined
             ? { featured: data.featured }
             : {}),

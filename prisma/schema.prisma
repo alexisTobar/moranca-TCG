@@ -91,6 +91,12 @@ model User {
   transferDiscountPct Int @default(2)
   cashDiscountPct     Int @default(0)
 
+  // Ubicación y formas de entrega del vendedor (para "cerca mío" y los filtros de entrega).
+  // La comuna va en `city`; la región se guarda aparte.
+  region         String?
+  offersShipping Boolean @default(true)
+  offersPickup   Boolean @default(true)
+
   // Solicitud de comprador para pasar a vendedor.
   sellerRequestStatus  String?
   sellerRequestMessage String?
@@ -240,6 +246,24 @@ model OrderEvent {
   createdAt DateTime @default(now())
 
   @@index([orderId, createdAt])
+}
+
+/// Foto diaria del precio de una carta (mínimo, mercado y máximo entre las ofertas activas),
+/// por idioma. language = "*" es el resumen de todos los idiomas. Alimenta el gráfico de historial.
+model PriceSnapshot {
+  id          String   @id @default(cuid())
+  game        String
+  externalId  String
+  language    String
+  minPrice    Int
+  marketPrice Int
+  maxPrice    Int
+  listings    Int
+  day         DateTime @db.Date
+  createdAt   DateTime @default(now())
+
+  @@unique([game, externalId, language, day])
+  @@index([game, externalId, day])
 }
 
 /// Descuentos por método de pago que crea el administrador (2%, 5%, 10%…).

@@ -231,6 +231,29 @@ y su propio chat.
 
 ---
 
+## 5b. Página por carta, mercado y vendedores
+
+Cada carta publicada con `externalId` (las que vienen del buscador de catálogo o de la carga
+masiva) tiene su propia página en `/carta/[juego]/[id]`:
+
+- **Todos los vendedores** que la tienen, con filtros de idioma, entrega (envío / retiro en
+  persona) y **"cerca mío"** (el visitante elige su región y queda en una cookie).
+- **Referencia de precio**: mínimo / mercado (mediana) / máximo por idioma, calculado con las
+  ofertas activas, más el precio internacional (TCGplayer) cuando el juego lo entrega.
+- **Historial de precio**: cada visita a la carta y el cron diario guardan una foto del precio
+  (`PriceSnapshot`), así el gráfico se arma solo con el tiempo.
+- **Últimas ventas** reales de esa carta.
+
+Cada vendedor muestra su **calificación**, **+ventas** (órdenes con pago confirmado) y ubicación.
+En **Panel → Mi perfil** el vendedor elige su región, comuna y si ofrece envío y/o retiro en
+persona; el checkout respeta esas opciones.
+
+**Carga masiva** (Panel → Publicar → Carga masiva): Magic (formato Moxfield), Pokémon (exportación
+de Pokémon TCG Live, ej. `4 Pikachu ex SSP 57`) y One Piece (por código, ej. `4xOP01-024`).
+Mitos y Leyendas no tiene carga masiva.
+
+---
+
 ## 6. Cuentas y compradores registrados
 
 Solo se puede comprar con sesión iniciada. Un comprador se autoregistra en

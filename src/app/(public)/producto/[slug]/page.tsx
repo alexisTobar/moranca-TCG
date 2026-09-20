@@ -11,6 +11,8 @@ import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
 import { AddToCartPanel } from "@/components/cart/AddToCart";
 import { effectiveListingPrice } from "@/lib/order-pricing";
+import { cardHref } from "@/lib/card-url";
+import { ArrowRight, LineChart } from "lucide-react";
 
 export const revalidate = 30;
 
@@ -278,6 +280,27 @@ export default async function ProductPage({
             </span>
             <span className="text-[12px] font-semibold text-brand-600">Ver perfil →</span>
           </Link>
+
+          {listing.type === "SINGLE" && listing.externalId && (
+            <Link
+              href={cardHref(listing.game, listing.externalId)}
+              className="group mt-4 flex items-center gap-3 rounded-2xl border border-brand-500/30 bg-brand-500/[0.05] p-4 transition hover:border-brand-500/60"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
+                <LineChart className="h-5 w-5" strokeWidth={1.75} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[13px] font-bold text-carbon">
+                  {new Set(sameCardListings.map((l) => l.seller.slug)).size}{" "}
+                  {new Set(sameCardListings.map((l) => l.seller.slug)).size === 1 ? "vendedor tiene" : "vendedores tienen"} esta carta
+                </span>
+                <span className="block text-[12px] text-ink-400">
+                  Compara precios, historial y últimas ventas
+                </span>
+              </span>
+              <ArrowRight className="h-4 w-4 shrink-0 text-brand-600 transition group-hover:translate-x-1" strokeWidth={2.25} />
+            </Link>
+          )}
 
           {priceStats && (
             <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl card-surface p-4 text-center">

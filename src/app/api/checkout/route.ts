@@ -142,9 +142,26 @@ export async function POST(req: Request) {
       bankAccountNumber: true,
       bankHolderName: true,
       bankRut: true,
+      offersShipping: true,
+      offersPickup: true,
     },
   });
   const sellerById = new Map(sellers.map((s) => [s.id, s]));
+
+  for (const s of sellers) {
+    if (data.shipMethod === "SHIPPING" && !s.offersShipping) {
+      return NextResponse.json(
+        { error: `${s.name} no hace envíos. Elige retiro en persona o quita sus cartas del carrito.` },
+        { status: 409 }
+      );
+    }
+    if (data.shipMethod === "PICKUP" && !s.offersPickup) {
+      return NextResponse.json(
+        { error: `${s.name} no ofrece retiro en persona. Elige envío o quita sus cartas del carrito.` },
+        { status: 409 }
+      );
+    }
+  }
 
   // El cupón se resuelve contra los vendedores presentes en el carrito: solo
   // aplica al subtotal del vendedor dueño del código, el resto no se ve

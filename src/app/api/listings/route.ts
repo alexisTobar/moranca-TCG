@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { listingSchema } from "@/lib/validators";
 import { uniqueSlug } from "@/lib/catalog";
+import { normalizeExternalId } from "@/lib/external-id";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
         color: data.color ?? null,
         family: data.family ?? null,
         illustrator: data.illustrator ?? null,
-        externalId: data.externalId ?? null,
+        externalId: normalizeExternalId(data.game, data.externalId),
         featured: user.role === "ADMIN" ? data.featured : false,
         sellerId,
         deckCards:

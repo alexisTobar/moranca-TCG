@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { SellerProfileForm } from "@/components/SellerProfileForm";
+import { sellerRegion } from "@/lib/location";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,10 @@ export default async function SellerProfilePage() {
       address: true,
       rut: true,
       avatarUrl: true,
+      city: true,
+      region: true,
+      offersShipping: true,
+      offersPickup: true,
       bankName: true,
       bankAccountType: true,
       bankAccountNumber: true,
@@ -34,7 +39,9 @@ export default async function SellerProfilePage() {
         </p>
       </header>
 
-      <SellerProfileForm initial={user} />
+      <SellerProfileForm
+        initial={{ ...user, region: sellerRegion({ region: user.region, city: user.city }) }}
+      />
     </div>
   );
 }

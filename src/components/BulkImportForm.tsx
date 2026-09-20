@@ -16,9 +16,41 @@ interface Row extends BulkPreviewItem {
   included: boolean;
 }
 
-const EXAMPLE = `1 Absolute Virtue (FIN) 212
+type BulkGame = "magic" | "pokemon" | "onepiece";
+
+/** Mitos y Leyendas no está: no tiene un formato de lista estándar que se pueda leer. */
+const BULK_INFO: Record<
+  BulkGame,
+  { label: string; format: string; hint: string; source: string; example: string }
+> = {
+  magic: {
+    label: "Magic",
+    format: "cantidad Nombre (SET) número [*F* si es foil]",
+    hint: "Formato Moxfield/Archidekt.",
+    source: "Scryfall",
+    example: `1 Absolute Virtue (FIN) 212
 2 Achilles Davenport (ACR) 294
-1 Aesi, Tyrant of Gyre Strait (CMR) 365 *F*`;
+1 Aesi, Tyrant of Gyre Strait (CMR) 365 *F*`,
+  },
+  pokemon: {
+    label: "Pokémon",
+    format: "cantidad Nombre CÓDIGO número",
+    hint: "Formato de exportación de Pokémon TCG Live.",
+    source: "pokemontcg.io",
+    example: `4 Pikachu ex SSP 57
+2 Charizard ex OBF 125
+3 Boss's Orders PAL 172`,
+  },
+  onepiece: {
+    label: "One Piece",
+    format: "cantidadxCÓDIGO (ej. 4xOP01-024)",
+    hint: "El código va impreso en cada carta.",
+    source: "dotGG",
+    example: `4xOP01-024
+2xOP05-119
+1xST01-012`,
+  },
+};
 
 export function BulkImportForm({
   sellers,
@@ -32,6 +64,8 @@ export function BulkImportForm({
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [game, setGame] = useState<BulkGame>("magic");
+  const info = BULK_INFO[game];
   const [text, setText] = useState("");
   const [rows, setRows] = useState<Row[] | null>(null);
   const [unrecognized, setUnrecognized] = useState<string[]>([]);
@@ -67,7 +101,7 @@ export function BulkImportForm({
       const res = await fetch("/api/cards/bulk-preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ game: "magic", text }),
+        body: JSON.stringify({ game, text }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "No se pudo analizar el archivo");
@@ -104,7 +138,7 @@ export function BulkImportForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          game: "magic",
+          game,
           status,
           condition,
           language,
@@ -139,23 +173,40 @@ export function BulkImportForm({
   return (
     <div className="space-y-5">
       <div className="rounded-2xl card-surface p-5">
-        <h3 className="text-sm font-semibold text-carbon">
-          Pega o sube tu lista de colección
+        <div className="flex flex-wrap gap-1.5">
+          {(Object.keys(BULK_INFO) as BulkGame[]).map((g) => (
+            <button
+              key={g}
+              type="button"
+              data-active={game === g}
+              onClick={() => {
+                setGame(g);
+                setRows(null);
+                setTotals(null);
+                setUnrecognized([]);
+                setError(null);
+              }}
+              className="pill"
+            >
+              {BULK_INFO[g].label}
+            </button>
+          ))}
+        </div>
+        <h3 className="mt-4 text-sm font-semibold text-carbon">
+          Pega o sube tu lista de {info.label}
         </h3>
         <p className="mt-0.5 text-[12px] text-ink-400">
-          Una carta por línea, formato Moxfield/Archidekt:{" "}
-          <code className="rounded bg-ink-900 px-1 py-0.5 text-[11px]">
-            cantidad Nombre (SET) número [*F* si es foil]
-          </code>
-          . El precio se calcula solo desde la referencia de TCGplayer vía
-          Scryfall — lo puedes ajustar fila por fila antes de publicar.
+          Una carta por línea. {info.hint}{" "}
+          <code className="rounded bg-ink-900 px-1 py-0.5 text-[11px]">{info.format}</code>. El precio se
+          calcula solo desde la referencia de TCGplayer vía {info.source}; lo puedes ajustar fila por
+          fila antes de publicar. Mitos y Leyendas no tiene carga masiva.
         </p>
 
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={8}
-          placeholder={EXAMPLE}
+          placeholder={info.example}
           className="mt-3 w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 font-mono text-[12px] text-ink-200 outline-none focus:border-carbon"
         />
 
@@ -224,7 +275,7 @@ export function BulkImportForm({
               </span>
               <span>
                 <strong className="text-emerald-500">{totals.matched}</strong>{" "}
-                encontradas en Scryfall
+                encontradas en {info.source}
               </span>
               {totals.noPrice > 0 && (
                 <span>

@@ -7,7 +7,8 @@ import { prisma } from "@/lib/db";
 import { safeQuery, LISTING_CARD_SELECT } from "@/lib/catalog";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { GAME_LIST, isGameId } from "@/lib/games";
-import { Star } from "lucide-react";
+import { Star, Store, Truck } from "lucide-react";
+import { formatSales, getSellerStats } from "@/lib/seller-stats";
 
 const PAGE_SIZE = 30;
 const REVIEWS_PAGE_SIZE = 10;
@@ -28,6 +29,9 @@ async function getSeller(slug: string) {
           role: true,
           avatarUrl: true,
           createdAt: true,
+          region: true,
+          offersShipping: true,
+          offersPickup: true,
         },
       }),
     null
@@ -72,8 +76,9 @@ export default async function SellerPage({
   const seller = await getSeller(slug);
   if (!seller) notFound();
 
-  const [rating, reviews] = await Promise.all([
+  const [rating, sellerStats, reviews] = await Promise.all([
     getRatingSummary(seller.id),
+    getSellerStats([seller.id]),
     safeQuery(
       () =>
         prisma.review.findMany({
@@ -186,11 +191,26 @@ export default async function SellerPage({
           </div>
           <p className="mt-1 text-[12px] text-ink-400">
             {total} publicaciones activas
-            {seller.city ? ` · ${seller.city}` : ""} · Miembro desde{" "}
+            {formatSales(sellerStats.get(seller.id)?.sales ?? 0)
+              ? ` · ${formatSales(sellerStats.get(seller.id)?.sales ?? 0)}`
+              : ""}
+            {seller.city || seller.region ? ` · ${seller.city ?? seller.region}` : ""} · Miembro desde{" "}
             {seller.createdAt.toLocaleDateString("es-CL", {
               month: "long",
               year: "numeric",
             })}
+          </p>
+          <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-ink-400">
+            {seller.offersShipping && (
+              <span className="inline-flex items-center gap-1">
+                <Truck className="h-3.5 w-3.5" strokeWidth={2} /> Envío a domicilio
+              </span>
+            )}
+            {seller.offersPickup && (
+              <span className="inline-flex items-center gap-1">
+                <Store className="h-3.5 w-3.5" strokeWidth={2} /> Retiro en persona
+              </span>
+            )}
           </p>
           {seller.bio && (
             <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-ink-300">

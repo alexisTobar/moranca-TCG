@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ImageUploader } from "./ImageUploader";
+import { REGIONS, comunasOf } from "@/lib/regions";
 
 export interface SellerProfileValues {
   name: string;
@@ -10,6 +11,10 @@ export interface SellerProfileValues {
   address: string | null;
   rut: string | null;
   avatarUrl: string | null;
+  city: string | null;
+  region: string | null;
+  offersShipping: boolean;
+  offersPickup: boolean;
   bankName: string | null;
   bankAccountType: string | null;
   bankAccountNumber: string | null;
@@ -27,6 +32,10 @@ export function SellerProfileForm({ initial }: { initial: SellerProfileValues })
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [region, setRegion] = useState(initial.region ?? "");
+  const [comuna, setComuna] = useState(initial.city ?? "");
+  const [offersShipping, setOffersShipping] = useState(initial.offersShipping);
+  const [offersPickup, setOffersPickup] = useState(initial.offersPickup);
 
   // La imagen ya queda subida al servidor apenas se elige (ImageUploader la
   // sube de inmediato), así que también guardamos la referencia en el perfil
@@ -69,6 +78,10 @@ export function SellerProfileForm({ initial }: { initial: SellerProfileValues })
           address: form.get("address"),
           rut: form.get("rut"),
           avatarUrl,
+          region: region || null,
+          city: comuna || null,
+          offersShipping,
+          offersPickup,
           bankName: form.get("bankName") || undefined,
           bankAccountType: form.get("bankAccountType") || undefined,
           bankAccountNumber: form.get("bankAccountNumber") || undefined,
@@ -108,6 +121,74 @@ export function SellerProfileForm({ initial }: { initial: SellerProfileValues })
             label="Dirección"
             defaultValue={initial.address ?? ""}
           />
+        </div>
+      </div>
+
+      <div className="rounded-2xl card-surface p-5">
+        <h3 className="text-sm font-semibold text-carbon">Ubicación y entrega</h3>
+        <p className="mt-0.5 text-[12px] text-ink-400">
+          Los compradores de tu región te ven con la etiqueta “Cerca mío”, y pueden filtrar por la forma
+          de entrega que ofreces.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="field-label">Región</span>
+            <select
+              value={region}
+              onChange={(e) => {
+                setRegion(e.target.value);
+                setComuna("");
+              }}
+              className="input"
+            >
+              <option value="">Selecciona tu región…</option>
+              {REGIONS.map((r) => (
+                <option key={r.code} value={r.name}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="field-label">Comuna</span>
+            <select
+              value={comuna}
+              onChange={(e) => setComuna(e.target.value)}
+              disabled={!region}
+              className="input disabled:opacity-50"
+            >
+              <option value="">{region ? "Selecciona tu comuna…" : "Elige una región primero"}</option>
+              {comunasOf(region).map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
+          {[
+            { label: "Envío a domicilio", hint: "Despacho por courier, por pagar", value: offersShipping, set: setOffersShipping },
+            { label: "Retiro en persona", hint: "El comprador retira y paga en efectivo o transferencia", value: offersPickup, set: setOffersPickup },
+          ].map((o) => (
+            <label
+              key={o.label}
+              className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-3.5 transition ${
+                o.value ? "border-brand-500 bg-brand-500/[0.04]" : "border-ink-800"
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={o.value}
+                onChange={(e) => o.set(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[var(--color-brand-600)]"
+              />
+              <span>
+                <span className="block text-[13px] font-bold text-carbon">{o.label}</span>
+                <span className="block text-[11px] text-ink-400">{o.hint}</span>
+              </span>
+            </label>
+          ))}
         </div>
       </div>
 
