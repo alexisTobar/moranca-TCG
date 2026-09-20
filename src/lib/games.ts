@@ -14,6 +14,8 @@ export interface GameMeta {
   artImage?: string;
   /** Logo oficial del juego (fuente pública: Wikimedia Commons / sitio oficial). */
   logo: string;
+  /** Proporción ancho/alto del archivo del logo; se usa para igualar el peso visual entre logos. */
+  logoRatio: number;
   tagline: string;
 }
 
@@ -25,8 +27,10 @@ export const GAMES: Record<GameId, GameMeta> = {
     accent: "#dc2626",
     gradient: "from-red-100 to-rose-50",
     provider: "dotGG",
-    cardImage: "https://static.dotgg.gg/onepiece/card/OP01-001.webp",
+    // Carta actual y de alto valor: Gol D. Roger (OP-09).
+    cardImage: "https://static.dotgg.gg/onepiece/card/OP09-118.webp",
     logo: "https://upload.wikimedia.org/wikipedia/en/c/c2/One_Piece_Card_Game_logo.webp",
+    logoRatio: 3.88,
     tagline: "Líderes, mazos y singles",
   },
   pokemon: {
@@ -36,8 +40,10 @@ export const GAMES: Record<GameId, GameMeta> = {
     accent: "#ca8a04",
     gradient: "from-yellow-100 to-sky-50",
     provider: "pokemontcg.io",
-    cardImage: "https://assets.tcgdex.net/en/pl/pl4/1/high.webp",
+    // Mega Gengar ex, Special Illustration Rare (Ascended Heroes).
+    cardImage: "https://assets.tcgdex.net/en/me/me02.5/284/high.webp",
     logo: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Pok%C3%A9mon_Trading_Card_Game_logo.svg",
+    logoRatio: 1.95,
     tagline: "Cartas, ETB y booster boxes",
   },
   magic: {
@@ -47,11 +53,13 @@ export const GAMES: Record<GameId, GameMeta> = {
     accent: "#c2410c",
     gradient: "from-orange-100 to-amber-50",
     provider: "Scryfall",
+    // Emeritus of Ideation // Ancestral Recall (Secrets of Strixhaven).
     cardImage:
-      "https://cards.scryfall.io/normal/front/9/1/91fdb56b-54d5-4272-8319-505ff987fe9b.jpg",
+      "https://cards.scryfall.io/normal/front/e/f/ef371352-ec8f-4da4-9085-67195068fb79.jpg",
     artImage:
-      "https://cards.scryfall.io/art_crop/front/9/1/91fdb56b-54d5-4272-8319-505ff987fe9b.jpg",
+      "https://cards.scryfall.io/art_crop/front/e/f/ef371352-ec8f-4da4-9085-67195068fb79.jpg",
     logo: "https://upload.wikimedia.org/wikipedia/commons/3/3f/Magicthegathering-logo.svg",
+    logoRatio: 3.49,
     tagline: "Singles, commander y sellados",
   },
   myl: {
@@ -61,8 +69,10 @@ export const GAMES: Record<GameId, GameMeta> = {
     accent: "#7c3aed",
     gradient: "from-violet-100 to-indigo-50",
     provider: "api.myl.cl",
-    cardImage: "https://api.myl.cl/static/cards/44/001.png",
+    // Legendaria de la edición más reciente (AyD Vigilantes).
+    cardImage: "https://api.myl.cl/static/cards/166/018.png",
     logo: "https://static.wikia.nocookie.net/myl-tcg/images/f/f4/Myl-logo1-sf.png/revision/latest?cb=20240717144516&path-prefix=es",
+    logoRatio: 1.2,
     tagline: "El TCG chileno de siempre",
   },
 };

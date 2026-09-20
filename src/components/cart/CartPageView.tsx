@@ -105,7 +105,7 @@ export function CartPageView() {
                     </button>
                   </div>
                   <span className="text-[11px] text-ink-400">
-                    {item.maxStock} disponibles
+                    {item.maxStock} {item.maxStock === 1 ? "disponible" : "disponibles"}
                   </span>
                   <button
                     onClick={() => remove(item.listingId)}

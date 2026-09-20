@@ -18,7 +18,7 @@ async function getSeller(slug: string) {
   return safeQuery(
     () =>
       prisma.user.findFirst({
-        where: { slug, active: true },
+        where: { slug, active: true, role: { in: ["SELLER", "ADMIN"] } },
         select: {
           id: true,
           name: true,

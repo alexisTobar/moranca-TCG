@@ -23,38 +23,44 @@ import { discountPctFor, getSiteSettings } from "@/lib/site-settings";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { Reveal } from "@/components/Reveal";
 import { NewsSlider, type NewsSlide } from "@/components/NewsSlider";
+import { GameLogo } from "@/components/GameLogo";
 
 export const revalidate = 60;
 
 const HERO_CARDS = [
   {
-    src: "https://cards.scryfall.io/normal/front/b/d/bd8fa327-dd41-4737-8f19-2cf5eb1f7cdd.jpg",
-    alt: "Carta de Magic",
-    rot: "-12deg",
+    // Mox Jasper (Tarkir: Dragonstorm)
+    src: "https://cards.scryfall.io/normal/front/e/c/ec33ea23-c8e8-4066-91b9-5e0ad191bcdb.jpg",
+    alt: "Mox Jasper, carta de Magic",
+    rot: "-13deg",
     lift: "mt-10",
   },
   {
-    src: "https://api.myl.cl/static/cards/44/001.png",
-    alt: "Carta de Mitos y Leyendas",
+    // Guerra Celestial, legendaria de AyD Vigilantes (Mitos y Leyendas)
+    src: "https://api.myl.cl/static/cards/166/018.png",
+    alt: "Guerra Celestial, carta legendaria de Mitos y Leyendas",
     rot: "-6deg",
     lift: "mt-3",
   },
   {
-    src: "https://static.dotgg.gg/onepiece/card/OP01-001.webp",
-    alt: "Carta de One Piece",
+    // Pikachu ex, Special Illustration Rare (Ascended Heroes)
+    src: "https://assets.tcgdex.net/en/me/me02.5/276/high.webp",
+    alt: "Pikachu ex, carta de Pokémon",
     rot: "0deg",
     lift: "-mt-4 scale-110 z-10",
   },
   {
-    src: "https://assets.tcgdex.net/en/pl/pl4/1/high.webp",
-    alt: "Carta de Pokémon",
+    // Monkey D. Luffy Gear 5, alterna (One Piece)
+    src: "https://static.dotgg.gg/onepiece/card/OP05-119.webp",
+    alt: "Monkey D. Luffy Gear 5, carta de One Piece",
     rot: "6deg",
     lift: "mt-3",
   },
   {
-    src: "https://cards.scryfall.io/normal/front/9/1/91fdb56b-54d5-4272-8319-505ff987fe9b.jpg",
-    alt: "Carta de Magic",
-    rot: "12deg",
+    // Emeritus of Ideation // Ancestral Recall (Secrets of Strixhaven)
+    src: "https://cards.scryfall.io/normal/front/e/f/ef371352-ec8f-4da4-9085-67195068fb79.jpg",
+    alt: "Emeritus of Ideation, carta de Magic",
+    rot: "13deg",
     lift: "mt-10",
   },
 ];
@@ -160,7 +166,7 @@ export default async function HomePage() {
     safeQuery(
       () =>
         prisma.user.findMany({
-          where: { active: true },
+          where: { active: true, role: { in: ["SELLER", "ADMIN"] } },
           select: {
             id: true,
             name: true,
@@ -267,15 +273,17 @@ export default async function HomePage() {
               ))}
             </div>
 
-            <dl className="animate-fade-up delay-4 mt-10 flex flex-wrap gap-x-10 gap-y-5">
+            <dl className="animate-fade-up delay-4 mt-10 grid max-w-md grid-cols-3 gap-x-6 gap-y-5">
               {[
                 [String(GAME_LIST.length), "Juegos"],
                 [String(totalListings), "Publicaciones"],
-                [transferPct > 0 ? `${transferPct}%` : "0%", "Dcto. transferencia"],
+                transferPct > 0
+                  ? [`${transferPct}%`, "Dcto. transferencia"]
+                  : [`${settings.paymentWindowHours} h`, "Para pagar"],
               ].map(([value, label]) => (
                 <div key={label}>
-                  <dt className="font-display text-3xl font-bold text-white">{value}</dt>
-                  <dd className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">
+                  <dt className="font-display text-2xl font-bold text-white sm:text-3xl">{value}</dt>
+                  <dd className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/50 sm:text-[11px]">
                     {label}
                   </dd>
                 </div>
@@ -285,12 +293,12 @@ export default async function HomePage() {
 
           {/* Abanico de cartas */}
           <div className="relative">
-            <div className="relative flex h-[300px] items-center justify-center sm:h-[420px]">
+            <div className="relative flex h-[260px] items-center justify-center sm:h-[420px]">
               <div className="pointer-events-none absolute inset-x-6 top-1/2 h-40 -translate-y-1/2 rounded-full bg-brand-500/30 blur-3xl" />
               {HERO_CARDS.map((c, i) => (
                 <div
                   key={c.src}
-                  className={`animate-float card-tilt tcg-card-shadow relative -ml-12 w-[100px] shrink-0 overflow-hidden rounded-xl border border-white/20 first:ml-0 sm:-ml-16 sm:w-[150px] lg:w-[168px] ${c.lift}`}
+                  className={`animate-float card-tilt tcg-card-shadow relative -ml-10 w-[86px] shrink-0 overflow-hidden rounded-xl border border-white/20 bg-white/10 first:ml-0 sm:-ml-12 sm:w-[128px] lg:w-[122px] xl:-ml-14 xl:w-[164px] ${c.lift}`}
                   style={
                     {
                       "--rot": c.rot,
@@ -304,9 +312,9 @@ export default async function HomePage() {
                     alt={c.alt}
                     width={252}
                     height={352}
-                    sizes="(max-width:640px) 100px, 168px"
+                    sizes="(max-width:640px) 86px, 164px"
                     className="h-auto w-full"
-                    priority={i === 2}
+                    priority
                     unoptimized
                   />
                 </div>
@@ -337,25 +345,6 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-
-        {/* Cinta de juegos */}
-        <div className="marquee relative overflow-hidden border-t border-white/10 bg-black/20 py-4">
-          <div className="marquee-track">
-            {[0, 1].map((dup) => (
-              <div key={dup} className="flex shrink-0 items-center" aria-hidden={dup === 1}>
-                {[...GAME_LIST, ...GAME_LIST, ...GAME_LIST].map((g, i) => (
-                  <span
-                    key={`${g.id}-${i}`}
-                    className="flex items-center gap-8 px-8 text-[13px] font-bold uppercase tracking-[0.2em] text-white/40"
-                  >
-                    {g.name}
-                    <span className="h-1 w-1 rounded-full bg-gold-400/70" />
-                  </span>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
       </section>
 
       {/* JUEGOS */}
@@ -365,7 +354,7 @@ export default async function HomePage() {
           title="Elige tu TCG favorito"
           subtitle="Cada juego con su catálogo, imágenes y filtros propios"
         />
-        <Reveal className="stagger mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal className="stagger mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {GAME_LIST.map((g) => (
             <GameTile key={g.id} game={g} count={countByGame.get(g.id) ?? 0} />
           ))}
@@ -637,34 +626,35 @@ function GameTile({ game, count }: { game: GameMeta; count: number }) {
   return (
     <Link
       href={`/cartas?game=${game.id}`}
-      className="group relative isolate flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-3xl bg-carbon"
+      className="group relative isolate flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-3xl bg-carbon p-3 sm:aspect-[4/5] sm:p-5"
     >
       <Image
         src={game.artImage ?? game.cardImage}
         alt=""
         fill
         sizes="(max-width:640px) 100vw, 320px"
-        className={`object-cover opacity-80 transition duration-700 group-hover:scale-110 group-hover:opacity-100 ${
-          game.artImage ? "" : "object-[center_12%]"
+        className={`-z-10 object-cover opacity-90 transition duration-700 group-hover:scale-110 group-hover:opacity-100 ${
+          game.artImage ? "" : "object-[center_10%]"
         }`}
         unoptimized
       />
-      <span className="absolute inset-0 bg-gradient-to-t from-carbon via-carbon/55 to-transparent" />
+      <span className="absolute inset-0 -z-10 bg-gradient-to-t from-carbon via-carbon/40 to-carbon/10" />
       <span
-        className="absolute inset-x-0 top-0 h-1 opacity-0 transition group-hover:opacity-100"
+        className="absolute inset-x-0 top-0 -z-10 h-1 opacity-0 transition group-hover:opacity-100"
         style={{ background: game.accent }}
       />
 
-      <span className="relative p-5">
-        <span className="block font-display text-2xl font-bold leading-tight text-white">
-          {game.short}
+      <GameLogo game={game.id} size="tile" />
+
+      <span className="block">
+        <span className="block font-display text-[13px] font-bold leading-snug text-white sm:text-xl">
+          {game.tagline}
         </span>
-        <span className="mt-1 block text-[12px] text-white/65">{game.tagline}</span>
-        <span className="mt-4 flex items-center justify-between">
-          <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold text-white backdrop-blur">
+        <span className="mt-3 flex items-center justify-between gap-2">
+          <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur sm:px-3 sm:text-[11px]">
             {count} {count === 1 ? "publicación" : "publicaciones"}
           </span>
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-carbon transition group-hover:bg-gold-300">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-carbon transition group-hover:bg-gold-300">
             <ArrowRight
               className="h-4 w-4 transition group-hover:translate-x-0.5"
               strokeWidth={2.25}
@@ -673,6 +663,19 @@ function GameTile({ game, count }: { game: GameMeta; count: number }) {
         </span>
       </span>
     </Link>
+  );
+}
+
+/** Fila de productos: carrusel con desplazamiento en móvil, grilla en pantallas grandes. */
+function ProductRow({ listings }: { listings: ListingCardData[] }) {
+  return (
+    <Reveal className="stagger no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3.5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-6">
+      {listings.map((l) => (
+        <div key={l.id} className="w-[46vw] max-w-[220px] shrink-0 snap-start sm:w-auto sm:max-w-none">
+          <ListingCard listing={l} />
+        </div>
+      ))}
+    </Reveal>
   );
 }
 
@@ -690,18 +693,16 @@ function Showcase({
   listings: ListingCardData[];
 }) {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10">
+    <section className="mx-auto max-w-7xl px-4 py-8">
       <SectionTitle eyebrow={eyebrow} title={title} subtitle={subtitle} href={href} />
-      <Reveal className="stagger mt-8 grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6">
-        {listings.map((l) => (
-          <ListingCard key={l.id} listing={l} />
-        ))}
-      </Reveal>
+      <div className="mt-7">
+        <ProductRow listings={listings} />
+      </div>
     </section>
   );
 }
 
-/** Fila propia para cada juego, con su nombre, su color y su enlace al catálogo. */
+/** Sección de un juego: su logo oficial (mismo tamaño para todos), un fondo con su color y sus productos. */
 function GameShowcase({
   game,
   listings,
@@ -712,37 +713,35 @@ function GameShowcase({
   total: number;
 }) {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-        <div className="flex items-center gap-3.5">
-          <span
-            className="h-11 w-1.5 rounded-full"
-            style={{ background: game.accent }}
-            aria-hidden="true"
-          />
-          <div>
-            <h2 className="font-display text-2xl font-bold tracking-tight text-carbon sm:text-[1.75rem]">
-              {game.name}
-            </h2>
-            <p className="mt-0.5 text-[13px] text-ink-400">
-              {total} {total === 1 ? "publicación" : "publicaciones"} · {game.tagline}
-            </p>
+    <section className="mx-auto max-w-7xl px-4 py-5">
+      <div
+        className="overflow-hidden rounded-[2rem] border border-ink-800 p-5 sm:p-8"
+        style={{
+          background: `linear-gradient(135deg, ${game.accent}18 0%, ${game.accent}06 38%, transparent 70%)`,
+        }}
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <GameLogo game={game.id} size="lg" />
+            <div className="min-w-0">
+              <h2 className="font-display text-lg font-bold leading-tight tracking-tight text-carbon sm:text-2xl">
+                {game.tagline}
+              </h2>
+              <p className="mt-1 text-[13px] text-ink-400">
+                {total} {total === 1 ? "publicación disponible" : "publicaciones disponibles"}
+              </p>
+            </div>
           </div>
+          <Link href={`/cartas?game=${game.id}`} className="btn btn-secondary btn-sm self-start sm:self-auto">
+            Ver todo {game.short}
+            <ArrowRight className="h-4 w-4" strokeWidth={2} />
+          </Link>
         </div>
-        <Link
-          href={`/cartas?game=${game.id}`}
-          className="group inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand-600 hover:text-brand-700"
-        >
-          Ver todo {game.short}
-          <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" strokeWidth={2} />
-        </Link>
-      </div>
 
-      <Reveal className="stagger grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6">
-        {listings.map((l) => (
-          <ListingCard key={l.id} listing={l} />
-        ))}
-      </Reveal>
+        <div className="mt-6">
+          <ProductRow listings={listings} />
+        </div>
+      </div>
     </section>
   );
 }

@@ -27,7 +27,7 @@ export default async function PanelLayout({
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-50 border-b border-ink-800 bg-ink-200/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-carbon/90 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-[1400px] items-center gap-4 px-4">
           <Link href="/">
             <Logo height={64} tone="light" />
@@ -39,7 +39,7 @@ export default async function PanelLayout({
           <div className="ml-auto flex items-center gap-3">
             <Link
               href="/"
-              className="hidden text-[13px] text-white/80 transition hover:text-carbon sm:block"
+              className="text-[13px] font-semibold text-white/80 transition hover:text-white"
             >
               Ver tienda ↗
             </Link>

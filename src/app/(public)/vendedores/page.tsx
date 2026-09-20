@@ -16,7 +16,7 @@ export default async function SellersPage() {
   const sellers = await safeQuery(
     () =>
       prisma.user.findMany({
-        where: { active: true },
+        where: { active: true, role: { in: ["SELLER", "ADMIN"] } },
         select: {
           id: true,
           name: true,
