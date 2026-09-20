@@ -242,11 +242,26 @@ model OrderEvent {
   @@index([orderId, createdAt])
 }
 
+/// Descuentos por método de pago que crea el administrador (2%, 5%, 10%…).
+/// Solo uno puede estar activo por método; sin ninguno activo no hay descuento.
+model PaymentDiscount {
+  id        String   @id @default(cuid())
+  method    String
+  percent   Int
+  label     String?
+  active    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([method, active])
+}
+
 /// Configuración global de la tienda (una sola fila, id = "site"). La edita el administrador.
+/// Los campos *DiscountEnabled/Pct están en desuso: los descuentos viven en PaymentDiscount.
 model SiteSetting {
   id                      String   @id @default("site")
-  transferDiscountEnabled Boolean  @default(true)
-  transferDiscountPct     Int      @default(2)
+  transferDiscountEnabled Boolean  @default(false)
+  transferDiscountPct     Int      @default(0)
   cashDiscountEnabled     Boolean  @default(false)
   cashDiscountPct         Int      @default(0)
   /// Horas que tiene el comprador para pagar antes de que se cancele la orden.

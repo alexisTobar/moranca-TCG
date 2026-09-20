@@ -17,7 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { GAME_LIST, type GameMeta } from "@/lib/games";
+import { GAME_LIST, GAMES, type GameMeta } from "@/lib/games";
 import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
 import { discountPctFor, getSiteSettings } from "@/lib/site-settings";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
@@ -27,41 +27,41 @@ import { GameLogo } from "@/components/GameLogo";
 
 export const revalidate = 60;
 
-const HERO_CARDS = [
+/** Una carta destacada por juego (todas caras o raras y de ediciones actuales). */
+const HERO_CARDS: Array<{
+  game: "magic" | "pokemon" | "onepiece" | "myl";
+  src: string;
+  alt: string;
+  name: string;
+  detail: string;
+}> = [
   {
-    // Mox Jasper (Tarkir: Dragonstorm)
-    src: "https://cards.scryfall.io/normal/front/e/c/ec33ea23-c8e8-4066-91b9-5e0ad191bcdb.jpg",
-    alt: "Mox Jasper, carta de Magic",
-    rot: "-13deg",
-    lift: "mt-10",
+    game: "magic",
+    src: "https://cards.scryfall.io/large/front/e/f/ef371352-ec8f-4da4-9085-67195068fb79.jpg",
+    alt: "Emeritus of Ideation // Ancestral Recall, carta de Magic",
+    name: "Ancestral Recall",
+    detail: "Secrets of Strixhaven",
   },
   {
-    // Guerra Celestial, legendaria de AyD Vigilantes (Mitos y Leyendas)
-    src: "https://api.myl.cl/static/cards/166/018.png",
-    alt: "Guerra Celestial, carta legendaria de Mitos y Leyendas",
-    rot: "-6deg",
-    lift: "mt-3",
-  },
-  {
-    // Pikachu ex, Special Illustration Rare (Ascended Heroes)
+    game: "pokemon",
     src: "https://assets.tcgdex.net/en/me/me02.5/276/high.webp",
     alt: "Pikachu ex, carta de Pokémon",
-    rot: "0deg",
-    lift: "-mt-4 scale-110 z-10",
+    name: "Pikachu ex",
+    detail: "Ascended Heroes",
   },
   {
-    // Monkey D. Luffy Gear 5, alterna (One Piece)
+    game: "onepiece",
     src: "https://static.dotgg.gg/onepiece/card/OP05-119.webp",
     alt: "Monkey D. Luffy Gear 5, carta de One Piece",
-    rot: "6deg",
-    lift: "mt-3",
+    name: "Monkey D. Luffy",
+    detail: "Gear 5 · OP-05",
   },
   {
-    // Emeritus of Ideation // Ancestral Recall (Secrets of Strixhaven)
-    src: "https://cards.scryfall.io/normal/front/e/f/ef371352-ec8f-4da4-9085-67195068fb79.jpg",
-    alt: "Emeritus of Ideation, carta de Magic",
-    rot: "13deg",
-    lift: "mt-10",
+    game: "myl",
+    src: "https://api.myl.cl/static/cards/166/018.png",
+    alt: "Guerra Celestial, carta legendaria de Mitos y Leyendas",
+    name: "Guerra Celestial",
+    detail: "AyD Vigilantes",
   },
 ];
 
@@ -217,7 +217,7 @@ export default async function HomePage() {
           style={{ animationDelay: "-6s" }}
         />
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-16 pt-12 lg:grid-cols-[1.05fr_1fr] lg:pb-24 lg:pt-20">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-16 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)] lg:gap-8 lg:pb-24 lg:pt-20">
           <div>
             <span className="animate-fade-up glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-gold-200">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-300" />
@@ -235,33 +235,17 @@ export default async function HomePage() {
               stock reservado, pagas por transferencia con referencia única y recibes en todo Chile.
             </p>
 
-            {/* Buscador principal */}
-            <form
-              action="/cartas"
-              method="get"
-              role="search"
-              className="animate-fade-up delay-3 relative mt-8 max-w-xl"
-            >
-              <Search
-                className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50"
-                strokeWidth={2}
-              />
-              <input
-                name="q"
-                placeholder="Busca Charizard, Sol Ring, Luffy…"
-                aria-label="Buscar cartas"
-                enterKeyHint="search"
-                className="h-14 w-full rounded-full border border-white/15 bg-white/10 pl-13 pr-32 text-[15px] text-white placeholder:text-white/45 outline-none backdrop-blur-xl transition focus:border-gold-400/70 focus:bg-white/15 focus:shadow-[0_0_0_5px_rgba(230,185,74,0.18)]"
-              />
-              <button
-                type="submit"
-                className="btn btn-gold absolute right-1.5 top-1/2 h-11 -translate-y-1/2 !rounded-full !px-6"
-              >
-                Buscar
-              </button>
-            </form>
+            <div className="animate-fade-up delay-3 mt-8 flex flex-wrap gap-3">
+              <Link href="/cartas" className="btn btn-gold btn-lg">
+                Explorar catálogo
+                <ArrowRight className="h-4 w-4" strokeWidth={2.25} />
+              </Link>
+              <Link href="/cartas?type=DECK" className="btn btn-glass btn-lg">
+                Ver mazos armados
+              </Link>
+            </div>
 
-            <div className="animate-fade-up delay-4 mt-4 flex flex-wrap gap-2">
+            <div className="animate-fade-up delay-4 mt-6 flex flex-wrap gap-2">
               {GAME_LIST.map((g) => (
                 <Link
                   key={g.id}
@@ -291,57 +275,42 @@ export default async function HomePage() {
             </dl>
           </div>
 
-          {/* Abanico de cartas */}
-          <div className="relative">
-            <div className="relative flex h-[260px] items-center justify-center sm:h-[420px]">
-              <div className="pointer-events-none absolute inset-x-6 top-1/2 h-40 -translate-y-1/2 rounded-full bg-brand-500/30 blur-3xl" />
+          {/* Muestra de cartas: una por juego, rectas y del mismo tamaño */}
+          <div className="relative pb-8 sm:pb-10">
+            <div className="pointer-events-none absolute inset-x-4 bottom-2 h-24 rounded-full bg-brand-500/25 blur-3xl" />
+            <div className="relative mx-auto grid max-w-[320px] grid-cols-2 gap-x-4 gap-y-5 sm:max-w-none sm:grid-cols-4 sm:gap-4">
               {HERO_CARDS.map((c, i) => (
-                <div
-                  key={c.src}
-                  className={`animate-float card-tilt tcg-card-shadow relative -ml-10 w-[86px] shrink-0 overflow-hidden rounded-xl border border-white/20 bg-white/10 first:ml-0 sm:-ml-12 sm:w-[128px] lg:w-[122px] xl:-ml-14 xl:w-[164px] ${c.lift}`}
-                  style={
-                    {
-                      "--rot": c.rot,
-                      transform: `rotate(${c.rot})`,
-                      animationDelay: `${i * 0.5}s`,
-                    } as React.CSSProperties
-                  }
+                <Link
+                  key={c.game}
+                  href={`/cartas?game=${c.game}`}
+                  aria-label={`Ver cartas de ${GAMES[c.game].short}`}
+                  className={`group block ${i % 2 === 1 ? "translate-y-5 sm:translate-y-9" : ""}`}
                 >
-                  <Image
-                    src={c.src}
-                    alt={c.alt}
-                    width={252}
-                    height={352}
-                    sizes="(max-width:640px) 86px, 164px"
-                    className="h-auto w-full"
-                    priority
-                    unoptimized
-                  />
-                </div>
+                  <span
+                    className="relative block overflow-hidden rounded-[9px] bg-white/10 ring-1 ring-white/25 transition duration-500 tcg-card-shadow group-hover:-translate-y-2 group-hover:ring-gold-300/80 sm:rounded-xl"
+                    style={{ aspectRatio: "63 / 88" }}
+                  >
+                    <Image
+                      src={c.src}
+                      alt={c.alt}
+                      fill
+                      sizes="(max-width:640px) 150px, (max-width:1024px) 15vw, 170px"
+                      className="object-cover"
+                      priority
+                      unoptimized
+                    />
+                    <span className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/15 opacity-0 transition duration-500 group-hover:opacity-100" />
+                  </span>
+                  <span className="mt-3 block text-center">
+                    <span className="block truncate text-[11px] font-bold uppercase tracking-wide text-white sm:text-[12px]">
+                      {c.name}
+                    </span>
+                    <span className="mt-0.5 block truncate text-[10px] text-white/50 sm:text-[11px]">
+                      {c.detail}
+                    </span>
+                  </span>
+                </Link>
               ))}
-            </div>
-
-            <div
-              className="animate-float glass absolute -left-1 top-2 hidden items-center gap-2.5 rounded-2xl px-4 py-3 sm:flex"
-              style={{ animationDelay: "-2s" }}
-            >
-              <LockKeyhole className="h-5 w-5 text-gold-300" strokeWidth={1.75} />
-              <div>
-                <p className="text-[12px] font-bold">Stock reservado</p>
-                <p className="text-[11px] text-white/55">Apartamos tu compra</p>
-              </div>
-            </div>
-            <div
-              className="animate-float glass absolute -right-1 bottom-4 hidden items-center gap-2.5 rounded-2xl px-4 py-3 sm:flex"
-              style={{ animationDelay: "-4s" }}
-            >
-              <Percent className="h-5 w-5 text-gold-300" strokeWidth={1.75} />
-              <div>
-                <p className="text-[12px] font-bold">
-                  {transferPct > 0 ? `${transferPct}% por transferencia` : "Pago por transferencia"}
-                </p>
-                <p className="text-[11px] text-white/55">Con código de referencia</p>
-              </div>
             </div>
           </div>
         </div>

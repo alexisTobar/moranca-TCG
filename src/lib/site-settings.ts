@@ -9,29 +9,39 @@ export interface SiteSettings {
   paymentWindowHours: number;
 }
 
+/** Sin descuentos por defecto: los crea y activa el administrador. */
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
-  transferDiscountEnabled: true,
-  transferDiscountPct: 2,
+  transferDiscountEnabled: false,
+  transferDiscountPct: 0,
   cashDiscountEnabled: false,
   cashDiscountPct: 0,
   paymentWindowHours: 48,
 };
 
 /**
- * Lee la configuración global que define el administrador. Si la tabla aún no
- * existe o no hay fila, devuelve los valores por defecto para que el sitio
- * nunca se caiga por esto.
+ * Lee la configuración global. El plazo de pago viene de SiteSetting y los
+ * descuentos del descuento ACTIVO de cada método (tabla PaymentDiscount). Si
+ * las tablas aún no existen devuelve los valores por defecto, para que el
+ * sitio nunca se caiga por esto.
  */
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
-    const row = await prisma.siteSetting.findUnique({ where: { id: "site" } });
-    if (!row) return DEFAULT_SITE_SETTINGS;
+    const [row, active] = await Promise.all([
+      prisma.siteSetting.findUnique({ where: { id: "site" } }),
+      prisma.paymentDiscount.findMany({
+        where: { active: true },
+        orderBy: { updatedAt: "desc" },
+        select: { method: true, percent: true },
+      }),
+    ]);
+    const transfer = active.find((d) => d.method === "TRANSFER");
+    const cash = active.find((d) => d.method === "CASH");
     return {
-      transferDiscountEnabled: row.transferDiscountEnabled,
-      transferDiscountPct: row.transferDiscountPct,
-      cashDiscountEnabled: row.cashDiscountEnabled,
-      cashDiscountPct: row.cashDiscountPct,
-      paymentWindowHours: row.paymentWindowHours,
+      transferDiscountEnabled: Boolean(transfer),
+      transferDiscountPct: transfer?.percent ?? 0,
+      cashDiscountEnabled: Boolean(cash),
+      cashDiscountPct: cash?.percent ?? 0,
+      paymentWindowHours: row?.paymentWindowHours ?? DEFAULT_SITE_SETTINGS.paymentWindowHours,
     };
   } catch (error) {
     console.error("[site-settings] usando valores por defecto", error);
@@ -39,7 +49,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   }
 }
 
-/** Porcentaje de descuento efectivo para un método de pago (0 si está desactivado). */
+/** Porcentaje de descuento efectivo para un método de pago (0 si no hay ninguno activo). */
 export function discountPctFor(
   settings: SiteSettings,
   method: "TRANSFER" | "CASH"

@@ -115,13 +115,23 @@ export const profileSchema = z.object({
   avatarUrl: imagenUrl,
 });
 
-/** Configuración de pagos y descuentos que define solo el administrador. */
+/** Configuración de pagos que define solo el administrador. */
 export const siteSettingsSchema = z.object({
-  transferDiscountEnabled: z.boolean(),
-  transferDiscountPct: z.number().int().min(0).max(30),
-  cashDiscountEnabled: z.boolean(),
-  cashDiscountPct: z.number().int().min(0).max(30),
   paymentWindowHours: z.number().int().min(1).max(168),
+});
+
+/** Descuento por método de pago que crea el administrador (como un cupón, pero automático). */
+export const paymentDiscountSchema = z.object({
+  method: z.enum(["TRANSFER", "CASH"]),
+  percent: z.number().int().min(1, "El descuento debe ser de al menos 1%").max(30, "El descuento máximo es 30%"),
+  label: z.string().trim().max(60).optional().nullable(),
+  active: z.boolean().default(true),
+});
+
+export const paymentDiscountUpdateSchema = z.object({
+  percent: z.number().int().min(1).max(30).optional(),
+  label: z.string().trim().max(60).optional().nullable(),
+  active: z.boolean().optional(),
 });
 
 /** Perfil + cuenta bancaria (la bancaria solo aplica si el rol es vendedor). */

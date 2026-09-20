@@ -215,9 +215,11 @@ Cada cambio queda en el historial de la orden (`OrderEvent`): quién, qué y cu�
 
 **Descuentos (los define el administrador)**
 
-En **Panel → Pagos y descuentos** (solo admin) se activa o desactiva el descuento
-por transferencia y por efectivo, se elige el porcentaje (0 a 30) y el plazo de
-pago. Aplica a toda la tienda y se refleja al instante en el checkout.
+No hay ningún descuento fijo. En **Panel → Pagos y descuentos** (solo admin) se crean
+descuentos por método de pago igual que los cupones (2%, 5%, 10%… hasta 30%), uno o
+varios guardados, y se elige cuál queda **activo** (solo uno por método: transferencia o
+efectivo). Sin ninguno activo el comprador paga el precio normal. También se define ahí el
+plazo de pago. El cambio se refleja al instante en el checkout y en el aviso del encabezado.
 
 Si un carrito trae cartas de más de un vendedor, el checkout lo separa
 automáticamente en **una orden por vendedor**, cada una con su propia cuenta
