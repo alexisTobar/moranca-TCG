@@ -194,7 +194,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
 
       <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
         {/* IMAGEN */}
-        <div className={`lg:sticky lg:h-fit ${store ? "lg:top-36" : "lg:top-24"}`}>
+        <div className={`lg:sticky lg:h-fit ${store ? "lg:top-48" : "lg:top-24"}`}>
           <div className="relative aspect-[63/88] overflow-hidden rounded-2xl border border-ink-700 bg-ink-950 tcg-card-shadow">
             {listing.imageUrl ? (
               <Image

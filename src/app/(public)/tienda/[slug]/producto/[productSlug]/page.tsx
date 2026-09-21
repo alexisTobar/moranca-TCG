@@ -9,7 +9,6 @@ import { ensureAdminPro, isStoreActive } from "@/lib/store";
 import { storeThemeVars } from "@/lib/store-theme";
 import { ProductDetail, getProductListing } from "@/components/product/ProductDetail";
 import { StoreHeader } from "@/components/store/StoreHeader";
-import { CartDrawer } from "@/components/cart/CartDrawer";
 
 export const dynamic = "force-dynamic";
 
@@ -82,7 +81,7 @@ export default async function StoreProductPage({ params }: { params: Params }) {
   const logoUrl = store.logoUrl ?? seller.avatarUrl;
 
   return (
-    <div style={storeThemeVars(store.accentColor) as React.CSSProperties} className="flex min-h-dvh flex-col bg-white">
+    <div style={storeThemeVars(store.accentColor) as React.CSSProperties} >
       <StoreHeader
         slug={seller.slug}
         name={name}
@@ -94,17 +93,11 @@ export default async function StoreProductPage({ params }: { params: Params }) {
         games={GAME_LIST.filter((g) => byGame.some((b) => b.game === g.id)).map((g) => g.id)}
         types={TYPES.filter((t) => byType.some((b) => b.type === t))}
         hasAbout={Boolean(store.about || seller.bio)}
-        user={viewer}
       />
-      <main className="flex-1">
-        <ProductDetail listing={listing} store={{ slug: seller.slug, name, logoUrl }} />
-      </main>
-      <footer className="border-t border-ink-800 bg-ink-900">
-        <p className="mx-auto max-w-7xl px-4 py-6 text-center text-[12px] text-ink-400">
-          {name} vende con la garantía de Win Condition TCG: stock reservado, código de pago y comprobante en cada compra.
-        </p>
-      </footer>
-      <CartDrawer />
+      <ProductDetail listing={listing} store={{ slug: seller.slug, name, logoUrl }} />
+      <p className="mx-auto max-w-7xl px-4 pb-2 pt-10 text-center text-[12px] text-ink-400">
+        {name} vende con la garantía de Win Condition TCG: stock reservado, código de pago y comprobante en cada compra.
+      </p>
     </div>
   );
 }

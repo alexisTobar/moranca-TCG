@@ -567,6 +567,18 @@ export function CheckoutView({
             </button>
 
             <p className="mt-3 text-center text-[11px] leading-relaxed text-ink-400">
+              Al confirmar aceptas los{" "}
+              <Link href="/terminos-y-condiciones" target="_blank" className="font-semibold text-brand-600 hover:text-brand-700">
+                Términos
+              </Link>
+              . La compra es entre tú y el vendedor: Win Condition no maneja el pago ni realiza devoluciones (
+              <Link href="/devoluciones" target="_blank" className="font-semibold text-brand-600 hover:text-brand-700">
+                ver cómo resolver un problema
+              </Link>
+              ).
+            </p>
+
+            <p className="mt-3 text-center text-[11px] leading-relaxed text-ink-400">
               {effectivePayMethod === "CASH"
                 ? "Pagas al retirar en persona. El vendedor confirma la orden al recibir el efectivo."
                 : "Después de confirmar verás los datos de la cuenta, tu código de referencia y podrás subir el comprobante."}

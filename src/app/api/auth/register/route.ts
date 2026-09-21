@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { createSession, hashPassword, uniqueUserSlug } from "@/lib/auth";
 import { registerSchema } from "@/lib/validators";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
+import { LEGAL_VERSION } from "@/lib/legal";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,6 +49,8 @@ export async function POST(req: Request) {
       rut: data.rut,
       phone: data.phone,
       address: data.address,
+      termsAcceptedAt: new Date(),
+      termsVersion: LEGAL_VERSION,
     },
     select: { id: true, name: true, email: true, role: true },
   });

@@ -18,7 +18,6 @@ import { buildQr } from "@/lib/qr";
 import { ShareQrCard } from "@/components/store/ShareQrCard";
 import { ShareToggle } from "@/components/store/ShareToggle";
 import { StoreHeader } from "@/components/store/StoreHeader";
-import { CartDrawer } from "@/components/cart/CartDrawer";
 
 export const dynamic = "force-dynamic";
 
@@ -201,7 +200,7 @@ export default async function StorefrontPage({
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    <div style={storeThemeVars(store.accentColor) as React.CSSProperties} className="flex min-h-dvh flex-col bg-white">
+    <div style={storeThemeVars(store.accentColor) as React.CSSProperties} >
       <StoreHeader
         slug={seller.slug}
         name={name}
@@ -213,9 +212,7 @@ export default async function StorefrontPage({
         games={GAME_LIST.filter((g) => byGame.some((b) => b.game === g.id)).map((g) => g.id)}
         types={TYPES.filter((t) => byType.some((b) => b.type === t.value)).map((t) => t.value)}
         hasAbout={Boolean(store.about || seller.bio)}
-        user={viewer}
       />
-      <main className="flex-1">
 
       {/* BANNER */}
       <div className="relative h-44 overflow-hidden sm:h-60 lg:h-72">
@@ -336,7 +333,7 @@ export default async function StorefrontPage({
         )}
 
         {/* CATÁLOGO */}
-        <section id="catalogo" className="mt-10 scroll-mt-40">
+        <section id="catalogo" className="mt-10 scroll-mt-44">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h2 className="font-display text-2xl font-bold tracking-tight text-carbon">Catálogo</h2>
             <p className="text-[13px] text-ink-400">
@@ -431,7 +428,7 @@ export default async function StorefrontPage({
 
         {/* SOBRE LA TIENDA */}
         {(store.about || seller.bio) && (
-          <section id="nosotros" className="mt-12 scroll-mt-40 rounded-3xl card-surface p-6 sm:p-8">
+          <section id="nosotros" className="mt-12 scroll-mt-44 rounded-3xl card-surface p-6 sm:p-8">
             <h2 className="font-display text-xl font-bold text-carbon">Sobre {name}</h2>
             <p className="mt-3 max-w-3xl whitespace-pre-line text-[15px] leading-relaxed text-ink-300">
               {store.about || seller.bio}
@@ -462,14 +459,10 @@ export default async function StorefrontPage({
         )}
 
       </div>
-      </main>
 
-      <footer className="border-t border-ink-800 bg-ink-900">
-        <p className="mx-auto max-w-7xl px-4 py-6 text-center text-[12px] text-ink-400">
-          {name} vende con la garantía de Win Condition TCG: stock reservado, código de pago y comprobante en cada compra.
-        </p>
-      </footer>
-      <CartDrawer />
+      <p className="mx-auto max-w-7xl px-4 pb-2 pt-10 text-center text-[12px] text-ink-400">
+        {name} vende con la garantía de Win Condition TCG: stock reservado, código de pago y comprobante en cada compra.
+      </p>
     </div>
   );
 }

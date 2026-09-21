@@ -623,7 +623,7 @@ export default async function HomePage() {
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-white/65">
                 Vende gratis con tu perfil o da el salto con una tienda premium: link corto, QR con tu logo, banner,
-                colores, estadísticas y soporte directo. Sin dominio propio y sin renovación automática.
+                colores, estadísticas y soporte directo. Sin comisiones por venta, sin dominio propio y sin renovación automática.
               </p>
             </div>
 

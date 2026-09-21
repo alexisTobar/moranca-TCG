@@ -30,6 +30,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     u("/vendedores", 0.7, "daily"),
     u("/noticias", 0.6, "daily"),
     u("/ayuda", 0.5, "monthly"),
+    u("/quienes-somos", 0.5, "monthly"),
+    u("/terminos-y-condiciones", 0.3, "yearly"),
+    u("/politica-de-privacidad", 0.3, "yearly"),
+    u("/devoluciones", 0.4, "yearly"),
   ];
 
   const [listings, cards, sellers, stores, news] = await Promise.all([

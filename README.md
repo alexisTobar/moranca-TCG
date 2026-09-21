@@ -275,10 +275,11 @@ Condition (no hay dominio propio ni se quita la marca).
   `/tienda/[slug]` redirige al perfil normal. Las visitas y escaneos de QR se cuentan por día
   (`StoreVisitDay`); el dueño y el administrador no cuentan.
 - La base se actualiza sola en el deploy (`prisma db push`, solo tablas nuevas).
-- **La tienda es la protagonista**: `/tienda/[slug]` usa su propio encabezado (logo, buscador y
-  filtros de la tienda: tipos y juegos que ese vendedor tiene) y no el menú de Win Condition. El
-  único enlace al marketplace es el logo de Win Condition en la barra oscura de arriba. Vive en el
-  grupo de rutas `(store)`, que solo comparte el carrito.
+- **Menú propio de la tienda**: `/tienda/[slug]` mantiene arriba el logo y el menú de Win Condition
+  (para quien quiera pasar al marketplace) y, debajo, un menú propio con el logo y buscador de la
+  tienda y filtros solo de su catálogo (los tipos y juegos que ese vendedor tiene). La ficha de
+  producto (`/tienda/[slug]/producto/[producto]`) también usa ese menú y no muestra a otros
+  vendedores con la misma carta.
 
 ## 5d. Avisos del panel y soporte
 
@@ -313,6 +314,26 @@ Condition (no hay dominio propio ni se quita la marca).
 - **Importante en Vercel**: define `NEXT_PUBLIC_SITE_URL` con el dominio real
   (`https://tu-dominio.cl`), porque de ahí salen el sitemap, los canonicals y las imágenes
   sociales. Después registra el sitio en Google Search Console y envía `/sitemap.xml`.
+
+## 5f. Páginas legales
+
+Enlazadas desde el footer (columna "Legal") y desde el registro y el checkout:
+`/terminos-y-condiciones`, `/politica-de-privacidad`, `/devoluciones` y `/quienes-somos`.
+
+- Están redactadas para cómo funciona la plataforma: somos un marketplace, el pago va directo al
+  vendedor por transferencia y **Win Condition no maneja el dinero de las ventas, por eso no hace
+  devoluciones ni reembolsos** (los resuelven comprador y vendedor; la plataforma orienta y actúa
+  sobre las cuentas que incumplan). La única excepción explicada son las membresías de tienda.
+- **Registro**: hay una casilla obligatoria para aceptar términos y privacidad. Se valida en el
+  servidor y queda la constancia (`User.termsAcceptedAt` y `termsVersion`).
+- El contenido vive en `src/app/(public)/<pagina>/page.tsx` y usa `LegalLayout` (índice lateral,
+  secciones numeradas y bloque de contacto). Al cambiar un texto, actualiza `LEGAL_VERSION` y
+  `LEGAL_UPDATED` en `src/lib/legal.ts`.
+- **Datos de la empresa (opcionales)**: define en Vercel `NEXT_PUBLIC_CONTACT_EMAIL`,
+  `NEXT_PUBLIC_LEGAL_NAME`, `NEXT_PUBLIC_LEGAL_RUT` y `NEXT_PUBLIC_LEGAL_ADDRESS` para que aparezcan
+  en el footer y en los documentos. Si no están definidos, no se muestra nada inventado.
+- **Revisión legal**: son textos de partida, hechos con el funcionamiento real del sitio. Conviene
+  que un abogado los revise antes de publicarlos.
 
 ---
 

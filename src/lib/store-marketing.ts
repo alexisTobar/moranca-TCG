@@ -41,6 +41,7 @@ export async function getMarketingPlans(): Promise<MarketingPlan[]> {
 /** Lista de beneficios de un plan, construida con sus límites reales (lo que promete la página es lo que se entrega). */
 export function planBenefits(p: MarketingPlan): string[] {
   return [
+    "Publicaciones ilimitadas, en tu tienda y en el marketplace",
     "Tienda propia con link corto y QR con tu logo",
     "Banner, logo, color de marca y barra de anuncio",
     `Hasta ${p.maxFeatured} productos destacados arriba de tu catálogo`,

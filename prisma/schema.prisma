@@ -97,6 +97,10 @@ model User {
   offersShipping Boolean @default(true)
   offersPickup   Boolean @default(true)
 
+  // Constancia de que la persona aceptó los términos y la política de privacidad al registrarse.
+  termsAcceptedAt DateTime?
+  termsVersion    String?
+
   // Solicitud de comprador para pasar a vendedor.
   sellerRequestStatus  String?
   sellerRequestMessage String?

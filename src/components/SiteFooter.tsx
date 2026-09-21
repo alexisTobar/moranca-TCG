@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ShieldCheck, Truck, Landmark, BadgeCheck } from "lucide-react";
 import { Logo } from "./Logo";
 import { GAME_LIST } from "@/lib/games";
+import { CONTACT_EMAIL, LEGAL_LINKS } from "@/lib/legal";
 
 const TRUST = [
   { icon: ShieldCheck, title: "Stock reservado", text: "Tus cartas quedan apartadas al comprar" },
@@ -57,13 +58,18 @@ export function SiteFooter() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
         <div>
           <Logo height={96} tone="light" />
           <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-white/55">
-            Tienda chilena de cartas coleccionables. Singles, sellados y mazos armados, con
-            despacho a todo Chile.
+            Marketplace chileno de cartas coleccionables. Singles, sellados y mazos armados de
+            vendedores de todo Chile.
           </p>
+          {CONTACT_EMAIL && (
+            <a href={`mailto:${CONTACT_EMAIL}`} className="mt-3 inline-block text-[13px] font-semibold text-gold-300 transition hover:text-gold-200">
+              {CONTACT_EMAIL}
+            </a>
+          )}
         </div>
 
         <FooterCol
@@ -83,6 +89,7 @@ export function SiteFooter() {
         <FooterCol
           title="Win Condition"
           links={[
+            { href: "/quienes-somos", label: "Quiénes somos" },
             { href: "/ayuda", label: "Cómo comprar" },
             { href: "/ayuda#envios", label: "Envíos" },
             { href: "/ayuda#estados", label: "Estados de carta" },
@@ -90,11 +97,17 @@ export function SiteFooter() {
             { href: "/ingresar", label: "Acceso vendedores" },
           ]}
         />
+        <FooterCol title="Legal" links={LEGAL_LINKS.map((l) => ({ href: l.href, label: l.label }))} />
       </div>
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-[11px] text-white/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Win Condition TCG · Hecho en Chile</p>
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>© {new Date().getFullYear()} Win Condition TCG · Hecho en Chile</span>
+            <Link href="/terminos-y-condiciones" className="transition hover:text-white/70">Términos</Link>
+            <Link href="/politica-de-privacidad" className="transition hover:text-white/70">Privacidad</Link>
+            <Link href="/devoluciones" className="transition hover:text-white/70">Devoluciones</Link>
+          </p>
           <p>
             Imágenes de cartas vía Scryfall, pokemontcg.io, dotGG y api.myl.cl. Marcas propiedad de
             sus respectivos dueños.

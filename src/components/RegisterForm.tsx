@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 
 export function RegisterForm() {
@@ -29,6 +30,7 @@ export function RegisterForm() {
           rut: form.get("rut"),
           phone: form.get("phone"),
           address: form.get("address"),
+          acceptTerms: form.get("acceptTerms") === "on",
         }),
       });
       const data = await res.json();
@@ -68,6 +70,26 @@ export function RegisterForm() {
         autoComplete="tel"
       />
       <Field name="address" label="Dirección" required autoComplete="street-address" />
+
+      <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-ink-700 bg-ink-950 p-3 text-[12.5px] leading-relaxed text-ink-300">
+        <input
+          type="checkbox"
+          name="acceptTerms"
+          required
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-ink-600 accent-[var(--color-brand-600)]"
+        />
+        <span>
+          Acepto los{" "}
+          <Link href="/terminos-y-condiciones" target="_blank" className="font-semibold text-brand-600 hover:text-brand-700">
+            Términos y condiciones
+          </Link>{" "}
+          y la{" "}
+          <Link href="/politica-de-privacidad" target="_blank" className="font-semibold text-brand-600 hover:text-brand-700">
+            Política de privacidad
+          </Link>
+          .
+        </span>
+      </label>
 
       {error && (
         <p className="rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-rose-700">

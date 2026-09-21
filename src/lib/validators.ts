@@ -94,6 +94,9 @@ export const registerSchema = z.object({
   rut: rutSchema,
   phone: z.string().min(6).max(40),
   address: z.string().min(5).max(200),
+  acceptTerms: z.boolean().refine((v) => v === true, {
+    message: "Debes aceptar los Términos y condiciones y la Política de privacidad",
+  }),
 });
 
 /** Cuenta bancaria que cada vendedor configura en su propio perfil. */

@@ -1,15 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import { LogIn, Megaphone, Search, UserRound } from "lucide-react";
-import { Logo } from "@/components/Logo";
-import { CartButton } from "@/components/cart/CartDrawer";
+import { Megaphone, Search } from "lucide-react";
 import { GAMES, type GameId } from "@/lib/games";
 
 const TYPE_LABEL: Record<string, string> = { SINGLE: "Singles", SEALED: "Sellados", DECK: "Mazos" };
 
 /**
- * Encabezado de una tienda premium. La protagonista es la tienda: el único enlace hacia
- * Win Condition es su logo (barra oscura de arriba); todo lo demás filtra el catálogo de esta tienda.
+ * Menú propio de una tienda premium. Va debajo del menú de Win Condition (que se mantiene arriba para
+ * quien quiera pasar al marketplace) y todo lo que hay aquí filtra solo el catálogo de esta tienda.
  */
 export function StoreHeader({
   slug,
@@ -22,7 +20,6 @@ export function StoreHeader({
   games,
   types,
   hasAbout,
-  user,
 }: {
   slug: string;
   name: string;
@@ -36,7 +33,6 @@ export function StoreHeader({
   /** Tipos de producto que la tienda tiene (SINGLE / SEALED / DECK). */
   types: string[];
   hasAbout: boolean;
-  user: { role: string } | null;
 }) {
   const base = `/tienda/${slug}`;
   const link = (p: Record<string, string>) => {
@@ -52,25 +48,6 @@ export function StoreHeader({
 
   return (
     <>
-      {/* Único enlace hacia Win Condition */}
-      <div className="bg-carbon text-white">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4">
-          <div className="flex items-center gap-3">
-            <Link href="/" aria-label="Ir a Win Condition TCG" className="flex shrink-0 items-center opacity-95 transition hover:opacity-100">
-              <Logo height={46} tone="light" />
-            </Link>
-            <span className="hidden text-[12px] font-medium text-white/60 sm:block">Tienda oficial en Win Condition TCG</span>
-          </div>
-          <Link
-            href={user ? (user.role === "BUYER" ? "/cuenta" : "/panel") : "/ingresar"}
-            className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-white/75 transition hover:text-white"
-          >
-            {user ? <UserRound className="h-3.5 w-3.5" strokeWidth={2} /> : <LogIn className="h-3.5 w-3.5" strokeWidth={2} />}
-            {user ? (user.role === "BUYER" ? "Mi cuenta" : "Mi panel") : "Ingresar"}
-          </Link>
-        </div>
-      </div>
-
       {announcement && (
         <div className="bg-brand-600 text-white">
           <p className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-2 text-center text-[13px] font-semibold">
@@ -81,7 +58,7 @@ export function StoreHeader({
       )}
 
       {/* Encabezado de la tienda (lo único que queda fijo al desplazar) */}
-      <header className="sticky top-0 z-40 border-b border-ink-800 bg-white/95 backdrop-blur-xl">
+      <header className="z-40 border-b border-ink-800 bg-white/95 backdrop-blur-xl lg:sticky lg:top-[68px]">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
           <Link href={base} className="flex min-w-0 shrink-0 items-center gap-2.5 lg:max-w-[16rem]">
             <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-600 font-display text-lg font-bold text-white">
@@ -107,9 +84,6 @@ export function StoreHeader({
             />
           </form>
 
-          <div className="ml-auto flex items-center gap-2">
-            <CartButton tone="light" />
-          </div>
         </div>
 
         {/* Categorías y juegos de esta tienda; en pantallas chicas se desplazan de lado */}

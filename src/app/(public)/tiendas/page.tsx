@@ -4,14 +4,17 @@ import {
   ArrowRight,
   BadgeCheck,
   BarChart3,
+  Boxes,
   Check,
   LifeBuoy,
   Minus,
   Palette,
+  Percent,
   QrCode,
   ShieldCheck,
   Sparkles,
   Store,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
@@ -72,6 +75,12 @@ const BENEFITS: Array<{ icon: LucideIcon; title: string; text: string }> = [
   },
 ];
 
+const HIGHLIGHTS: Array<{ icon: LucideIcon; title: string; text: string }> = [
+  { icon: Percent, title: "0% de comisión por venta", text: "Cobras directo en tu cuenta. Solo pagas tu membresía." },
+  { icon: Boxes, title: "Publicaciones ilimitadas", text: "Sube todo tu inventario, en tu tienda y en el marketplace." },
+  { icon: Zap, title: "Sin nada que configurar", text: "Sin dominios ni integraciones: tu link y tu QR quedan listos al activar." },
+];
+
 const STEPS = [
   { title: "Elige tu plan", text: "Con 1, 3, 6 o 12 meses. Sin renovación automática: tú decides cuándo seguir." },
   { title: "Transfiere y sube el comprobante", text: "Te damos los datos y un código único para identificar tu pago. Es privado y solo lo ve el administrador." },
@@ -107,6 +116,14 @@ export default async function StoresLandingPage() {
     {
       q: "¿Qué pasa si mi plan vence?",
       a: "Tu tienda deja de mostrarse y tu perfil normal de vendedor sigue funcionando. Tu diseño y tus datos se conservan: al renovar, todo vuelve a estar como lo dejaste.",
+    },
+    {
+      q: "¿Cobran comisión por mis ventas?",
+      a: "No. Win Condition TCG no maneja el dinero de tus ventas: tus clientes te transfieren directo a tu cuenta. Lo único que pagas es la membresía si contratas una tienda.",
+    },
+    {
+      q: "¿Con qué courier despacho?",
+      a: "Con el que prefieras (Starken, Blue Express, Correos de Chile u otro) o con retiro en persona. Tú coordinas el envío y defines su costo; no hay integraciones que contratar.",
     },
     {
       q: "¿Puedo vender sin contratar un plan?",
@@ -159,8 +176,25 @@ export default async function StoresLandingPage() {
               Cómo funciona
             </Link>
           </div>
-          <p className="mt-5 text-[12px] text-white/45">Sin dominio propio · sin renovación automática · cancela cuando quieras</p>
+          <p className="mt-5 text-[12px] text-white/45">Sin dominio propio · sin comisiones por venta · sin renovación automática</p>
         </div>
+      </section>
+
+      {/* VENTAJAS CLAVE */}
+      <section className="mx-auto -mt-8 max-w-5xl px-4">
+        <ul className="grid gap-px overflow-hidden rounded-2xl bg-ink-800 shadow-xl sm:grid-cols-3">
+          {HIGHLIGHTS.map((h) => (
+            <li key={h.title} className="flex items-start gap-3.5 bg-white p-5">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600">
+                <h.icon className="h-5 w-5" strokeWidth={1.75} />
+              </span>
+              <div>
+                <p className="font-display text-[15px] font-bold text-carbon">{h.title}</p>
+                <p className="mt-0.5 text-[13px] leading-relaxed text-ink-400">{h.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* BENEFICIOS */}
