@@ -2,12 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
-import { MapPin, Star, Store, Truck } from "lucide-react";
+import { BadgeCheck, MapPin, Star, Store, Truck } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { safeQuery } from "@/lib/catalog";
 import { formatSales, getSellerStats } from "@/lib/seller-stats";
 import { REGION_COOKIE, isValidRegion, sellerRegion } from "@/lib/location";
 import { LocationPicker } from "@/components/LocationPicker";
+import { isStoreActive } from "@/lib/store";
 
 export const metadata: Metadata = {
   title: "Vendedores",
@@ -33,6 +34,7 @@ export default async function SellersPage() {
           avatarUrl: true,
           offersShipping: true,
           offersPickup: true,
+          store: { select: { status: true, planId: true, activeUntil: true } },
           _count: { select: { listings: { where: { status: "ACTIVE" } } } },
         },
         orderBy: { createdAt: "asc" },
@@ -48,6 +50,7 @@ export default async function SellersPage() {
       avatarUrl: string | null;
       offersShipping: boolean;
       offersPickup: boolean;
+      store: { status: string; planId: string | null; activeUntil: Date | null } | null;
       _count: { listings: number };
     }>
   );
@@ -60,7 +63,7 @@ export default async function SellersPage() {
     .map((s) => {
       const st = stats.get(s.id) ?? { sales: 0, rating: 0, reviews: 0 };
       const region = sellerRegion(s);
-      return { ...s, st, region, near: Boolean(buyerRegion && region === buyerRegion) };
+      return { ...s, st, region, hasStore: Boolean(s.store && isStoreActive(s.store)), near: Boolean(buyerRegion && region === buyerRegion) };
     })
     // Primero los de tu región, después los que más venden.
     .sort((a, b) => Number(b.near) - Number(a.near) || b.st.sales - a.st.sales || b.st.reviews - a.st.reviews);
@@ -88,7 +91,7 @@ export default async function SellersPage() {
             return (
               <Link
                 key={s.id}
-                href={`/vendedor/${s.slug}`}
+                href={s.hasStore ? `/tienda/${s.slug}` : `/vendedor/${s.slug}`}
                 className="group lift rounded-2xl card-surface p-5"
               >
                 <div className="flex items-center gap-3">
@@ -127,6 +130,11 @@ export default async function SellersPage() {
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3 w-3" strokeWidth={2} />
                       {s.city ?? s.region}
+                    </span>
+                  )}
+                  {s.hasStore && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-500/10 px-2 py-0.5 text-[10px] font-bold text-brand-600">
+                      <BadgeCheck className="h-3 w-3" strokeWidth={2.25} /> Tienda
                     </span>
                   )}
                   {s.near && (

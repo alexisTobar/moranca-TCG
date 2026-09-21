@@ -7,13 +7,18 @@ import { prisma } from "@/lib/db";
 import { safeQuery, LISTING_CARD_SELECT } from "@/lib/catalog";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { GAME_LIST, isGameId } from "@/lib/games";
-import { Star, Store, Truck } from "lucide-react";
+import { BadgeCheck, Star, Store, Truck } from "lucide-react";
 import { formatSales, getSellerStats } from "@/lib/seller-stats";
+import { isStoreActive, siteOrigin } from "@/lib/store";
+import { buildQr } from "@/lib/qr";
+import { ShareQrCard } from "@/components/store/ShareQrCard";
+import { ShareToggle } from "@/components/store/ShareToggle";
 
 const PAGE_SIZE = 30;
 const REVIEWS_PAGE_SIZE = 10;
 
-export const revalidate = 30;
+// El link para compartir depende del host de la petición, así que la página es dinámica.
+export const dynamic = "force-dynamic";
 
 async function getSeller(slug: string) {
   return safeQuery(
@@ -32,6 +37,7 @@ async function getSeller(slug: string) {
           region: true,
           offersShipping: true,
           offersPickup: true,
+          store: { select: { status: true, planId: true, activeUntil: true } },
         },
       }),
     null
@@ -75,6 +81,10 @@ export default async function SellerPage({
   const { slug } = await params;
   const seller = await getSeller(slug);
   if (!seller) notFound();
+
+  const hasStore = Boolean(seller.store && isStoreActive(seller.store));
+  const shareUrl = `${await siteOrigin()}/v/${seller.slug}`;
+  const qr = buildQr(shareUrl, false);
 
   const [rating, sellerStats, reviews] = await Promise.all([
     getRatingSummary(seller.id),
@@ -217,6 +227,24 @@ export default async function SellerPage({
               {seller.bio}
             </p>
           )}
+          <div className="mt-4 flex flex-wrap items-start gap-2">
+            {hasStore && (
+              <Link href={`/tienda/${seller.slug}`} className="btn btn-primary btn-sm">
+                <BadgeCheck className="h-4 w-4" strokeWidth={2} />
+                Ver su tienda
+              </Link>
+            )}
+            <ShareToggle label="Compartir perfil">
+              <ShareQrCard
+                url={shareUrl}
+                displayUrl={shareUrl.replace(/^https?:\/\//, "")}
+                qr={qr}
+                filename={`qr-${seller.slug}`}
+                title={`Comparte a ${seller.name}`}
+                hint="Escanea el QR o copia el link para compartir este perfil."
+              />
+            </ShareToggle>
+          </div>
         </div>
       </header>
 

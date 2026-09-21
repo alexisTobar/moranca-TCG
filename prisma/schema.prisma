@@ -110,6 +110,7 @@ model User {
   sentMessages   OrderMessage[]
   passwordResets PasswordReset[]
   coupons        Coupon[]
+  store          Store?
   receivedReviews Review[] @relation("SellerReviews")
   writtenReviews  Review[] @relation("BuyerReviews")
 
@@ -246,6 +247,96 @@ model OrderEvent {
   createdAt DateTime @default(now())
 
   @@index([orderId, createdAt])
+}
+
+/// Planes de tienda premium que define el administrador (precio, límites y beneficios).
+model StorePlan {
+  id            String              @id @default(cuid())
+  code          String              @unique
+  name          String
+  description   String?
+  priceMonthly  Int
+  active        Boolean             @default(true)
+  /// Cuántos productos puede destacar arriba de su tienda.
+  maxFeatured   Int                 @default(6)
+  advancedStats Boolean             @default(false)
+  /// Puede aparecer en la vitrina "Tiendas destacadas" del inicio (si el admin lo activa).
+  showcase      Boolean             @default(false)
+  sortOrder     Int                 @default(0)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  stores        Store[]
+  subscriptions StoreSubscription[]
+}
+
+/// Tienda personalizable de un vendedor. Está "activa" solo con un plan vigente.
+model Store {
+  id                 String              @id @default(cuid())
+  sellerId           String              @unique
+  seller             User                @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  planId             String?
+  plan               StorePlan?          @relation(fields: [planId], references: [id])
+  /// ACTIVE o SUSPENDED (suspensión manual del administrador).
+  status             String              @default("ACTIVE")
+  activeUntil        DateTime?
+  /// Aparece en la vitrina del inicio (lo decide el administrador).
+  featured           Boolean             @default(false)
+  displayName        String?
+  tagline            String?
+  about              String?
+  logoUrl            String?
+  bannerUrl          String?
+  accentColor        String              @default("#c22443")
+  instagram          String?
+  facebook           String?
+  whatsapp           String?
+  website            String?
+  announcement       String?
+  featuredListingIds String[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  visits             StoreVisitDay[]
+  subscriptions      StoreSubscription[]
+
+  @@index([status, activeUntil])
+  @@index([featured])
+}
+
+/// Compra o renovación de un plan de tienda (pago por transferencia que revisa el administrador).
+model StoreSubscription {
+  id                String    @id @default(cuid())
+  storeId           String
+  store             Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  planId            String
+  plan              StorePlan @relation(fields: [planId], references: [id])
+  months            Int
+  amount            Int
+  /// PENDING, APPROVED o REJECTED.
+  status            String    @default("PENDING")
+  reference         String
+  receiptUploadId   String?
+  receiptUploadedAt DateTime?
+  note              String?
+  reviewedById      String?
+  reviewedAt        DateTime?
+  periodStart       DateTime?
+  periodEnd         DateTime?
+  createdAt         DateTime  @default(now())
+
+  @@index([status, createdAt])
+  @@index([storeId])
+}
+
+/// Visitas diarias a una tienda (y cuántas llegaron escaneando el QR).
+model StoreVisitDay {
+  id      String   @id @default(cuid())
+  storeId String
+  store   Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  day     DateTime @db.Date
+  views   Int      @default(0)
+  qrScans Int      @default(0)
+
+  @@unique([storeId, day])
 }
 
 /// Foto diaria del precio de una carta (mínimo, mercado y máximo entre las ofertas activas),

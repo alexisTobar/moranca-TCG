@@ -252,6 +252,30 @@ persona; el checkout respeta esas opciones.
 de Pokémon TCG Live, ej. `4 Pikachu ex SSP 57`) y One Piece (por código, ej. `4xOP01-024`).
 Mitos y Leyendas no tiene carga masiva.
 
+## 5c. Tiendas premium (membresía)
+
+Un vendedor puede tener **su propia tienda** en `/tienda/[slug]`, con solo sus publicaciones:
+banner, logo, color de marca, anuncio, redes (WhatsApp / Instagram / Facebook / sitio),
+productos destacados, insignia "Tienda verificada" y estadísticas. Sigue siendo parte de Win
+Condition (no hay dominio propio ni se quita la marca).
+
+- **Todos los perfiles** se comparten con link corto `/v/[slug]` y QR (Panel → Mi perfil). Con
+  tienda vigente el link es `/t/[slug]` y el QR lleva **el logo de la tienda al centro**
+  (corrección de errores nivel H; se verificó que sigue leyéndose).
+- **El administrador controla todo** en Panel → *Tiendas premium*: aprueba o rechaza pagos,
+  regala o extiende planes, suspende, corta, destaca en el inicio ("Tiendas destacadas") y edita
+  nombre, precio y beneficios de cada plan. Los planes por defecto (Tienda $9.990 y Pro $19.990
+  al mes) se crean solos y se pueden cambiar.
+- **Cada vendedor personaliza su tienda** en Panel → *Mi tienda*. Logo y banner solo se aceptan
+  subidos a la plataforma.
+- **Pago**: transferencia a la cuenta bancaria del usuario administrador (Panel → Mi perfil) con
+  código `TI-XXXXXXXX` y comprobante privado; el administrador confirma y se activa el período.
+  Sin pasarela de pago.
+- Una tienda solo se muestra si está `ACTIVE` y con período vigente; si vence o se suspende,
+  `/tienda/[slug]` redirige al perfil normal. Las visitas y escaneos de QR se cuentan por día
+  (`StoreVisitDay`); el dueño y el administrador no cuentan.
+- La base se actualiza sola en el deploy (`prisma db push`, solo tablas nuevas).
+
 ---
 
 ## 6. Cuentas y compradores registrados

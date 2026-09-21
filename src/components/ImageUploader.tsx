@@ -9,9 +9,22 @@ interface Props {
   onChange: (url: string | null) => void;
   /** Texto de ayuda según el tipo de publicación */
   hint?: string;
+  /** Título de la tarjeta (por defecto "Imagen"). */
+  title?: string;
+  /** Forma de la vista previa: carta (vertical), banner (ancha) o logo (cuadrada). */
+  shape?: "card" | "wide" | "square";
+  /** Permite pegar una URL de internet. Las tiendas solo aceptan imágenes subidas. */
+  allowUrl?: boolean;
 }
 
-export function ImageUploader({ value, onChange, hint }: Props) {
+const PREVIEW: Record<NonNullable<Props["shape"]>, { box: string; fit: string; size: string }> = {
+  card: { box: "h-[150px] w-[107px]", fit: "object-contain", size: "107px" },
+  wide: { box: "h-[110px] w-[240px]", fit: "object-cover", size: "240px" },
+  square: { box: "h-[120px] w-[120px]", fit: "object-cover", size: "120px" },
+};
+
+export function ImageUploader({ value, onChange, hint, title, shape = "card", allowUrl = true }: Props) {
+  const preview = PREVIEW[shape];
   const inputRef = useRef<HTMLInputElement>(null);
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +53,7 @@ export function ImageUploader({ value, onChange, hint }: Props) {
     <div className="rounded-2xl card-surface p-5">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-carbon">Imagen</h3>
+          <h3 className="text-sm font-semibold text-carbon">{title ?? "Imagen"}</h3>
           <p className="mt-0.5 text-[12px] text-ink-400">
             {hint ??
               "Si la carta no aparece en el buscador, sube la foto tú mismo."}
@@ -62,14 +75,14 @@ export function ImageUploader({ value, onChange, hint }: Props) {
 
       <div className="mt-4 flex flex-wrap items-start gap-4">
         {/* Vista previa */}
-        <div className="relative h-[150px] w-[107px] shrink-0 overflow-hidden rounded-lg border border-ink-700 bg-ink-900">
+        <div className={`relative ${preview.box} shrink-0 overflow-hidden rounded-lg border border-ink-700 bg-ink-900`}>
           {value ? (
             <Image
               src={value}
               alt="Vista previa"
               fill
-              sizes="107px"
-              className="object-contain"
+              sizes={preview.size}
+              className={preview.fit}
               unoptimized
             />
           ) : (
@@ -126,6 +139,7 @@ export function ImageUploader({ value, onChange, hint }: Props) {
             }}
           />
 
+          {allowUrl && (
           <button
             type="button"
             onClick={() => setMostrarUrl((v) => !v)}
@@ -133,8 +147,9 @@ export function ImageUploader({ value, onChange, hint }: Props) {
           >
             {mostrarUrl ? "Ocultar" : "…o pegar una URL de internet"}
           </button>
+          )}
 
-          {mostrarUrl && (
+          {allowUrl && mostrarUrl && (
             <div className="mt-2 flex gap-2">
               <input
                 value={urlManual}

@@ -21,7 +21,7 @@ export async function GET(
 
   // Los comprobantes de pago son privados: solo se sirven desde
   // /api/orders/[id]/receipt, que verifica que quien pide sea parte de la orden.
-  if (!upload || upload.filename?.startsWith("receipt:")) {
+  if (!upload || upload.filename?.startsWith("receipt:") || upload.filename?.startsWith("store-receipt:")) {
     return new Response("Imagen no encontrada", { status: 404 });
   }
 

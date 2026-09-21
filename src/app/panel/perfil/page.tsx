@@ -1,7 +1,11 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { SellerProfileForm } from "@/components/SellerProfileForm";
 import { sellerRegion } from "@/lib/location";
+import { isStoreActive, siteOrigin } from "@/lib/store";
+import { buildQr } from "@/lib/qr";
+import { ShareQrCard } from "@/components/store/ShareQrCard";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +17,7 @@ export default async function SellerProfilePage() {
     where: { id: session.id },
     select: {
       name: true,
+      slug: true,
       phone: true,
       address: true,
       rut: true,
@@ -26,9 +31,18 @@ export default async function SellerProfilePage() {
       bankAccountNumber: true,
       bankHolderName: true,
       bankRut: true,
+      store: { select: { status: true, planId: true, activeUntil: true, logoUrl: true } },
     },
   });
   if (!user) return null;
+
+  // Todos los perfiles se pueden compartir. Con tienda premium vigente el link lleva a la tienda y el QR al logo.
+  const { store, slug, ...form } = user;
+  const premium = Boolean(store && isStoreActive(store));
+  const origin = await siteOrigin();
+  const shareUrl = `${origin}/${premium ? "t" : "v"}/${slug}`;
+  const logo = premium ? store?.logoUrl ?? null : null;
+  const qr = buildQr(shareUrl, Boolean(logo));
 
   return (
     <div className="space-y-6">
@@ -39,8 +53,32 @@ export default async function SellerProfilePage() {
         </p>
       </header>
 
+      <div className="max-w-xl">
+        <ShareQrCard
+          url={shareUrl}
+          displayUrl={shareUrl.replace(/^https?:\/\//, "")}
+          qr={qr}
+          logoUrl={logo}
+          filename={`qr-${slug}`}
+          title="Comparte tu perfil"
+          hint={
+            premium
+              ? "Tu link lleva a tu tienda y tu QR lleva el logo de tu tienda."
+              : "Cualquier persona que escanee el QR o abra el link verá tus publicaciones."
+          }
+        />
+        {!premium && (
+          <p className="mt-2 text-[12px] text-ink-400">
+            ¿Quieres tu propia tienda con banner, colores y QR con tu logo?{" "}
+            <Link href="/panel/tienda" className="font-semibold text-brand-600 hover:text-brand-700">
+              Conoce los planes
+            </Link>
+          </p>
+        )}
+      </div>
+
       <SellerProfileForm
-        initial={{ ...user, region: sellerRegion({ region: user.region, city: user.city }) }}
+        initial={{ ...form, region: sellerRegion({ region: form.region, city: form.city }) }}
       />
     </div>
   );

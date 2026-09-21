@@ -242,3 +242,74 @@ export const bulkCreateSchema = z.object({
 export type ListingInput = z.infer<typeof listingSchema>;
 export type DeckCardInput = z.infer<typeof deckCardSchema>;
 export type BulkListingItemInput = z.infer<typeof bulkListingItemSchema>;
+
+/* ---------- Tiendas premium ---------- */
+
+const textoOpcional = (max: number) => z.string().trim().max(max).optional().nullable();
+
+/** Logo y banner: solo archivos subidos a la plataforma (nada de URLs externas ni rastreadores). */
+const imagenSubida = z
+  .string()
+  .max(500)
+  .regex(/^\/api\/uploads\/[\w.-]+$/, "Sube la imagen desde tu computador o teléfono")
+  .optional()
+  .nullable();
+
+/** Personalización de la tienda: la edita cada vendedor desde su propio panel. */
+export const storeUpdateSchema = z.object({
+  displayName: textoOpcional(60),
+  tagline: textoOpcional(120),
+  about: textoOpcional(2000),
+  logoUrl: imagenSubida,
+  bannerUrl: imagenSubida,
+  accentColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "El color debe ser un código como #c22443")
+    .optional(),
+  instagram: textoOpcional(200),
+  facebook: textoOpcional(200),
+  whatsapp: textoOpcional(40),
+  website: textoOpcional(200),
+  announcement: textoOpcional(160),
+  featuredListingIds: z.array(z.string().max(60)).max(50).optional(),
+});
+
+export const storeSubscribeSchema = z.object({
+  planCode: z.string().min(2).max(30),
+  months: z
+    .number()
+    .int()
+    .refine((m) => [1, 3, 6, 12].includes(m), { message: "Elige 1, 3, 6 o 12 meses" }),
+});
+
+/** Precio y beneficios de un plan: los define solo el administrador. */
+export const storePlanUpdateSchema = z
+  .object({
+    name: z.string().trim().min(2).max(40),
+    description: textoOpcional(200),
+    priceMonthly: z.number().int().min(0).max(9_999_999),
+    active: z.boolean(),
+    maxFeatured: z.number().int().min(0).max(50),
+    advancedStats: z.boolean(),
+    showcase: z.boolean(),
+  })
+  .partial();
+
+/** Acciones del administrador sobre una tienda. */
+export const adminStoreActionSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("grant"),
+    planCode: z.string().min(2).max(30),
+    months: z.number().int().min(1).max(36),
+    note: textoOpcional(300),
+  }),
+  z.object({ action: z.literal("suspend") }),
+  z.object({ action: z.literal("resume") }),
+  z.object({ action: z.literal("revoke") }),
+  z.object({ action: z.literal("feature"), value: z.boolean() }),
+]);
+
+export const adminSubscriptionActionSchema = z.object({
+  action: z.enum(["approve", "reject"]),
+  note: textoOpcional(300),
+});

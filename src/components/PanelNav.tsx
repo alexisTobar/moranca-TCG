@@ -11,6 +11,8 @@ import {
   Users,
   UserCircle,
   ShieldCheck,
+  Store,
+  Gem,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -26,8 +28,10 @@ const ITEMS: Array<{
   { href: "/panel/publicaciones", label: "Publicaciones", icon: ListChecks },
   { href: "/panel/ordenes", label: "Órdenes", icon: Package },
   { href: "/panel/descuentos", label: "Descuentos", icon: Percent },
+  { href: "/panel/tienda", label: "Mi tienda", icon: Store },
   { href: "/panel/perfil", label: "Mi perfil", icon: UserCircle },
   { href: "/panel/usuarios", label: "Vendedores", icon: Users, adminOnly: true },
+  { href: "/panel/tiendas", label: "Tiendas premium", icon: Gem, adminOnly: true },
   { href: "/panel/configuracion", label: "Pagos y descuentos", icon: ShieldCheck, adminOnly: true },
 ];
 
@@ -40,7 +44,7 @@ export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
         {ITEMS.filter((i) => !i.adminOnly || isAdmin).map((item) => {
           const active = item.exact
             ? pathname === item.href
-            : pathname.startsWith(item.href);
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
           return (
             <li key={item.href} className="shrink-0">

@@ -24,6 +24,7 @@ import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { Reveal } from "@/components/Reveal";
 import { NewsSlider, type NewsSlide } from "@/components/NewsSlider";
 import { GameLogo } from "@/components/GameLogo";
+import { StoreShowcase } from "@/components/store/StoreShowcase";
 
 export const revalidate = 60;
 
@@ -486,6 +487,8 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <StoreShowcase />
 
       {/* VENDEDORES */}
       {sellers.length > 0 && (
