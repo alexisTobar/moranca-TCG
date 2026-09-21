@@ -5,6 +5,9 @@ import { Logo } from "@/components/Logo";
 import { getCurrentUser } from "@/lib/auth";
 import { LogoutButton } from "@/components/LogoutButton";
 import { PanelNav } from "@/components/PanelNav";
+import { PanelBell, PanelCountsProvider } from "@/components/panel/PanelCounts";
+import { getPanelCounts } from "@/lib/panel-counts";
+import { ensureAdminPro } from "@/lib/store";
 
 export const metadata: Metadata = {
   title: "Panel",
@@ -24,8 +27,11 @@ export default async function PanelLayout({
   if (user.role === "BUYER") redirect("/cuenta");
 
   const isAdmin = user.role === "ADMIN";
+  if (isAdmin) await ensureAdminPro(user.id);
+  const counts = await getPanelCounts(user);
 
   return (
+    <PanelCountsProvider initial={counts}>
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-50 border-b border-white/10 bg-carbon/90 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-[1400px] items-center gap-4 px-4">
@@ -46,6 +52,7 @@ export default async function PanelLayout({
             <span className="hidden text-[13px] font-medium text-white/80 md:block">
               {user.name}
             </span>
+            <PanelBell isAdmin={isAdmin} />
             <LogoutButton className="!border-white/20 !text-white/80" />
           </div>
         </div>
@@ -56,5 +63,6 @@ export default async function PanelLayout({
         <main className="min-w-0 flex-1">{children}</main>
       </div>
     </div>
+    </PanelCountsProvider>
   );
 }

@@ -7,7 +7,7 @@ import { ShoppingBag, ShoppingCart } from "lucide-react";
 import { useCart } from "./CartProvider";
 import { clp } from "@/lib/format";
 
-export function CartButton() {
+export function CartButton({ tone = "dark" }: { tone?: "dark" | "light" }) {
   const { count, setOpen, ready, registerCartIcon } = useCart();
   const btnRef = useRef<HTMLButtonElement>(null);
   const [bump, setBump] = useState(false);
@@ -33,7 +33,11 @@ export function CartButton() {
       ref={btnRef}
       onClick={() => setOpen(true)}
       aria-label={`Abrir carrito (${count} productos)`}
-      className="icon-btn"
+      className={
+        tone === "light"
+          ? "relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink-700 bg-white text-carbon transition hover:border-brand-500 hover:text-brand-600"
+          : "icon-btn"
+      }
     >
       <ShoppingBag className={`h-[18px] w-[18px] ${bump ? "animate-cart-bump" : ""}`} strokeWidth={2} />
       {ready && count > 0 && (

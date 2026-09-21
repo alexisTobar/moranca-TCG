@@ -313,3 +313,19 @@ export const adminSubscriptionActionSchema = z.object({
   action: z.enum(["approve", "reject"]),
   note: textoOpcional(300),
 });
+
+/* ---------- Soporte ---------- */
+
+export const supportTicketSchema = z.object({
+  subject: z.string().trim().min(4, "Escribe un asunto de al menos 4 caracteres").max(120),
+  category: z.enum(["PLAN", "TIENDA", "ORDEN", "CUENTA", "OTRO"]),
+  body: z.string().trim().min(5, "Cuéntanos un poco más (mínimo 5 caracteres)").max(2000),
+});
+
+export const supportMessageSchema = z.object({
+  body: z.string().trim().min(1, "Escribe un mensaje").max(2000),
+});
+
+export const supportTicketActionSchema = z.object({
+  action: z.enum(["close", "reopen"]),
+});

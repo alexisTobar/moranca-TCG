@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { safeQuery } from "@/lib/catalog";
 import { clp, timeAgo } from "@/lib/format";
 import { GameChip } from "@/components/GameChip";
+import { getPanelCounts } from "@/lib/panel-counts";
+import { CreditCard, LifeBuoy, Package, UserPlus, type LucideIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +69,14 @@ export default async function PanelHome() {
     ),
   ]);
 
+  const pending = await getPanelCounts(user);
+  const attention: Array<{ href: string; icon: LucideIcon; n: number; text: string }> = [
+    { href: "/panel/tiendas", icon: CreditCard, n: pending.subscriptions, text: "pagos de membresía por revisar" },
+    { href: "/panel/soporte", icon: LifeBuoy, n: pending.tickets, text: isAdmin ? "tickets con mensajes nuevos" : "respuestas de soporte sin leer" },
+    { href: "/panel/usuarios", icon: UserPlus, n: pending.sellerRequests, text: "solicitudes para ser vendedor" },
+    { href: "/panel/ordenes", icon: Package, n: pending.orders, text: "órdenes con comprobante por confirmar" },
+  ].filter((a) => a.n > 0);
+
   const stats = [
     { label: "Publicaciones activas", value: String(active), href: "/panel/publicaciones" },
     { label: "Borradores", value: String(drafts), href: "/panel/publicaciones?status=DRAFT" },
@@ -98,6 +108,28 @@ export default async function PanelHome() {
           + Nueva publicación
         </Link>
       </header>
+
+      {attention.length > 0 && (
+        <section aria-label="Requiere tu atención" className="rounded-2xl border border-brand-500/30 bg-brand-500/5 p-4">
+          <p className="font-display text-sm font-bold text-carbon">Requiere tu atención</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {attention.map((a) => (
+              <Link
+                key={a.href}
+                href={a.href}
+                className="group flex items-center gap-3 rounded-xl bg-white px-3.5 py-3 text-[13px] font-medium text-ink-300 shadow-sm transition hover:shadow-md"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-500/10 text-brand-600">
+                  <a.icon className="h-4 w-4" strokeWidth={2} />
+                </span>
+                <span>
+                  <strong className="font-display text-base text-carbon">{a.n}</strong> {a.text}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {isAdmin && pendingOrders > 0 && (
         <Link

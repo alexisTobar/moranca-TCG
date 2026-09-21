@@ -16,6 +16,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Solo los vendedores pueden tener tienda" }, { status: 403 });
     }
 
+    if (user.role === "ADMIN") {
+      return NextResponse.json(
+        { error: "Como administrador ya tienes el plan Pro incluido, sin vencimiento." },
+        { status: 409 }
+      );
+    }
+
     const limiter = await rateLimit(clientKey(req, `store-subscribe:${user.id}`), 6, 3600);
     if (!limiter.allowed) {
       return NextResponse.json({ error: "Demasiadas solicitudes. Intenta más tarde." }, { status: 429 });

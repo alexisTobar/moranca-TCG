@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { ensureDefaultPlans, isStoreActive } from "@/lib/store";
+import { ensureAdminPro, ensureDefaultPlans, isStoreActive } from "@/lib/store";
 import { StoresAdmin, type AdminPending, type AdminStore, type AdminPlan } from "@/components/store/StoresAdmin";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +12,7 @@ export default async function StoresAdminPage() {
   if (user.role !== "ADMIN") redirect("/panel");
 
   await ensureDefaultPlans();
+  await ensureAdminPro();
 
   // Todos los vendedores aparecen en la lista, tengan o no tienda todavía, para poder regalarles un plan.
   const sellers = await prisma.user.findMany({
@@ -28,7 +29,7 @@ export default async function StoresAdminPage() {
       orderBy: { updatedAt: "desc" },
       include: {
         plan: { select: { code: true, name: true, showcase: true, priceMonthly: true } },
-        seller: { select: { name: true, slug: true, email: true, _count: { select: { listings: { where: { status: "ACTIVE" } } } } } },
+        seller: { select: { name: true, slug: true, email: true, role: true, _count: { select: { listings: { where: { status: "ACTIVE" } } } } } },
       },
     }),
     prisma.storeSubscription.findMany({
@@ -60,6 +61,7 @@ export default async function StoresAdminPage() {
     status: s.status,
     active: isStoreActive(s),
     featured: s.featured,
+    isAdminAccount: s.seller.role === "ADMIN",
     views30: viewsByStore.get(s.id) ?? 0,
     listings: s.seller._count.listings,
   }));
@@ -89,7 +91,7 @@ export default async function StoresAdminPage() {
   }));
 
   const monthlyIncome = stores
-    .filter((s) => isStoreActive(s))
+    .filter((s) => isStoreActive(s) && s.seller.role !== "ADMIN")
     .reduce((sum, s) => sum + (s.plan?.priceMonthly ?? 0), 0);
 
   return (

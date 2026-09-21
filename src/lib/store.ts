@@ -58,6 +58,38 @@ export function activeStoreWhere(now = new Date()): Prisma.StoreWhereInput {
   return { status: "ACTIVE", planId: { not: null }, activeUntil: { gt: now } };
 }
 
+/** Fecha "sin vencimiento" de las cuentas de administrador. */
+export const ADMIN_PLAN_UNTIL = new Date("2099-12-31T00:00:00Z");
+
+/**
+ * El administrador siempre tiene todo lo del plan Pro, sin comprarlo ni renovarlo.
+ * Es idempotente y barato: si ya está en orden no escribe nada. Sin `sellerId`, cubre a todos los administradores.
+ */
+export async function ensureAdminPro(sellerId?: string) {
+  try {
+    await ensureDefaultPlans();
+    const pro = await prisma.storePlan.findUnique({ where: { code: "PRO" }, select: { id: true } });
+    if (!pro) return;
+    const admins = await prisma.user.findMany({
+      where: { role: "ADMIN", active: true, ...(sellerId ? { id: sellerId } : {}) },
+      select: { id: true, store: { select: { planId: true, status: true, activeUntil: true } } },
+    });
+    for (const a of admins) {
+      const s = a.store;
+      const ok =
+        s && s.planId === pro.id && s.status === "ACTIVE" && s.activeUntil && s.activeUntil.getFullYear() >= 2098;
+      if (ok) continue;
+      await prisma.store.upsert({
+        where: { sellerId: a.id },
+        create: { sellerId: a.id, planId: pro.id, status: "ACTIVE", activeUntil: ADMIN_PLAN_UNTIL },
+        update: { planId: pro.id, status: "ACTIVE", activeUntil: ADMIN_PLAN_UNTIL },
+      });
+    }
+  } catch (error) {
+    console.error("[store] no se pudo asegurar el plan Pro del administrador", error);
+  }
+}
+
 /** Devuelve la tienda del vendedor, creándola vacía la primera vez. */
 export async function ensureStore(sellerId: string) {
   return prisma.store.upsert({

@@ -111,6 +111,7 @@ model User {
   passwordResets PasswordReset[]
   coupons        Coupon[]
   store          Store?
+  supportTickets SupportTicket[]
   receivedReviews Review[] @relation("SellerReviews")
   writtenReviews  Review[] @relation("BuyerReviews")
 
@@ -337,6 +338,40 @@ model StoreVisitDay {
   qrScans Int      @default(0)
 
   @@unique([storeId, day])
+}
+
+/// Ticket de soporte: solo los vendedores con tienda vigente pueden abrirlos y los atiende el administrador.
+model SupportTicket {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  sellerId      String
+  seller        User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  subject       String
+  /// PLAN | TIENDA | ORDEN | CUENTA | OTRO
+  category      String   @default("OTRO")
+  /// OPEN (espera al admin) | ANSWERED (espera al vendedor) | CLOSED
+  status        String   @default("OPEN")
+  adminUnread   Boolean  @default(true)
+  sellerUnread  Boolean  @default(false)
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  messages      SupportMessage[]
+
+  @@index([status, lastMessageAt])
+  @@index([sellerId, lastMessageAt])
+}
+
+model SupportMessage {
+  id        String        @id @default(cuid())
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  fromAdmin Boolean       @default(false)
+  body      String
+  createdAt DateTime      @default(now())
+
+  @@index([ticketId, createdAt])
 }
 
 /// Foto diaria del precio de una carta (mínimo, mercado y máximo entre las ofertas activas),

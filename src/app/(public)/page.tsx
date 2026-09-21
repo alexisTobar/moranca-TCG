@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import Image from "next/image";
 import type { NewsCategory } from "@prisma/client";
 import {
@@ -25,8 +26,27 @@ import { Reveal } from "@/components/Reveal";
 import { NewsSlider, type NewsSlide } from "@/components/NewsSlider";
 import { GameLogo } from "@/components/GameLogo";
 import { StoreShowcase } from "@/components/store/StoreShowcase";
+import { PlanCards } from "@/components/store/PlanCards";
+import { FaqList, faqJsonLd, type FaqItem } from "@/components/FaqList";
+import { JsonLd } from "@/components/JsonLd";
+import { getMarketingPlans } from "@/lib/store-marketing";
+import { SITE_NAME, siteUrl } from "@/lib/seo";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: { absolute: "Win Condition TCG | Compra y vende cartas TCG en Chile" },
+  description:
+    "Marketplace chileno de cartas TCG: singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas. Stock reservado, pago por transferencia y envíos a todo Chile.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Win Condition TCG | Compra y vende cartas TCG en Chile",
+    description: "Singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas. Stock reservado y envíos a todo Chile.",
+    url: "/",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Win Condition TCG — cartas TCG en Chile" }],
+  },
+  twitter: { card: "summary_large_image" },
+};
 
 /** Una carta destacada por juego (todas caras o raras y de ediciones actuales). */
 const HERO_CARDS: Array<{
@@ -206,9 +226,63 @@ export default async function HomePage() {
   const countByGame = new Map(counts.map((c) => [c.game, c._count._all]));
   const totalListings = counts.reduce((a, c) => a + c._count._all, 0);
   const transferPct = discountPctFor(settings, "TRANSFER");
+  const plans = await getMarketingPlans();
+
+  const faqs: FaqItem[] = [
+    {
+      q: "¿Cómo compro cartas en Win Condition TCG?",
+      a: "Buscas la carta, la agregas al carrito y confirmas la compra. Reservamos el stock a tu nombre, transfieres al vendedor con tu código único y subes el comprobante. El vendedor confirma el pago y despacha tu pedido.",
+    },
+    {
+      q: "¿Cómo se paga y es seguro?",
+      a: `El pago es por transferencia bancaria directa al vendedor. Cada orden tiene un código de referencia único y un comprobante privado, y tu stock queda reservado por ${settings.paymentWindowHours} horas mientras pagas. Si no pagas a tiempo, la orden se cancela y las cartas vuelven a estar disponibles.`,
+    },
+    {
+      q: "¿Hacen envíos a todo Chile?",
+      a: "Sí. Cada vendedor indica si ofrece envío a domicilio, retiro en persona o ambos, y puedes filtrar por la opción que prefieras o por vendedores cerca de tu región.",
+    },
+    {
+      q: "¿Qué juegos y productos puedo encontrar?",
+      a: "Singles, sellados y mazos armados de Magic: The Gathering, Pokémon TCG, One Piece Card Game y Mitos y Leyendas, con la imagen real del catálogo oficial y comparación de precios entre vendedores.",
+    },
+    {
+      q: "¿Cómo puedo vender mis cartas?",
+      a: "Crea tu cuenta, solicita ser vendedor y publica tus cartas. Puedes cargar listas completas de Magic, Pokémon y One Piece de una sola vez. Cobras directo a tu cuenta y tienes un perfil con link y QR para compartir.",
+    },
+    {
+      q: "¿Qué es una tienda premium?",
+      a: "Es tu propia vitrina dentro de Win Condition: con tu logo, banner y colores, solo tus productos, link corto y QR con tu logo, estadísticas y soporte directo. Conoce los planes en la página de tiendas.",
+    },
+  ];
 
   return (
     <>
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: SITE_NAME,
+            url: siteUrl(),
+            logo: `${siteUrl()}/logo-full.png`,
+            description: "Marketplace chileno de cartas coleccionables TCG.",
+            areaServed: "CL",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: SITE_NAME,
+            url: siteUrl(),
+            inLanguage: "es-CL",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: { "@type": "EntryPoint", urlTemplate: `${siteUrl()}/cartas?q={search_term_string}` },
+              "query-input": "required name=search_term_string",
+            },
+          },
+          faqJsonLd(faqs),
+        ]}
+      />
       {/* HERO */}
       <section className="bg-hero relative overflow-hidden text-white">
         <div className="bg-grid pointer-events-none absolute inset-0" />
@@ -226,13 +300,13 @@ export default async function HomePage() {
             </span>
 
             <h1 className="animate-fade-up delay-1 mt-6 font-display text-[2.5rem] font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.25rem]">
-              Las cartas que
+              Compra y vende
               <br />
-              te hacen <span className="text-gold-gradient">ganar</span>.
+              <span className="text-gold-gradient">cartas TCG</span> en Chile.
             </h1>
 
             <p className="animate-fade-up delay-2 mt-6 max-w-xl text-[16px] leading-relaxed text-white/70">
-              Singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas. Compras con
+              <strong className="font-semibold text-white">Las cartas que te hacen ganar.</strong> Singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas. Compras con
               stock reservado, pagas por transferencia con referencia única y recibes en todo Chile.
             </p>
 
@@ -245,6 +319,13 @@ export default async function HomePage() {
                 Ver mazos armados
               </Link>
             </div>
+
+            <p className="animate-fade-up delay-3 mt-4 text-[13px] text-white/60">
+              ¿Vendes cartas?{" "}
+              <Link href="/tiendas" className="font-semibold text-gold-300 underline-offset-4 transition hover:text-gold-200 hover:underline">
+                Abre tu tienda propia con link y QR →
+              </Link>
+            </p>
 
             <div className="animate-fade-up delay-4 mt-6 flex flex-wrap gap-2">
               {GAME_LIST.map((g) => (
@@ -526,31 +607,48 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* CTA VENDEDORES */}
-      <section className="mx-auto max-w-7xl px-4 pt-16">
-        <div className="bg-hero relative overflow-hidden rounded-[2rem] px-6 py-14 text-center text-white sm:px-14">
+      {/* TU TIENDA: planes */}
+      <section id="tu-tienda" className="mx-auto max-w-7xl scroll-mt-24 px-4 pt-16">
+        <div className="bg-hero relative overflow-hidden rounded-[2rem] px-5 py-14 text-white sm:px-12 lg:py-16">
           <div className="bg-grid pointer-events-none absolute inset-0 opacity-50" />
-          <div className="relative mx-auto max-w-2xl">
-            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold-300 to-gold-500 text-[#2a1d00]">
-              <Store className="h-7 w-7" strokeWidth={1.75} />
-            </span>
-            <h2 className="mt-6 font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              ¿Tienes cartas para vender?
-            </h2>
-            <p className="mt-4 text-[15px] leading-relaxed text-white/65">
-              Publica singles, sellados y mazos en minutos. Cobras por transferencia directa a tu
-              cuenta y nosotros reservamos el stock por ti.
-            </p>
+          <div className="animate-blob pointer-events-none absolute -right-16 -top-10 h-64 w-64 rounded-full bg-gold-500/15 blur-3xl" />
+          <div className="relative">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold-300 to-gold-500 text-[#2a1d00]">
+                <Store className="h-7 w-7" strokeWidth={1.75} />
+              </span>
+              <p className="mt-5 text-[12px] font-bold uppercase tracking-[0.2em] text-gold-300">Para vendedores</p>
+              <h2 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+                Tu tienda propia, con tu marca al frente
+              </h2>
+              <p className="mt-4 text-[15px] leading-relaxed text-white/65">
+                Vende gratis con tu perfil o da el salto con una tienda premium: link corto, QR con tu logo, banner,
+                colores, estadísticas y soporte directo. Sin dominio propio y sin renovación automática.
+              </p>
+            </div>
+
+            <div className="mt-10">
+              <PlanCards plans={plans} ctaHref="/tiendas#planes" ctaLabel="Quiero este plan" tone="dark" />
+            </div>
+
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/registro" className="btn btn-gold btn-lg">
-                Crear mi cuenta
+              <Link href="/tiendas" className="btn btn-gold btn-lg">
+                Conocer las tiendas
                 <ArrowRight className="h-4 w-4" strokeWidth={2.25} />
               </Link>
-              <Link href="/vendedores" className="btn btn-glass btn-lg">
-                Ver vendedores
+              <Link href="/registro" className="btn btn-glass btn-lg">
+                Crear mi cuenta gratis
               </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* PREGUNTAS FRECUENTES */}
+      <section className="mx-auto max-w-7xl px-4 pt-16">
+        <SectionTitle eyebrow="Ayuda" title="Preguntas frecuentes" subtitle="Lo que más nos preguntan compradores y vendedores" />
+        <div className="mt-8">
+          <FaqList items={faqs} />
         </div>
       </section>
     </>

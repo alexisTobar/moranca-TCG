@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { memoryRateLimit, clientKey } from "@/lib/rate-limit";
+import { notifyAdmins } from "@/lib/notify";
 import { IMAGE_SIGNATURES, PDF_SIGNATURE, detectSignature } from "@/lib/file-signature";
 
 export const runtime = "nodejs";
@@ -64,6 +65,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         data: { receiptUploadId: upload.id, receiptUploadedAt: new Date() },
       });
     });
+
+    await notifyAdmins(
+      `Comprobante de membresía de ${user.name}`,
+      ["Subió el comprobante de transferencia y espera tu aprobación."],
+      "/panel/tiendas"
+    );
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {

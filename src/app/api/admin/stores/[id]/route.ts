@@ -18,8 +18,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
     const data = parsed.data;
 
-    const store = await prisma.store.findUnique({ where: { id }, select: { id: true } });
+    const store = await prisma.store.findUnique({ where: { id }, select: { id: true, seller: { select: { role: true } } } });
     if (!store) return NextResponse.json({ error: "Tienda no encontrada" }, { status: 404 });
+
+    // La cuenta de administrador tiene el plan Pro incluido: no se regala, suspende ni corta.
+    if (store.seller.role === "ADMIN" && data.action !== "feature") {
+      return NextResponse.json(
+        { error: "La cuenta de administrador tiene el plan Pro incluido y no se puede modificar." },
+        { status: 409 }
+      );
+    }
 
     switch (data.action) {
       case "grant": {

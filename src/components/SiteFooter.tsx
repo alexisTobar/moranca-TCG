@@ -86,6 +86,7 @@ export function SiteFooter() {
             { href: "/ayuda", label: "Cómo comprar" },
             { href: "/ayuda#envios", label: "Envíos" },
             { href: "/ayuda#estados", label: "Estados de carta" },
+            { href: "/tiendas", label: "Abre tu tienda" },
             { href: "/ingresar", label: "Acceso vendedores" },
           ]}
         />

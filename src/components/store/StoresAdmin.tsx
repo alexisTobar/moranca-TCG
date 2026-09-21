@@ -30,6 +30,8 @@ export interface AdminStore {
   status: string;
   active: boolean;
   featured: boolean;
+  /** Cuenta de administrador: tiene el plan Pro incluido y no se puede regalar, suspender ni cortar. */
+  isAdminAccount: boolean;
   views30: number;
   listings: number;
 }
@@ -332,7 +334,9 @@ export function StoresAdmin({
                     {s.status === "SUSPENDED"
                       ? "Suspendida"
                       : s.active
-                        ? `${s.planName} · hasta ${fmt(s.activeUntil)}`
+                        ? s.isAdminAccount
+                          ? `${s.planName} · incluido, sin vencimiento`
+                          : `${s.planName} · hasta ${fmt(s.activeUntil)}`
                         : expired
                           ? `Venció ${fmt(s.activeUntil)}`
                           : "Sin plan"}
@@ -358,6 +362,9 @@ export function StoresAdmin({
                       label="Destacada"
                     />
                   </label>
+                  {s.isAdminAccount ? (
+                    <p className="ml-auto text-[12px] font-medium text-ink-400">Cuenta de administrador: Pro incluido</p>
+                  ) : (
                   <div className="ml-auto flex flex-wrap gap-2">
                     <button type="button" onClick={() => setOpen(open === s.id ? null : s.id)} className="btn btn-secondary btn-sm">
                       <Gift className="h-4 w-4" strokeWidth={2} />
@@ -390,9 +397,10 @@ export function StoresAdmin({
                       </button>
                     )}
                   </div>
+                  )}
                 </div>
 
-                {open === s.id && (
+                {open === s.id && !s.isAdminAccount && (
                   <div className="mt-3 flex flex-wrap items-end gap-3 rounded-xl bg-ink-900 p-3">
                     <label className="block">
                       <span className="field-label">Plan</span>

@@ -40,7 +40,9 @@ export const metadata: Metadata = {
     title: "Win Condition TCG — Cartas coleccionables en Chile",
     description:
       "Singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas.",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Win Condition TCG — cartas TCG en Chile" }],
   },
+  twitter: { card: "summary_large_image" },
   robots: { index: true, follow: true },
 };
 

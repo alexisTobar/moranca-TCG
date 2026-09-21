@@ -3,7 +3,7 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
-import { BadgeCheck, Globe, MapPin, Megaphone, MessageCircle, SearchX, Star, Store, Truck } from "lucide-react";
+import { BadgeCheck, Globe, MapPin, MessageCircle, SearchX, Star, Store, Truck } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { GAME_LIST, isGameId } from "@/lib/games";
@@ -11,12 +11,14 @@ import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { formatSales, getSellerStats } from "@/lib/seller-stats";
 import { sellerRegion } from "@/lib/location";
-import { isStoreActive, recordStoreVisit, siteOrigin } from "@/lib/store";
+import { ensureAdminPro, isStoreActive, recordStoreVisit, siteOrigin } from "@/lib/store";
 import { storeLinks } from "@/lib/store-links";
 import { storeThemeVars } from "@/lib/store-theme";
 import { buildQr } from "@/lib/qr";
 import { ShareQrCard } from "@/components/store/ShareQrCard";
 import { ShareToggle } from "@/components/store/ShareToggle";
+import { StoreHeader } from "@/components/store/StoreHeader";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +44,7 @@ async function loadSeller(slug: string) {
         where: { slug, active: true, role: { in: ["SELLER", "ADMIN"] } },
         select: {
           id: true,
+          role: true,
           name: true,
           slug: true,
           bio: true,
@@ -67,7 +70,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return {
     title: name,
     description: store.tagline || `Catálogo de ${name} en Win Condition TCG.`,
-    openGraph: { title: name, images: store.bannerUrl ? [store.bannerUrl] : store.logoUrl ? [store.logoUrl] : undefined },
+    alternates: { canonical: `/tienda/${slug}` },
+    openGraph: { title: name, images: store.bannerUrl ? [store.bannerUrl] : store.logoUrl ? [store.logoUrl] : ["/opengraph-image"] },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -79,7 +84,12 @@ export default async function StorefrontPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
-  const seller = await loadSeller(slug);
+  let seller = await loadSeller(slug);
+  // El administrador siempre tiene el plan Pro: si aún no está aplicado, se aplica ahora.
+  if (seller?.role === "ADMIN" && !isStoreActive(seller.store)) {
+    await ensureAdminPro(seller.id);
+    seller = await loadSeller(slug);
+  }
   if (!seller) notFound();
   const store = seller.store;
   // Sin plan vigente, la tienda no se muestra: el visitante ve el perfil normal del vendedor.
@@ -115,7 +125,7 @@ export default async function StorefrontPage({
       : {}),
   };
 
-  const [listings, total, byGame, featuredRaw, stats, reviews, origin] = await Promise.all([
+  const [listings, total, byGame, byType, featuredRaw, stats, reviews, origin] = await Promise.all([
     safeQuery(
       () =>
         prisma.listing.findMany({
@@ -131,6 +141,10 @@ export default async function StorefrontPage({
     safeQuery(
       () => prisma.listing.groupBy({ by: ["game"], where: baseWhere, _count: { _all: true } }),
       [] as Array<{ game: string; _count: { _all: number } }>
+    ),
+    safeQuery(
+      () => prisma.listing.groupBy({ by: ["type"], where: baseWhere, _count: { _all: true } }),
+      [] as Array<{ type: string; _count: { _all: number } }>
     ),
     store.featuredListingIds.length > 0
       ? safeQuery(
@@ -187,15 +201,21 @@ export default async function StorefrontPage({
   const initial = name.charAt(0).toUpperCase();
 
   return (
-    <div style={storeThemeVars(store.accentColor) as React.CSSProperties}>
-      {store.announcement && (
-        <div className="bg-brand-600 text-white">
-          <p className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-2 text-center text-[13px] font-semibold">
-            <Megaphone className="h-4 w-4 shrink-0" strokeWidth={2} />
-            {store.announcement}
-          </p>
-        </div>
-      )}
+    <div style={storeThemeVars(store.accentColor) as React.CSSProperties} className="flex min-h-dvh flex-col bg-white">
+      <StoreHeader
+        slug={seller.slug}
+        name={name}
+        logoUrl={store.logoUrl ?? seller.avatarUrl}
+        announcement={store.announcement}
+        q={q}
+        game={game}
+        type={type}
+        games={GAME_LIST.filter((g) => byGame.some((b) => b.game === g.id)).map((g) => g.id)}
+        types={TYPES.filter((t) => byType.some((b) => b.type === t.value)).map((t) => t.value)}
+        hasAbout={Boolean(store.about || seller.bio)}
+        user={viewer}
+      />
+      <main className="flex-1">
 
       {/* BANNER */}
       <div className="relative h-44 overflow-hidden sm:h-60 lg:h-72">
@@ -308,7 +328,7 @@ export default async function StorefrontPage({
             <div className="no-scrollbar -mx-4 mt-5 flex snap-x snap-mandatory gap-3.5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0 lg:grid-cols-6">
               {featured.map((l) => (
                 <div key={l.id} className="w-[46vw] max-w-[220px] shrink-0 snap-start sm:w-auto sm:max-w-none">
-                  <ListingCard listing={l} />
+                  <ListingCard listing={l} href={`/tienda/${seller.slug}/producto/${l.slug}`} />
                 </div>
               ))}
             </div>
@@ -316,7 +336,7 @@ export default async function StorefrontPage({
         )}
 
         {/* CATÁLOGO */}
-        <section className="mt-10">
+        <section id="catalogo" className="mt-10 scroll-mt-40">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h2 className="font-display text-2xl font-bold tracking-tight text-carbon">Catálogo</h2>
             <p className="text-[13px] text-ink-400">
@@ -388,7 +408,7 @@ export default async function StorefrontPage({
           ) : (
             <div className="mt-5 grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
               {listings.map((l) => (
-                <ListingCard key={l.id} listing={l} />
+                <ListingCard key={l.id} listing={l} href={`/tienda/${seller.slug}/producto/${l.slug}`} />
               ))}
             </div>
           )}
@@ -411,7 +431,7 @@ export default async function StorefrontPage({
 
         {/* SOBRE LA TIENDA */}
         {(store.about || seller.bio) && (
-          <section className="mt-12 rounded-3xl card-surface p-6 sm:p-8">
+          <section id="nosotros" className="mt-12 scroll-mt-40 rounded-3xl card-surface p-6 sm:p-8">
             <h2 className="font-display text-xl font-bold text-carbon">Sobre {name}</h2>
             <p className="mt-3 max-w-3xl whitespace-pre-line text-[15px] leading-relaxed text-ink-300">
               {store.about || seller.bio}
@@ -424,9 +444,6 @@ export default async function StorefrontPage({
           <section className="mt-6">
             <div className="flex items-end justify-between gap-3">
               <h2 className="font-display text-xl font-bold text-carbon">Lo que dicen los compradores</h2>
-              <Link href={`/vendedor/${seller.slug}#resenas`} className="text-[13px] font-semibold text-brand-600 hover:text-brand-700">
-                Ver todas
-              </Link>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {reviews.map((r) => (
@@ -444,11 +461,15 @@ export default async function StorefrontPage({
           </section>
         )}
 
-        <p className="mt-12 border-t border-ink-800 pt-6 text-center text-[12px] text-ink-400">
-          {name} vende con la garantía de <Link href="/" className="font-semibold text-brand-600 hover:text-brand-700">Win Condition TCG</Link>:
-          stock reservado, código de pago y comprobante en cada compra.
-        </p>
       </div>
+      </main>
+
+      <footer className="border-t border-ink-800 bg-ink-900">
+        <p className="mx-auto max-w-7xl px-4 py-6 text-center text-[12px] text-ink-400">
+          {name} vende con la garantía de Win Condition TCG: stock reservado, código de pago y comprobante en cada compra.
+        </p>
+      </footer>
+      <CartDrawer />
     </div>
   );
 }

@@ -30,14 +30,15 @@ const TYPE_LABEL: Record<string, string> = {
   DECK: "Mazo",
 };
 
-export function ListingCard({ listing }: { listing: ListingCardData }) {
+/** `href` permite llevar el clic a otra ruta (por ejemplo la ficha dentro de una tienda). */
+export function ListingCard({ listing, href }: { listing: ListingCardData; href?: string }) {
   const isDeck = listing.type === "DECK";
   const hasOffer = listing.offerPrice != null && listing.offerPrice < listing.price;
   const effectivePrice = hasOffer ? listing.offerPrice! : listing.price;
 
   return (
     <div className="group lift flex flex-col overflow-hidden rounded-2xl card-surface">
-      <Link href={`/producto/${listing.slug}`} className="flex flex-1 flex-col">
+      <Link href={href ?? `/producto/${listing.slug}`} className="flex flex-1 flex-col">
         <div className="relative aspect-[63/88] overflow-hidden bg-gradient-to-b from-ink-900 to-ink-850">
           {listing.imageUrl ? (
             <Image

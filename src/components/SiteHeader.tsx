@@ -15,6 +15,7 @@ const NAV = [
   { href: "/cartas?type=SEALED", label: "Sellados" },
   { href: "/cartas?type=DECK", label: "Mazos" },
   { href: "/vendedores", label: "Vendedores" },
+  { href: "/tiendas", label: "Abre tu tienda" },
   { href: "/noticias", label: "Noticias" },
   { href: "/ayuda", label: "Ayuda" },
 ];

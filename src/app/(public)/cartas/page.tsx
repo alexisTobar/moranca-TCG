@@ -9,11 +9,35 @@ import { Reveal } from "@/components/Reveal";
 import { FilterDrawer } from "@/components/FilterDrawer";
 import { SearchX } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Catálogo de cartas",
-  description:
-    "Explora singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas.",
-};
+const TYPE_SEO: Record<string, string> = { SINGLE: "Singles", SEALED: "Sellados", DECK: "Mazos armados" };
+
+/** Título y canonical propios por juego y tipo, para que cada vista posicione por lo que muestra. */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const sp = await searchParams;
+  const game = one(sp.game);
+  const type = one(sp.type);
+  const gameName = game && isGameId(game) ? GAME_LIST.find((g) => g.id === game)?.name : undefined;
+  const typeName = type ? TYPE_SEO[type] : undefined;
+
+  if (!gameName && !typeName) {
+    return {
+      title: "Catálogo de cartas TCG en Chile",
+      description: "Explora singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas con stock reservado y envíos a todo Chile.",
+      alternates: { canonical: "/cartas" },
+    };
+  }
+  const what = [typeName ?? "Cartas", gameName].filter(Boolean).join(" de ");
+  const canon = new URLSearchParams({ ...(gameName && game ? { game } : {}), ...(typeName && type ? { type } : {}) }).toString();
+  return {
+    title: `${what} en Chile`,
+    description: `${what} de vendedores chilenos: compara precios, elige idioma y estado, y compra con stock reservado y pago por transferencia.`,
+    alternates: { canonical: `/cartas?${canon}` },
+  };
+}
 
 export const revalidate = 30;
 

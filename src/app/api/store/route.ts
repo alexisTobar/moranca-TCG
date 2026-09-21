@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { storeUpdateSchema } from "@/lib/validators";
-import { ensureStore, isStoreActive } from "@/lib/store";
+import { ensureAdminPro, ensureStore, isStoreActive } from "@/lib/store";
 import {
   normalizeFacebook,
   normalizeInstagram,
@@ -29,7 +29,16 @@ export async function PUT(req: Request) {
       );
     }
     const data = parsed.data;
+    if (user.role === "ADMIN") await ensureAdminPro(user.id);
     const store = await ensureStore(user.id);
+
+    // Personalizar la tienda es parte de la membresía: sin plan vigente no se puede editar.
+    if (!isStoreActive(store)) {
+      return NextResponse.json(
+        { error: "Necesitas una membresía de tienda vigente para personalizarla." },
+        { status: 403 }
+      );
+    }
 
     // Los enlaces se normalizan: si algo no es un usuario/número/URL válido, se rechaza.
     const social: Record<string, string | null> = {};

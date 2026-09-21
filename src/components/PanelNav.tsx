@@ -13,8 +13,10 @@ import {
   ShieldCheck,
   Store,
   Gem,
+  LifeBuoy,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { CountBadge, usePanelCounts, type Counts } from "@/components/panel/PanelCounts";
 
 const ITEMS: Array<{
   href: string;
@@ -22,21 +24,25 @@ const ITEMS: Array<{
   icon: LucideIcon;
   exact?: boolean;
   adminOnly?: boolean;
+  /** Qué contador de avisos se muestra en este ítem. */
+  badge?: keyof Counts;
 }> = [
   { href: "/panel", label: "Resumen", icon: LayoutDashboard, exact: true },
   { href: "/panel/publicar", label: "Publicar", icon: PlusCircle },
   { href: "/panel/publicaciones", label: "Publicaciones", icon: ListChecks },
-  { href: "/panel/ordenes", label: "Órdenes", icon: Package },
+  { href: "/panel/ordenes", label: "Órdenes", icon: Package, badge: "orders" },
   { href: "/panel/descuentos", label: "Descuentos", icon: Percent },
   { href: "/panel/tienda", label: "Mi tienda", icon: Store },
+  { href: "/panel/soporte", label: "Soporte", icon: LifeBuoy, badge: "tickets" },
   { href: "/panel/perfil", label: "Mi perfil", icon: UserCircle },
-  { href: "/panel/usuarios", label: "Vendedores", icon: Users, adminOnly: true },
-  { href: "/panel/tiendas", label: "Tiendas premium", icon: Gem, adminOnly: true },
+  { href: "/panel/usuarios", label: "Vendedores", icon: Users, adminOnly: true, badge: "sellerRequests" },
+  { href: "/panel/tiendas", label: "Tiendas premium", icon: Gem, adminOnly: true, badge: "subscriptions" },
   { href: "/panel/configuracion", label: "Pagos y descuentos", icon: ShieldCheck, adminOnly: true },
 ];
 
 export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
+  const { counts } = usePanelCounts();
 
   return (
     <nav className="lg:w-56 lg:shrink-0">
@@ -58,6 +64,7 @@ export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
               >
                 <Icon className="h-4 w-4" strokeWidth={2} />
                 {item.label}
+                {item.badge && <CountBadge value={counts[item.badge]} className="ml-auto" />}
               </Link>
             </li>
           );

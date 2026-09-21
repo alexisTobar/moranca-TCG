@@ -275,6 +275,44 @@ Condition (no hay dominio propio ni se quita la marca).
   `/tienda/[slug]` redirige al perfil normal. Las visitas y escaneos de QR se cuentan por día
   (`StoreVisitDay`); el dueño y el administrador no cuentan.
 - La base se actualiza sola en el deploy (`prisma db push`, solo tablas nuevas).
+- **La tienda es la protagonista**: `/tienda/[slug]` usa su propio encabezado (logo, buscador y
+  filtros de la tienda: tipos y juegos que ese vendedor tiene) y no el menú de Win Condition. El
+  único enlace al marketplace es el logo de Win Condition en la barra oscura de arriba. Vive en el
+  grupo de rutas `(store)`, que solo comparte el carrito.
+
+## 5d. Avisos del panel y soporte
+
+- **Campana y contadores** (todos los paneles): se actualizan solos cada 30 s. El administrador ve
+  pagos de membresía con comprobante por revisar, tickets con mensajes nuevos y solicitudes para
+  ser vendedor; el vendedor ve respuestas de soporte sin leer y órdenes con comprobante por
+  confirmar. El Resumen del panel muestra "Requiere tu atención".
+- **Soporte** (Panel → Soporte): solo los vendedores con **tienda vigente** (Tienda o Pro) pueden
+  abrir tickets al administrador; sin plan ven la opción bloqueada. Si el plan vence pueden leer su
+  historial pero no escribir. Máximo 5 tickets abiertos por vendedor. El administrador ve la
+  bandeja completa (Por responder / Respondidos / Cerrados) con el plan de cada vendedor.
+- **Correo opcional**: con `RESEND_API_KEY` configurado, el administrador recibe un correo por cada
+  ticket, mensaje o comprobante nuevo, y el vendedor cuando le responden. Sin la clave todo
+  funciona igual dentro del panel.
+
+## 5e. SEO y marketing
+
+- **Página de venta `/tiendas`**: beneficios, planes con precio real (se leen de la base, así que
+  cambian solos cuando el admin los edita), tabla comparativa, cómo funciona y preguntas
+  frecuentes. El botón cambia según quién mira (visitante → crear cuenta, comprador → solicitar
+  ser vendedor, vendedor → elegir plan). Se enlaza desde el menú, el footer, el hero y una
+  sección de planes en el inicio.
+- **Inicio**: H1 con la palabra clave ("Compra y vende cartas TCG en Chile"), título y
+  descripción propios, preguntas frecuentes visibles y sección "Tu tienda propia" con los planes.
+- **Técnico**: `robots.txt` (bloquea panel, cuenta, checkout y APIs), `sitemap.xml` (home,
+  catálogo por juego y tipo, cartas, publicaciones activas, tiendas premium con plan vigente,
+  vendedores y noticias; se regenera cada hora), favicon e imagen social (Open Graph 1200×630)
+  generados, tarjeta grande en X/WhatsApp, `canonical` por página y datos estructurados
+  (Organization, WebSite con buscador, FAQPage, BreadcrumbList y Product con precio en CLP).
+- La ficha de producto dentro de una tienda apunta como canónica a la ficha general, para no
+  duplicar contenido ante los buscadores.
+- **Importante en Vercel**: define `NEXT_PUBLIC_SITE_URL` con el dominio real
+  (`https://tu-dominio.cl`), porque de ahí salen el sitemap, los canonicals y las imágenes
+  sociales. Después registra el sitio en Google Search Console y envía `/sitemap.xml`.
 
 ---
 

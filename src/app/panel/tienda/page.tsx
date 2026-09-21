@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Eye, Package, QrCode, ShoppingBag, Sparkles } from "lucide-react";
+import { BadgeCheck, Eye, LockKeyhole, Package, QrCode, ShoppingBag, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { clp } from "@/lib/format";
 import {
+  ensureAdminPro,
   ensureDefaultPlans,
   ensureStore,
   getMembershipBank,
@@ -38,6 +39,8 @@ export default async function MyStorePage() {
   if (user.role !== "SELLER" && user.role !== "ADMIN") redirect("/panel");
 
   await ensureDefaultPlans();
+  const isAdmin = user.role === "ADMIN";
+  if (isAdmin) await ensureAdminPro(user.id);
   const store = await ensureStore(user.id);
   const active = isStoreActive(store);
 
@@ -93,25 +96,42 @@ export default async function MyStorePage() {
         </p>
       </header>
 
-      <StorePlanPanel
-        active={active}
-        planName={store.plan?.name ?? null}
-        activeUntil={store.activeUntil?.toISOString() ?? null}
-        suspended={store.status === "SUSPENDED"}
-        plans={plans.map((p) => ({
-          id: p.id,
-          code: p.code,
-          name: p.name,
-          description: p.description,
-          priceMonthly: p.priceMonthly,
-          maxFeatured: p.maxFeatured,
-          advancedStats: p.advancedStats,
-          showcase: p.showcase,
-        }))}
-        pending={pending}
-        history={history}
-        bank={bank}
-      />
+      {isAdmin ? (
+        <div className="flex items-start gap-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700">
+            <BadgeCheck className="h-5 w-5" strokeWidth={2} />
+          </span>
+          <div>
+            <p className="font-display text-base font-bold text-carbon">
+              Plan {store.plan?.name ?? "Pro"} incluido en tu cuenta de administrador
+            </p>
+            <p className="mt-1 text-[13px] leading-relaxed text-ink-400">
+              Tienes todo lo del plan Pro, sin comprarlo ni renovarlo y sin fecha de vencimiento: tienda propia,
+              hasta {store.plan?.maxFeatured ?? 12} destacados, estadísticas completas, vitrina en el inicio y QR con tu logo.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <StorePlanPanel
+          active={active}
+          planName={store.plan?.name ?? null}
+          activeUntil={store.activeUntil?.toISOString() ?? null}
+          suspended={store.status === "SUSPENDED"}
+          plans={plans.map((p) => ({
+            id: p.id,
+            code: p.code,
+            name: p.name,
+            description: p.description,
+            priceMonthly: p.priceMonthly,
+            maxFeatured: p.maxFeatured,
+            advancedStats: p.advancedStats,
+            showcase: p.showcase,
+          }))}
+          pending={pending}
+          history={history}
+          bank={bank}
+        />
+      )}
 
       {active && (
         <>
@@ -194,6 +214,21 @@ export default async function MyStorePage() {
 
       <section>
         <h2 className="mb-3 font-display text-lg font-bold text-carbon">Personaliza tu tienda</h2>
+        {!active ? (
+          <div className="flex items-start gap-4 rounded-2xl border border-dashed border-ink-700 p-6">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ink-850 text-ink-500">
+              <LockKeyhole className="h-5 w-5" strokeWidth={1.75} />
+            </span>
+            <div>
+              <p className="font-display text-base font-bold text-carbon">Disponible con tu membresía</p>
+              <p className="mt-1 max-w-xl text-[13px] leading-relaxed text-ink-400">
+                {store.planId
+                  ? "Tu plan venció o está suspendido, así que la edición está bloqueada. Tus cambios anteriores se conservan y vuelven a estar disponibles al renovar."
+                  : "Con una membresía activas tu tienda propia: banner, logo, colores, anuncio, redes, productos destacados y QR con tu logo. Elige un plan arriba para desbloquearlo."}
+              </p>
+            </div>
+          </div>
+        ) : (
         <StoreEditor
           initial={{
             displayName: store.displayName ?? "",
@@ -213,6 +248,7 @@ export default async function MyStorePage() {
           maxFeatured={maxFeatured}
           fallbackName={user.name}
         />
+        )}
       </section>
     </div>
   );
