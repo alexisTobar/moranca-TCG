@@ -1,3 +1,4 @@
+import { ReportButton } from "@/components/ReportButton";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -234,6 +235,9 @@ export default async function SellerPage({
                 Ver su tienda
               </Link>
             )}
+            <span className="ml-auto self-center">
+              <ReportButton targetType="USER" targetId={seller.id} />
+            </span>
             <ShareToggle label="Compartir perfil">
               <ShareQrCard
                 url={shareUrl}

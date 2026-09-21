@@ -1,3 +1,5 @@
+import { GoogleButton, OrDivider } from "@/components/GoogleButton";
+import { googleEnabled } from "@/lib/google";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
@@ -10,6 +12,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const GOOGLE_ERRORS: Record<string, string> = {
+  google_off: "El ingreso con Google no está disponible por ahora.",
+  google_cancelled: "Cancelaste el ingreso con Google.",
+  google_failed: "No pudimos ingresar con Google. Inténtalo de nuevo.",
+  google_state: "La sesión de ingreso expiró. Inténtalo de nuevo.",
+  google_unverified: "Tu cuenta de Google no tiene el email verificado.",
+  google_inactive: "Esta cuenta está desactivada.",
+};
+
 export default async function LoginPage({
   searchParams,
 }: {
@@ -17,6 +28,8 @@ export default async function LoginPage({
 }) {
   const sp = await searchParams;
   const next = typeof sp.next === "string" ? sp.next : "";
+  const errorCode = typeof sp.error === "string" ? sp.error : "";
+  const errorText = GOOGLE_ERRORS[errorCode];
   const registerHref = next ? `/registro?next=${encodeURIComponent(next)}` : "/registro";
 
   return (
@@ -32,9 +45,20 @@ export default async function LoginPage({
             Inicia sesión para comprar, vender o revisar tus órdenes.
           </p>
 
+          {errorText && (
+            <p className="mt-4 rounded-lg border border-rose-600/40 bg-rose-500/10 p-3 text-[12px] text-rose-700">{errorText}</p>
+          )}
+
           <Suspense fallback={null}>
             <LoginForm />
           </Suspense>
+
+          {googleEnabled() && (
+            <>
+              <OrDivider />
+              <GoogleButton next={next || undefined} />
+            </>
+          )}
         </div>
 
         <p className="mt-6 text-center text-[12px] text-ink-400">

@@ -3,12 +3,22 @@ import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { recordOrderEvent, releaseOrderStock } from "@/lib/order-payments";
 import { z } from "zod";
+import { mailOrderStatus } from "@/lib/order-mail";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const schema = z.object({
   status: z.enum(["PAID", "SHIPPED", "DELIVERED", "CANCELLED"]),
+  /** Solo se usan al marcar el envío. */
+  trackingCourier: z.string().trim().max(40).optional().nullable(),
+  trackingCode: z
+    .string()
+    .trim()
+    .max(60)
+    .regex(/^[\w .\-/#]*$/, "El número de seguimiento tiene caracteres no válidos")
+    .optional()
+    .nullable(),
 });
 
 /** Qué estados puede seguir cada estado actual. */
@@ -91,6 +101,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       // orden, no pisamos nada ni tocamos el stock dos veces.
       const data: Record<string, unknown> = { status: next };
       if (next === "PAID") data.paidAt = new Date();
+      if (next === "SHIPPED") {
+        data.shippedAt = new Date();
+        data.trackingCourier = parsed.data.trackingCourier?.trim() || null;
+        data.trackingCode = parsed.data.trackingCode?.trim() || null;
+      }
       if (next === "CANCELLED") data.stockReserved = false;
       if (next === "PAID" && !holdsStock) data.stockReserved = true;
 
@@ -126,6 +141,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         data: { orderId: id, senderId: user.id, body: SYSTEM_MESSAGE[next] },
       });
     });
+
+    await mailOrderStatus(id, next, isAdmin && !isBuyer && !isSeller ? "admin" : isBuyer ? "buyer" : "seller");
 
     return NextResponse.json({ ok: true, status: next });
   } catch (error) {

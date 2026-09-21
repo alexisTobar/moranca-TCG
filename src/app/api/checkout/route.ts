@@ -1,3 +1,5 @@
+import { emailNotVerifiedResponse } from "@/lib/verification";
+import { mailOrderCreated } from "@/lib/order-mail";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
@@ -28,6 +30,9 @@ export async function POST(req: Request) {
     }
     throw error;
   }
+
+  const unverified = emailNotVerifiedResponse(user);
+  if (unverified) return unverified;
 
   const limiter = await rateLimit(clientKey(req, `checkout:${user.id}`), 12, 600);
   if (!limiter.allowed) {
@@ -108,6 +113,12 @@ export async function POST(req: Request) {
 
   for (const item of data.items) {
     const listing = byId.get(item.listingId);
+    if (listing && listing.sellerId === user.id) {
+      return NextResponse.json(
+        { error: "No puedes comprar tus propias publicaciones. Quítalas del carrito." },
+        { status: 400 }
+      );
+    }
     if (!listing || listing.status !== "ACTIVE") {
       return NextResponse.json(
         { error: `Una de las publicaciones ya no está disponible` },
@@ -301,6 +312,8 @@ export async function POST(req: Request) {
     if (created.length === 0) {
       return NextResponse.json({ error: "No se pudo procesar la orden" }, { status: 500 });
     }
+
+    await mailOrderCreated(created.map((c) => c.orderId));
 
     return NextResponse.json({ ok: true, orders: created });
   } catch (error) {

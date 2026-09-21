@@ -1,6 +1,6 @@
-# Dream Deck TCG
+# Win Condition TCG
 
-Tienda chilena de cartas coleccionables: **singles, sellados y mazos armados** de
+Marketplace chileno de cartas coleccionables: **singles, sellados y mazos armados** de
 Magic, Pokémon, One Piece y Mitos y Leyendas.
 
 Las **imágenes de las cartas se buscan por nombre** en los catálogos oficiales de
@@ -264,7 +264,7 @@ Condition (no hay dominio propio ni se quita la marca).
   (corrección de errores nivel H; se verificó que sigue leyéndose).
 - **El administrador controla todo** en Panel → *Tiendas premium*: aprueba o rechaza pagos,
   regala o extiende planes, suspende, corta, destaca en el inicio ("Tiendas destacadas") y edita
-  nombre, precio y beneficios de cada plan. Los planes por defecto (Tienda $9.990 y Pro $19.990
+  nombre, precio y beneficios de cada plan. Los planes por defecto (Tienda $4.990 y Pro $7.990
   al mes) se crean solos y se pueden cambiar.
 - **Cada vendedor personaliza su tienda** en Panel → *Mi tienda*. Logo y banner solo se aceptan
   subidos a la plataforma.
@@ -314,6 +314,32 @@ Condition (no hay dominio propio ni se quita la marca).
 - **Importante en Vercel**: define `NEXT_PUBLIC_SITE_URL` con el dominio real
   (`https://tu-dominio.cl`), porque de ahí salen el sitemap, los canonicals y las imágenes
   sociales. Después registra el sitio en Google Search Console y envía `/sitemap.xml`.
+
+## 5g. Cuentas y seguridad
+
+- **Correos de órdenes** (con `RESEND_API_KEY`): al vendedor cuando hay una compra nueva o suben un comprobante;
+  al comprador cuando se confirma el pago, se envía el pedido (con courier y N° de seguimiento) o se cancela;
+  a ambos si la orden vence. El vendedor ingresa el courier y el N° al marcar la orden como enviada.
+- **Confirmar el email**: al registrarse llega un link (vale 24 h y es de un solo uso). Mientras no se confirme,
+  la persona no puede comprar ni pedir ser vendedor. Solo se exige cuando el correo real está configurado y solo a
+  cuentas creadas desde `VERIFICATION_START` (`src/lib/verification.ts`); las anteriores quedan exentas.
+- **Login con Google**: se activa al definir `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`. Usa OAuth con PKCE y
+  `state`. Si ya existe una cuenta con ese email, se vincula; si esa cuenta nunca confirmó su email, se le
+  restablece la contraseña y se cierran sus sesiones (evita que quien la creó con un correo ajeno se quede con el acceso).
+- **Verificación en dos pasos (TOTP)** opcional para todos, recomendada al admin (Panel → Mi perfil): app
+  autenticadora + 8 códigos de respaldo de un solo uso. El secreto se guarda cifrado y un código no se puede reutilizar.
+- **Contraseña y sesiones**: cambiar la contraseña desde la cuenta, "cerrar sesión en otros dispositivos" y recuperar
+  la clave invalidan las demás sesiones (`User.tokenVersion`).
+- **CSRF**: las peticiones que modifican datos vía `/api` deben venir del mismo origen (`src/middleware.ts`).
+- **Auditoría** (Panel → Auditoría, solo admin): qué hizo el administrador y los cambios de seguridad de las cuentas.
+- **Reportes**: cualquier persona con sesión puede reportar una publicación o un vendedor; el admin los resuelve
+  (pudiendo pausar la publicación o suspender la cuenta) o los descarta (Panel → Reportes, con contador en la campana).
+- **Tus datos**: en Mi cuenta se puede descargar una copia en JSON y eliminar la cuenta (se anonimizan los datos
+  personales; se bloquea si hay órdenes en curso).
+- **Salud y errores**: `GET /api/health` (para monitores de disponibilidad) y registro de errores del servidor en
+  formato JSON (`src/instrumentation.ts`) visible en los logs de Vercel.
+- **Pruebas y CI**: `tests/` (469 comprobaciones e2e, ver `tests/README.md`) y `.github/workflows/ci.yml`
+  (tipos + build en cada cambio).
 
 ## 5f. Páginas legales
 

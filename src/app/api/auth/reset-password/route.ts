@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { z } from "zod";
@@ -51,9 +52,10 @@ export async function POST(req: Request) {
   const hashed = await hashPassword(parsed.data.password);
 
   await prisma.$transaction([
-    prisma.user.update({ where: { id: record.userId }, data: { password: hashed } }),
+    prisma.user.update({ where: { id: record.userId }, data: { password: hashed, tokenVersion: { increment: 1 } } }),
     prisma.passwordReset.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
   ]);
 
+  await audit({ id: record.userId, name: "Cuenta" }, "security.password_reset", { type: "User", id: record.userId });
   return NextResponse.json({ ok: true });
 }

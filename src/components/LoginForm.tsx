@@ -31,6 +31,10 @@ export function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "No se pudo iniciar sesión");
+      if (data.needs2fa) {
+        router.push(`/ingresar/verificacion${next.startsWith("/") ? `?next=${encodeURIComponent(next)}` : ""}`);
+        return;
+      }
       router.push(next.startsWith("/") ? next : "/panel");
       router.refresh();
     } catch (err) {

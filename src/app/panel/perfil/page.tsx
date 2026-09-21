@@ -1,3 +1,5 @@
+import { PrivacyCard } from "@/components/account/PrivacyCard";
+import { TwoFactorSection } from "@/components/account/TwoFactorSection";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
@@ -6,6 +8,7 @@ import { sellerRegion } from "@/lib/location";
 import { isStoreActive, siteOrigin } from "@/lib/store";
 import { buildQr } from "@/lib/qr";
 import { ShareQrCard } from "@/components/store/ShareQrCard";
+import { SecurityCard } from "@/components/account/SecurityCard";
 
 export const dynamic = "force-dynamic";
 
@@ -32,12 +35,13 @@ export default async function SellerProfilePage() {
       bankHolderName: true,
       bankRut: true,
       store: { select: { status: true, planId: true, activeUntil: true, logoUrl: true } },
+      totpEnabledAt: true,
     },
   });
   if (!user) return null;
 
   // Todos los perfiles se pueden compartir. Con tienda premium vigente el link lleva a la tienda y el QR al logo.
-  const { store, slug, ...form } = user;
+  const { store, slug, totpEnabledAt, ...form } = user;
   const premium = Boolean(store && isStoreActive(store));
   const origin = await siteOrigin();
   const shareUrl = `${origin}/${premium ? "t" : "v"}/${slug}`;
@@ -76,6 +80,12 @@ export default async function SellerProfilePage() {
           </p>
         )}
       </div>
+
+      <SecurityCard>
+        <TwoFactorSection enabled={Boolean(totpEnabledAt)} recommended={session.role === "ADMIN"} />
+      </SecurityCard>
+
+      <PrivacyCard canDelete={session.role !== "ADMIN"} />
 
       <SellerProfileForm
         initial={{ ...form, region: sellerRegion({ region: form.region, city: form.city }) }}

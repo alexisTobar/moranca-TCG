@@ -44,6 +44,9 @@ export interface AccountOrder {
   paymentDueAt: string | null;
   receiptUploadedAt: string | null;
   createdAt: string;
+  shipMethod: string;
+  trackingCourier: string | null;
+  trackingCode: string | null;
   items: Array<{ id: string; title: string; quantity: number; unitPrice: number }>;
   review: OrderReview | null;
 }
@@ -179,6 +182,13 @@ export function OrderCard({ order, userId }: { order: AccountOrder; userId: stri
             {cancelling ? "Cancelando…" : "Cancelar esta orden"}
           </button>
         </div>
+      )}
+
+      {(order.status === "SHIPPED" || order.status === "DELIVERED") && (order.trackingCourier || order.trackingCode) && (
+        <p className="mt-3 rounded-lg border border-ink-800 bg-ink-900 px-3 py-2 text-[12px] text-ink-300">
+          <span className="font-semibold text-carbon">Seguimiento:</span>{" "}
+          {[order.trackingCourier, order.trackingCode].filter(Boolean).join(" · ")}
+        </p>
       )}
 
       {order.status === "SHIPPED" && (

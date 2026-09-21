@@ -1,3 +1,4 @@
+import { sendVerificationEmail } from "@/lib/verification";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createSession, hashPassword, uniqueUserSlug } from "@/lib/auth";
@@ -55,11 +56,14 @@ export async function POST(req: Request) {
     select: { id: true, name: true, email: true, role: true },
   });
 
+  await sendVerificationEmail({ id: user.id, email: user.email, name: user.name });
+
   await createSession({
     sub: user.id,
     email: user.email,
     name: user.name,
     role: "BUYER",
+    tv: 0,
   });
 
   return NextResponse.json({ ok: true, user }, { status: 201 });

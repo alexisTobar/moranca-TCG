@@ -1,0 +1,31 @@
+name: CI
+
+# En cada cambio: revisa que el código compile (tipos) y que el sitio se pueda construir, sin base de datos.
+# Las pruebas de punta a punta (tests/e2e) necesitan una base Postgres y se corren a mano; ver tests/README.md.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Valores de mentira: el build no se conecta a la base (las consultas de las páginas fallan de forma controlada).
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:1/ci
+      DIRECT_URL: postgresql://ci:ci@127.0.0.1:1/ci
+      AUTH_SECRET: ci-secret-with-at-least-32-characters-long-xx
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - name: Tipos
+        run: npx tsc --noEmit
+      - name: Build
+        run: npx next build

@@ -19,7 +19,7 @@ export const DEFAULT_PLANS = [
     code: "PRO",
     name: "Tienda Pro",
     description: "Todo lo de Tienda, más estadísticas completas y vitrina de tiendas destacadas.",
-    priceMonthly: 9990,
+    priceMonthly: 7990,
     maxFeatured: 12,
     advancedStats: true,
     showcase: true,

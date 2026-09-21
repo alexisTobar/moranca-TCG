@@ -1,3 +1,5 @@
+import { VerifyEmailBanner } from "@/components/account/VerifyEmailBanner";
+import { emailVerificationRequired } from "@/lib/verification";
 import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { discountPctFor, getSiteSettings } from "@/lib/site-settings";
@@ -16,6 +18,14 @@ export default async function CheckoutPage() {
   if (!user) return null;
 
   const settings = await getSiteSettings();
+
+  if (emailVerificationRequired(user)) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-16">
+        <VerifyEmailBanner email={user.email} />
+      </div>
+    );
+  }
 
   return (
     <CheckoutView

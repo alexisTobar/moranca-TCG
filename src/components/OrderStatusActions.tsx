@@ -9,15 +9,20 @@ export function OrderStatusActions({
   status,
   reference,
   total,
+  shipMethod,
 }: {
   orderId: string;
   status: string;
   reference?: string | null;
   total?: number;
+  shipMethod?: string;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shipping, setShipping] = useState(false);
+  const [courier, setCourier] = useState("");
+  const [code, setCode] = useState("");
 
   async function setStatus(next: "PAID" | "SHIPPED" | "CANCELLED") {
     if (next === "CANCELLED" && !confirm("¿Cancelar este pedido? Esto no se puede deshacer.")) {
@@ -39,7 +44,9 @@ export function OrderStatusActions({
       const res = await fetch(`/api/orders/${orderId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: next }),
+        body: JSON.stringify(
+          next === "SHIPPED" ? { status: next, trackingCourier: courier || null, trackingCode: code || null } : { status: next }
+        ),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "No se pudo actualizar la orden");
@@ -70,7 +77,7 @@ export function OrderStatusActions({
         <button
           type="button"
           disabled={loading}
-          onClick={() => setStatus("SHIPPED")}
+          onClick={() => (shipMethod === "PICKUP" ? setStatus("SHIPPED") : setShipping((v) => !v))}
           className="flex items-center gap-1.5 rounded-xl border border-sky-600/40 bg-sky-500/10 px-3.5 py-2 text-[12px] font-bold text-sky-700 transition hover:bg-sky-500/20 disabled:opacity-50"
         >
           <Truck className="h-3.5 w-3.5" strokeWidth={2} />
@@ -86,6 +93,26 @@ export function OrderStatusActions({
         <XCircle className="h-3.5 w-3.5" strokeWidth={2} />
         Cancelar
       </button>
+      {shipping && status === "PAID" && (
+        <div className="flex w-full flex-wrap items-end gap-2 rounded-xl border border-sky-600/30 bg-sky-500/5 p-3">
+          <label className="block">
+            <span className="mb-1 block text-[11px] font-semibold text-ink-400">Courier</span>
+            <select value={courier} onChange={(e) => setCourier(e.target.value)} className="input !w-auto !py-2 text-[12px]">
+              <option value="">Selecciona…</option>
+              {["Starken", "Blue Express", "Chilexpress", "Correos de Chile", "Otro"].map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-[11px] font-semibold text-ink-400">N° de seguimiento (opcional)</span>
+            <input value={code} onChange={(e) => setCode(e.target.value)} maxLength={60} placeholder="Ej: 1234567890" className="input !w-48 !py-2 text-[12px]" />
+          </label>
+          <button type="button" disabled={loading} onClick={() => setStatus("SHIPPED")} className="rounded-xl bg-sky-600 px-4 py-2 text-[12px] font-bold text-white transition hover:bg-sky-500 disabled:opacity-50">
+            Confirmar envío
+          </button>
+        </div>
+      )}
       {error && <p className="w-full text-[11px] text-rose-700">{error}</p>}
     </div>
   );

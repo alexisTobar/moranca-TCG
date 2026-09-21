@@ -1,3 +1,4 @@
+import { emailNotVerifiedResponse } from "@/lib/verification";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
@@ -15,6 +16,9 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const unverified = emailNotVerifiedResponse(user);
+    if (unverified) return unverified;
 
     const current = await prisma.user.findUnique({
       where: { id: user.id },

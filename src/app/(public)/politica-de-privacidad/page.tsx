@@ -37,6 +37,8 @@ const sections: LegalSection[] = [
             ["Compras y ventas", "Productos, montos, dirección y método de envío, notas de la orden, comprobantes de transferencia, mensajes del chat y reseñas.", "Cuando compras, vendes o conversas en una orden."],
             ["Tiendas y soporte", "Solicitudes de membresía y su comprobante, datos de personalización de la tienda y tickets de soporte.", "Cuando contratas un plan o nos escribes."],
             ["Técnicos", "Dirección IP (solo para límites anti-abuso), cookie de sesión y preferencias.", "Cada vez que usas el sitio."],
+            ["Ingreso con Google", "Nombre, email verificado e identificador de tu cuenta de Google. Nunca recibimos tu contraseña de Google.", "Solo si eliges ingresar con Google."],
+            ["Verificación en dos pasos", "Una clave secreta (guardada cifrada) y códigos de respaldo (guardados con hash).", "Solo si activas esta protección."],
             ["Estadísticas de tienda", "Conteo diario de visitas y escaneos de QR, sin identificar a las personas.", "Cuando alguien visita una tienda premium."],
           ]}
         />
@@ -79,6 +81,7 @@ const sections: LegalSection[] = [
             <><B>Con la otra parte de la orden.</B> Si compras, el vendedor ve tu nombre, email, teléfono y dirección de envío para poder despachar. Si vendes, el comprador ve tu nombre, tus datos bancarios (para transferirte) y tu ubicación aproximada.</>,
             <><B>De forma pública.</B> El perfil de un vendedor (nombre, foto, descripción, comuna o región, calificaciones) es visible para cualquiera. Las reseñas muestran el nombre de quien las escribió.</>,
             <><B>Proveedores tecnológicos</B> que operan el servicio por encargo nuestro: alojamiento del sitio (Vercel), base de datos (Supabase) y envío de correos (Resend, cuando está configurado).</>,
+            <><B>Google</B>, si eliges ingresar con tu cuenta de Google: le pedimos tu nombre y email verificado.</>,
             <><B>Catálogos de cartas</B> (Scryfall, Pokémon TCG y TCGdex, dotGG y api.myl.cl): al buscar cartas o ver imágenes, tu navegador se conecta a esos servidores y ellos pueden ver tu dirección IP.</>,
             <><B>Autoridades</B>, cuando la ley o una orden judicial lo exijan.</>,
           ]}
@@ -97,6 +100,8 @@ const sections: LegalSection[] = [
             ["dreamdeck_session", "Mantiene tu sesión iniciada. Es esencial: sin ella no puedes ingresar. No es accesible desde scripts (httpOnly).", "8 horas, o 30 días si eliges “Recordar sesión”."],
             ["wc_region", "Recuerda la región que elegiste para mostrarte vendedores cercanos.", "Hasta 1 año o hasta que la quites."],
             ["dreamdeck_cart_v1 (almacenamiento local)", "Guarda tu carrito en tu propio dispositivo. No se envía a nuestros servidores hasta que confirmas la compra.", "Hasta que lo vacíes o compres."],
+            ["wc_2fa", "Recuerda por unos minutos que ya pusiste tu clave, mientras escribes el código de verificación en dos pasos. Solo existe si activaste esa protección.", "5 minutos."],
+            ["wc_oauth", "Protege el ingreso con Google (evita que un tercero lo interfiera). Solo existe mientras ingresas con Google.", "10 minutos."],
           ]}
         />
         <P>
@@ -117,6 +122,8 @@ const sections: LegalSection[] = [
             "La comunicación viaja cifrada (HTTPS) y la sesión usa una cookie protegida.",
             "Los comprobantes de transferencia son privados: solo pueden verlos las partes de la orden y la administración.",
             "Aplicamos límites de intentos, validación de archivos y permisos por rol en cada acción.",
+            "Puedes activar la verificación en dos pasos y cerrar tus sesiones en otros dispositivos desde tu cuenta.",
+            "Dejamos un registro de las acciones sensibles del equipo administrador y de los cambios de seguridad de las cuentas.",
           ]}
         />
         <P>
@@ -147,8 +154,8 @@ const sections: LegalSection[] = [
         <UL
           items={[
             <><B>Acceso:</B> saber qué datos tuyos tratamos.</>,
-            <><B>Rectificación:</B> corregir datos inexactos o incompletos. Muchos puedes editarlos tú mismo en “Mi cuenta” o “Mi perfil”.</>,
-            <><B>Supresión:</B> pedir que eliminemos tus datos cuando ya no sean necesarios o retires tu consentimiento.</>,
+            <><B>Rectificación:</B> corregir datos inexactos o incompletos. Muchos puedes editarlos tú mismo en “Mi cuenta” o “Mi perfil”, y puedes descargar una copia de tus datos desde ahí.</>,
+            <><B>Supresión:</B> pedir que eliminemos tus datos cuando ya no sean necesarios o retires tu consentimiento. Puedes eliminar tu cuenta tú mismo desde “Mi cuenta” (sin órdenes en curso); se borran tus datos personales y se conservan, sin identificarte, las órdenes ya terminadas.</>,
             <><B>Oposición y bloqueo:</B> oponerte a ciertos tratamientos o pedir que se suspendan temporalmente.</>,
             <><B>Portabilidad:</B> recibir tus datos en un formato estructurado, cuando la ley lo reconozca.</>,
           ]}

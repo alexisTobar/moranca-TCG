@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireAdmin } from "@/lib/auth";
@@ -49,6 +50,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (!result) {
       return NextResponse.json({ error: "Esta solicitud ya fue revisada." }, { status: 409 });
     }
+    await audit(admin, `subscription.${action}`, { type: "StoreSubscription", id, detail: note?.trim() || undefined });
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
     if (error instanceof AuthError) {

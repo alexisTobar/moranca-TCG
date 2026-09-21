@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, hashPassword, requireAdmin, uniqueUserSlug } from "@/lib/auth";
@@ -5,7 +6,7 @@ import { userSchema } from "@/lib/validators";
 
 export async function POST(req: Request) {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const parsed = userSchema.safeParse(await req.json());
     if (!parsed.success) {
       return NextResponse.json(
@@ -42,6 +43,7 @@ export async function POST(req: Request) {
       select: { id: true, name: true, slug: true, email: true, role: true },
     });
 
+    await audit(admin, "user.create", { type: "User", id: user.id, detail: `${user.email} (${user.role})` });
     return NextResponse.json({ ok: true, user }, { status: 201 });
   } catch (error) {
     if (error instanceof AuthError) {

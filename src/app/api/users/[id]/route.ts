@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, hashPassword, requireAdmin } from "@/lib/auth";
@@ -56,11 +57,17 @@ export async function PATCH(
         ...(data.sellerRequestStatus !== undefined
           ? { sellerRequestStatus: data.sellerRequestStatus }
           : {}),
-        ...(data.password ? { password: await hashPassword(data.password) } : {}),
+        ...(data.password ? { password: await hashPassword(data.password), tokenVersion: { increment: 1 } } : {}),
       },
       select: { id: true, name: true, email: true, role: true, active: true },
     });
 
+    const changed = Object.keys(data).filter((k) => k !== "password").join(", ");
+    await audit(admin, "user.update", {
+      type: "User",
+      id,
+      detail: `${user.email}: ${changed || "sin cambios"}${data.password ? " + contraseña" : ""}${data.sellerRequestStatus ? ` (solicitud ${data.sellerRequestStatus})` : ""}`,
+    });
     return NextResponse.json({ ok: true, user });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -84,7 +91,9 @@ export async function DELETE(
         { status: 400 }
       );
     }
+    const gone = await prisma.user.findUnique({ where: { id }, select: { email: true } });
     await prisma.user.delete({ where: { id } });
+    await audit(admin, "user.delete", { type: "User", id, detail: gone?.email });
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (error instanceof AuthError) {

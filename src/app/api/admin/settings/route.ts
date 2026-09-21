@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireAdmin } from "@/lib/auth";
@@ -38,6 +39,7 @@ export async function PUT(req: Request) {
       update: { ...parsed.data, updatedById: admin.id },
     });
 
+    await audit(admin, "settings.update", { type: "SiteSetting", id: "site", detail: JSON.stringify(parsed.data) });
     return NextResponse.json({ ok: true, settings });
   } catch (error) {
     if (error instanceof AuthError) {

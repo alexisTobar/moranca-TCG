@@ -1,3 +1,7 @@
+import { PrivacyCard } from "@/components/account/PrivacyCard";
+import { TwoFactorSection } from "@/components/account/TwoFactorSection";
+import { VerifyEmailBanner } from "@/components/account/VerifyEmailBanner";
+import { emailVerificationRequired } from "@/lib/verification";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
@@ -5,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { safeQuery } from "@/lib/catalog";
 import { AccountProfileForm } from "@/components/account/AccountProfileForm";
 import { SellerRequestBox } from "@/components/account/SellerRequestBox";
+import { SecurityCard } from "@/components/account/SecurityCard";
 import { OrderCard, type AccountOrder } from "@/components/account/OrderCard";
 import { expireOverdueOrders } from "@/lib/order-payments";
 
@@ -30,6 +35,9 @@ export default async function AccountPage() {
       address: true,
       rut: true,
       sellerRequestStatus: true,
+      emailVerifiedAt: true,
+      createdAt: true,
+      totpEnabledAt: true,
     },
   });
   if (!user) redirect("/ingresar?next=/cuenta");
@@ -52,6 +60,9 @@ export default async function AccountPage() {
           paymentReference: true,
           paymentDueAt: true,
           receiptUploadedAt: true,
+          shipMethod: true,
+          trackingCourier: true,
+          trackingCode: true,
           createdAt: true,
           seller: {
             select: {
@@ -89,6 +100,9 @@ export default async function AccountPage() {
     paymentDueAt: o.paymentDueAt?.toISOString() ?? null,
     receiptUploadedAt: o.receiptUploadedAt?.toISOString() ?? null,
     createdAt: o.createdAt.toISOString(),
+    shipMethod: o.shipMethod,
+    trackingCourier: o.trackingCourier,
+    trackingCode: o.trackingCode,
     items: o.items,
     review: o.review,
   }));
@@ -102,6 +116,8 @@ export default async function AccountPage() {
         </p>
       </header>
 
+      {emailVerificationRequired(user) && <VerifyEmailBanner email={user.email} />}
+
       <section className="rounded-2xl card-surface p-5">
         <h2 className="mb-4 text-sm font-semibold text-carbon">Mis datos</h2>
         <AccountProfileForm
@@ -111,6 +127,12 @@ export default async function AccountPage() {
           rut={user.rut}
         />
       </section>
+
+      <SecurityCard>
+        <TwoFactorSection enabled={Boolean(user.totpEnabledAt)} />
+      </SecurityCard>
+
+      <PrivacyCard canDelete={user.role !== "ADMIN"} />
 
       {user.role === "BUYER" && <SellerRequestBox status={user.sellerRequestStatus} />}
 

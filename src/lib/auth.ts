@@ -14,6 +14,8 @@ export interface SessionPayload {
   email: string;
   name: string;
   role: "ADMIN" | "SELLER" | "BUYER";
+  /** Versión de sesión del usuario (User.tokenVersion). Tokens antiguos sin este dato equivalen a 0. */
+  tv?: number;
 }
 
 function secretKey(): Uint8Array {
@@ -32,6 +34,28 @@ export async function hashPassword(plain: string): Promise<string> {
 
 export async function verifyPassword(plain: string, hash: string) {
   return bcrypt.compare(plain, hash);
+}
+
+const PURPOSE_AUDIENCE = "dreamdeck-purpose";
+
+/** Token firmado de corta vida para un paso intermedio (por ejemplo, esperar el código 2FA). No sirve como sesión. */
+export async function signPurposeToken(purpose: string, claims: Record<string, unknown>, ttlSeconds: number) {
+  return new SignJWT({ ...claims, purpose })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setIssuer("dreamdeck-tcg")
+    .setAudience(PURPOSE_AUDIENCE)
+    .setExpirationTime(`${ttlSeconds}s`)
+    .sign(secretKey());
+}
+
+export async function verifyPurposeToken(purpose: string, token: string): Promise<Record<string, unknown> | null> {
+  try {
+    const { payload } = await jwtVerify(token, secretKey(), { issuer: "dreamdeck-tcg", audience: PURPOSE_AUDIENCE });
+    return payload.purpose === purpose ? (payload as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function createSession(payload: SessionPayload, remember = false) {
@@ -72,6 +96,7 @@ export async function verifyToken(token: string): Promise<SessionPayload | null>
       name: String(payload.name ?? ""),
       role:
         payload.role === "ADMIN" ? "ADMIN" : payload.role === "BUYER" ? "BUYER" : "SELLER",
+      tv: typeof payload.tv === "number" ? payload.tv : 0,
     };
   } catch {
     return null;
@@ -99,9 +124,14 @@ export async function getCurrentUser() {
       role: true,
       active: true,
       avatarUrl: true,
+      tokenVersion: true,
+      emailVerifiedAt: true,
+      createdAt: true,
     },
   });
   if (!user || !user.active) return null;
+  // Si se cambió la clave o se cerraron las sesiones, los tokens anteriores dejan de valer.
+  if ((session.tv ?? 0) !== user.tokenVersion) return null;
   return user;
 }
 

@@ -1,3 +1,4 @@
+import { ReportButton } from "@/components/ReportButton";
 import Link from "next/link";
 import Image from "next/image";
 import { ImageOff } from "lucide-react";
@@ -302,6 +303,10 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
             </span>
             <span className="text-[12px] font-semibold text-brand-600">{store ? "Ver tienda →" : "Ver perfil →"}</span>
           </Link>
+
+          <div className="mt-2 flex justify-end">
+            <ReportButton targetType="LISTING" targetId={listing.id} />
+          </div>
 
           {listing.type === "SINGLE" && listing.externalId && !store && (
             <Link

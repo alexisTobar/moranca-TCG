@@ -97,6 +97,18 @@ model User {
   offersShipping Boolean @default(true)
   offersPickup   Boolean @default(true)
 
+  /// Email confirmado (por el link del correo o porque entró con Google).
+  emailVerifiedAt DateTime?
+
+  /// Verificación en dos pasos (TOTP). El secreto se guarda cifrado; los códigos de respaldo, con hash.
+  totpSecret         String?
+  totpEnabledAt      DateTime?
+  totpLastStep       Int?
+  totpRecoveryHashes String[] @default([])
+
+  /// Sube cada vez que se cambia la clave o se cierran las sesiones: los tokens con otro número dejan de valer.
+  tokenVersion Int @default(0)
+
   // Constancia de que la persona aceptó los términos y la política de privacidad al registrarse.
   termsAcceptedAt DateTime?
   termsVersion    String?
@@ -113,6 +125,8 @@ model User {
   sellerOrders   Order[]         @relation("SellerOrders")
   sentMessages   OrderMessage[]
   passwordResets PasswordReset[]
+  emailVerifications EmailVerification[]
+  oauthAccounts  OAuthAccount[]
   coupons        Coupon[]
   store          Store?
   supportTickets SupportTicket[]
@@ -131,6 +145,71 @@ model PasswordReset {
   usedAt    DateTime?
   createdAt DateTime  @default(now())
 
+  @@index([userId])
+}
+
+/// Registro de acciones sensibles: qué hizo el administrador y eventos de seguridad de las cuentas.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorName  String
+  /// Ejemplos: user.update, store.grant, plan.update, security.2fa_enabled
+  action     String
+  targetType String?
+  targetId   String?
+  detail     String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorId])
+  @@index([action])
+}
+
+/// Denuncia de una publicación o de un usuario, que revisa el administrador.
+model Report {
+  id           String    @id @default(cuid())
+  reporterId   String
+  /// LISTING | USER
+  targetType   String
+  targetId     String
+  /// FALSIFICADO | ENGANOSO | PRECIO | FRAUDE | INAPROPIADO | OTRO
+  reason       String
+  detail       String?
+  /// OPEN | RESOLVED | DISMISSED
+  status       String    @default("OPEN")
+  resolution   String?
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+  @@index([reporterId])
+}
+
+/// Link de un solo uso para confirmar el email de una cuenta.
+model EmailVerification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+/// Cuenta externa vinculada (Google). Una persona puede entrar con clave, con Google o con ambos.
+model OAuthAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          String
+  providerAccountId String
+  createdAt         DateTime @default(now())
+
+  @@unique([provider, providerAccountId])
   @@index([userId])
 }
 
@@ -225,6 +304,10 @@ model Order {
   paidAt             DateTime?
   /// El stock de la orden está reservado (se descuenta al crear la orden).
   stockReserved      Boolean     @default(false)
+  /// Datos del despacho, que completa el vendedor al marcar la orden como enviada.
+  trackingCourier    String?
+  trackingCode       String?
+  shippedAt          DateTime?
 
   items              OrderItem[]
   messages           OrderMessage[]

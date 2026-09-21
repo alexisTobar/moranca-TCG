@@ -5,6 +5,12 @@ import "server-only";
  * verdad: se deja el contenido en los logs del servidor para poder probar el
  * flujo igual (la app funciona sin la clave configurada, solo que degradada).
  */
+/** ¿Está configurado el envío real de correos? (Sin esto, lo que exige correo se relaja para no dejar a nadie afuera.) */
+export function mailConfigured(): boolean {
+  if (process.env.NODE_ENV !== "production" && process.env.TEST_FORCE_MAIL === "1") return true;
+  return Boolean(process.env.RESEND_API_KEY);
+}
+
 export async function sendEmail({
   to,
   subject,

@@ -1,3 +1,5 @@
+import { GoogleButton, OrDivider } from "@/components/GoogleButton";
+import { googleEnabled } from "@/lib/google";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
@@ -23,6 +25,15 @@ export default function RegisterPage() {
           <p className="mt-1 text-[13px] text-ink-400">
             Solo los compradores registrados pueden comprar en Win Condition.
           </p>
+
+          {googleEnabled() && (
+            <>
+              <div className="mt-5">
+                <GoogleButton label="Registrarme con Google" />
+              </div>
+              <OrDivider />
+            </>
+          )}
 
           <Suspense fallback={null}>
             <RegisterForm />

@@ -78,6 +78,8 @@ export default async function OrdersPage() {
       couponDiscount: number;
       paymentDiscountPct: number;
       paymentReference: string | null;
+      trackingCourier: string | null;
+      trackingCode: string | null;
       paymentDueAt: Date | null;
       receiptUploadedAt: Date | null;
       subtotal: number;
@@ -260,7 +262,14 @@ export default async function OrdersPage() {
                   status={o.status}
                   reference={o.paymentReference}
                   total={o.total}
+                  shipMethod={o.shipMethod}
                 />
+                {(o.status === "SHIPPED" || o.status === "DELIVERED") && (o.trackingCourier || o.trackingCode) && (
+                  <p className="mt-3 text-[12px] text-ink-400">
+                    <span className="font-semibold text-ink-300">Seguimiento:</span>{" "}
+                    {[o.trackingCourier, o.trackingCode].filter(Boolean).join(" · ")}
+                  </p>
+                )}
               </div>
 
               {o.review && <ReviewReply orderId={o.id} review={o.review} />}

@@ -6,7 +6,7 @@ import { safeQuery } from "@/lib/catalog";
 import { clp, timeAgo } from "@/lib/format";
 import { GameChip } from "@/components/GameChip";
 import { getPanelCounts } from "@/lib/panel-counts";
-import { CreditCard, LifeBuoy, Package, UserPlus, type LucideIcon } from "lucide-react";
+import { CreditCard, Flag, LifeBuoy, Package, ShieldAlert, UserPlus, type LucideIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -70,10 +70,13 @@ export default async function PanelHome() {
   ]);
 
   const pending = await getPanelCounts(user);
+  const adminNo2fa =
+    isAdmin && !(await prisma.user.findUnique({ where: { id: user.id }, select: { totpEnabledAt: true } }))?.totpEnabledAt;
   const attention: Array<{ href: string; icon: LucideIcon; n: number; text: string }> = [
     { href: "/panel/tiendas", icon: CreditCard, n: pending.subscriptions, text: "pagos de membresía por revisar" },
     { href: "/panel/soporte", icon: LifeBuoy, n: pending.tickets, text: isAdmin ? "tickets con mensajes nuevos" : "respuestas de soporte sin leer" },
     { href: "/panel/usuarios", icon: UserPlus, n: pending.sellerRequests, text: "solicitudes para ser vendedor" },
+    { href: "/panel/reportes", icon: Flag, n: pending.reports, text: "reportes por revisar" },
     { href: "/panel/ordenes", icon: Package, n: pending.orders, text: "órdenes con comprobante por confirmar" },
   ].filter((a) => a.n > 0);
 
@@ -108,6 +111,18 @@ export default async function PanelHome() {
           + Nueva publicación
         </Link>
       </header>
+
+      {adminNo2fa && (
+        <Link
+          href="/panel/perfil"
+          className="flex items-center gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/[0.07] p-4 text-[13px] text-ink-300 transition hover:bg-amber-500/10"
+        >
+          <ShieldAlert className="h-5 w-5 shrink-0 text-amber-700" strokeWidth={2} />
+          <span>
+            <strong className="text-carbon">Protege tu cuenta de administrador.</strong> Activa la verificación en dos pasos: controlas pagos y usuarios.
+          </span>
+        </Link>
+      )}
 
       {attention.length > 0 && (
         <section aria-label="Requiere tu atención" className="rounded-2xl border border-brand-500/30 bg-brand-500/5 p-4">

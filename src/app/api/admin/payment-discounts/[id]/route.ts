@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireAdmin } from "@/lib/auth";
@@ -16,7 +17,7 @@ async function listAll() {
 /** Activa, desactiva o edita un descuento. Activar uno desactiva el resto del mismo método. */
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const { id } = await params;
     const parsed = paymentDiscountUpdateSchema.safeParse(await req.json());
     if (!parsed.success) {
@@ -62,6 +63,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       });
     });
 
+    await audit(admin, "discount.update", { type: "PaymentDiscount", id });
     return NextResponse.json({ ok: true, discounts: await listAll() });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -74,9 +76,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const { id } = await params;
     await prisma.paymentDiscount.deleteMany({ where: { id } });
+    await audit(admin, "discount.delete", { type: "PaymentDiscount", id });
     return NextResponse.json({ ok: true, discounts: await listAll() });
   } catch (error) {
     if (error instanceof AuthError) {

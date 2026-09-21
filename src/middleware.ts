@@ -49,8 +49,37 @@ async function readSession(token: string | undefined) {
   }
 }
 
+const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+/**
+ * Defensa extra contra CSRF: una petición que modifica datos vía /api debe venir de este mismo sitio.
+ * Si el navegador manda Origin (o Sec-Fetch-Site), tiene que coincidir; las peticiones sin esas cabeceras
+ * (cron de Vercel con Bearer, herramientas de servidor) no son de navegador y se dejan pasar.
+ */
+function crossSiteMutation(req: NextRequest): boolean {
+  if (!MUTATING.has(req.method) || !req.nextUrl.pathname.startsWith("/api/")) return false;
+  if (req.nextUrl.pathname.startsWith("/api/cron/")) return false;
+  const origin = req.headers.get("origin");
+  if (origin) {
+    try {
+      const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? req.nextUrl.host;
+      return new URL(origin).host !== host;
+    } catch {
+      return true;
+    }
+  }
+  const site = req.headers.get("sec-fetch-site");
+  return site === "cross-site";
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  if (crossSiteMutation(req)) {
+    return securityHeaders(
+      NextResponse.json({ error: "Petición bloqueada: origen no permitido." }, { status: 403 })
+    );
+  }
   const isPanel = pathname.startsWith("/panel");
   const isAccount = pathname.startsWith("/cuenta");
   const isCheckout = pathname === "/checkout";

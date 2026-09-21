@@ -1,3 +1,4 @@
+import { mailOrdersExpired } from "@/lib/order-mail";
 import "server-only";
 import crypto from "node:crypto";
 import type { Prisma } from "@prisma/client";
@@ -52,6 +53,7 @@ export async function releaseOrderStock(
  * estado condicional, así que correrlo dos veces a la vez no duplica nada.
  */
 export async function expireOverdueOrders(now = new Date()): Promise<number> {
+  const expiredIds: string[] = [];
   const overdue = await prisma.order.findMany({
     where: { status: "PENDING", paymentDueAt: { lt: now } },
     select: {
@@ -81,10 +83,14 @@ export async function expireOverdueOrders(now = new Date()): Promise<number> {
         );
         return true;
       });
-      if (done) expired++;
+      if (done) {
+        expired++;
+        expiredIds.push(order.id);
+      }
     } catch (error) {
       console.error("[orders] no se pudo expirar la orden", order.id, error);
     }
   }
+  if (expiredIds.length > 0) await mailOrdersExpired(expiredIds);
   return expired;
 }

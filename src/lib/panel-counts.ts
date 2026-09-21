@@ -9,16 +9,18 @@ export interface PanelCounts {
   tickets: number;
   /** Admin: compradores que piden ser vendedores. */
   sellerRequests: number;
+  /** Admin: reportes de publicaciones o usuarios por revisar. */
+  reports: number;
   /** Órdenes propias con comprobante subido, esperando que confirmes el pago. */
   orders: number;
 }
 
-export const EMPTY_COUNTS: PanelCounts = { subscriptions: 0, tickets: 0, sellerRequests: 0, orders: 0 };
+export const EMPTY_COUNTS: PanelCounts = { subscriptions: 0, tickets: 0, sellerRequests: 0, reports: 0, orders: 0 };
 
 export async function getPanelCounts(user: { id: string; role: string }): Promise<PanelCounts> {
   const isAdmin = user.role === "ADMIN";
   try {
-    const [subscriptions, tickets, sellerRequests, orders] = await Promise.all([
+    const [subscriptions, tickets, sellerRequests, reports, orders] = await Promise.all([
       isAdmin
         ? prisma.storeSubscription.count({ where: { status: "PENDING", receiptUploadedAt: { not: null } } })
         : 0,
@@ -26,11 +28,12 @@ export async function getPanelCounts(user: { id: string; role: string }): Promis
         ? prisma.supportTicket.count({ where: { adminUnread: true, status: { not: "CLOSED" } } })
         : prisma.supportTicket.count({ where: { sellerId: user.id, sellerUnread: true } }),
       isAdmin ? prisma.user.count({ where: { sellerRequestStatus: "PENDING" } }) : 0,
+      isAdmin ? prisma.report.count({ where: { status: "OPEN" } }) : 0,
       prisma.order.count({
         where: { sellerId: user.id, status: "PENDING", receiptUploadedAt: { not: null } },
       }),
     ]);
-    return { subscriptions, tickets, sellerRequests, orders };
+    return { subscriptions, tickets, sellerRequests, reports, orders };
   } catch (error) {
     console.error("[panel-counts]", error);
     return EMPTY_COUNTS;

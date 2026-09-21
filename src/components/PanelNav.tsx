@@ -14,6 +14,8 @@ import {
   Store,
   Gem,
   LifeBuoy,
+  Flag,
+  ClipboardList,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { CountBadge, usePanelCounts, type Counts } from "@/components/panel/PanelCounts";
@@ -37,6 +39,8 @@ const ITEMS: Array<{
   { href: "/panel/perfil", label: "Mi perfil", icon: UserCircle },
   { href: "/panel/usuarios", label: "Vendedores", icon: Users, adminOnly: true, badge: "sellerRequests" },
   { href: "/panel/tiendas", label: "Tiendas premium", icon: Gem, adminOnly: true, badge: "subscriptions" },
+  { href: "/panel/reportes", label: "Reportes", icon: Flag, adminOnly: true, badge: "reports" },
+  { href: "/panel/auditoria", label: "Auditoría", icon: ClipboardList, adminOnly: true },
   { href: "/panel/configuracion", label: "Pagos y descuentos", icon: ShieldCheck, adminOnly: true },
 ];
 

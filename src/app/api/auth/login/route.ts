@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { createSession, verifyPassword } from "@/lib/auth";
+import { verifyPassword } from "@/lib/auth";
+import { completeLogin } from "@/lib/login";
 import { rateLimit, clearRateLimit, clientKey } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -80,18 +81,11 @@ export async function POST(req: Request) {
   }
 
   await clearRateLimit(key);
-  await createSession(
-    {
-      sub: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    },
-    parsed.data.remember
-  );
+  const { needs2fa } = await completeLogin(user, parsed.data.remember);
 
   return NextResponse.json({
     ok: true,
-    user: { id: user.id, name: user.name, role: user.role },
+    needs2fa,
+    ...(needs2fa ? {} : { user: { id: user.id, name: user.name, role: user.role } }),
   });
 }

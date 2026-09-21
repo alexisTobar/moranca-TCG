@@ -3,20 +3,21 @@
 import Link from "next/link";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bell, CheckCheck, CreditCard, LifeBuoy, Package, UserPlus } from "lucide-react";
+import { Bell, CheckCheck, CreditCard, Flag, LifeBuoy, Package, UserPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface Counts {
   subscriptions: number;
   tickets: number;
   sellerRequests: number;
+  reports: number;
   orders: number;
 }
 
 const POLL_MS = 30_000;
 
 const Ctx = createContext<{ counts: Counts; refresh: () => void }>({
-  counts: { subscriptions: 0, tickets: 0, sellerRequests: 0, orders: 0 },
+  counts: { subscriptions: 0, tickets: 0, sellerRequests: 0, reports: 0, orders: 0 },
   refresh: () => {},
 });
 
@@ -118,13 +119,19 @@ export function PanelBell({ isAdmin }: { isAdmin: boolean }) {
       icon: UserPlus,
       text: `${plural(counts.sellerRequests, "solicitud", "solicitudes")} para ser vendedor`,
     });
+  if (counts.reports > 0)
+    entries.push({
+      href: "/panel/reportes",
+      icon: Flag,
+      text: `${plural(counts.reports, "reporte", "reportes")} por revisar`,
+    });
   if (counts.orders > 0)
     entries.push({
       href: "/panel/ordenes",
       icon: Package,
       text: `${plural(counts.orders, "orden", "órdenes")} con comprobante por confirmar`,
     });
-  const total = counts.subscriptions + counts.tickets + counts.sellerRequests + counts.orders;
+  const total = counts.subscriptions + counts.tickets + counts.sellerRequests + counts.reports + counts.orders;
 
   return (
     <div ref={ref} className="sm:relative">

@@ -1,3 +1,4 @@
+import { mailReceiptUploaded } from "@/lib/order-mail";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
@@ -111,6 +112,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         },
       });
     });
+
+    await mailReceiptUploaded(order.id);
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {

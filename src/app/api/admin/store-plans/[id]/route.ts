@@ -1,3 +1,4 @@
+import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireAdmin } from "@/lib/auth";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 /** El administrador cambia precio, beneficios o disponibilidad de un plan. */
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const { id } = await params;
     const parsed = storePlanUpdateSchema.safeParse(await req.json());
     if (!parsed.success) {
@@ -31,6 +32,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(data.showcase !== undefined ? { showcase: data.showcase } : {}),
       },
     });
+    await audit(admin, "plan.update", { type: "StorePlan", id, detail: `${plan.code}: ${JSON.stringify(data)}` });
     return NextResponse.json({ ok: true, plan });
   } catch (error) {
     if (error instanceof AuthError) {
