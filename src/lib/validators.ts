@@ -177,6 +177,9 @@ export const couponUpdateSchema = z.object({
 });
 
 export const checkoutSchema = z.object({
+  idempotencyKey: z.string().uuid("Solicitud de compra inválida"),
+  expectedTotal: z.number().int().min(0).max(2147483647),
+  acceptTerms: z.literal(true, { errorMap: () => ({ message: "Debes aceptar los términos de compra" }) }),
   items: z
     .array(
       z.object({
@@ -185,7 +188,8 @@ export const checkoutSchema = z.object({
       })
     )
     .min(1, "El carrito está vacío")
-    .max(50),
+    .max(50)
+    .refine((items) => new Set(items.map((item) => item.listingId)).size === items.length, "El carrito contiene publicaciones repetidas"),
   shipMethod: z.enum(["PICKUP", "SHIPPING"]).default("SHIPPING"),
   shipAddress: z.string().max(200).optional().nullable(),
   shipCity: z.string().max(80).optional().nullable(),

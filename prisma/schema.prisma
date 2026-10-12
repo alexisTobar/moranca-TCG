@@ -291,6 +291,8 @@ model Order {
   subtotal           Int         @default(0)
   total              Int
   preferenceId       String?
+  checkoutKey        String?
+  termsVersion       String?
   paymentId          String?
   notes              String?
 
@@ -322,6 +324,36 @@ model Order {
   @@index([buyerId])
   @@index([sellerId])
   @@index([couponId])
+  @@index([checkoutKey])
+}
+
+/// Una solicitud de compra confirmada; su respuesta se conserva para reintentos seguros.
+model CheckoutRequest {
+  key         String   @id
+  buyerId     String
+  fingerprint String
+  response    Json
+  createdAt   DateTime @default(now())
+  @@index([buyerId])
+}
+
+/// Analítica voluntaria: no almacena nombres, correos, IP ni rutas con identificadores.
+model UsageEvent {
+  id        String   @id
+  day       DateTime @db.Date
+  visitor   String
+  page      String
+  createdAt DateTime @default(now())
+
+  @@index([day, page])
+  @@index([day, visitor])
+}
+
+model UsageReport {
+  weekStart DateTime @id @db.Date
+  weekEnd   DateTime @db.Date
+  data      Json
+  createdAt DateTime @default(now())
 }
 
 /// Historial de cada orden: quién hizo qué y cuándo (creación, comprobante, pago, envío, cancelación).

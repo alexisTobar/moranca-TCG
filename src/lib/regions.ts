@@ -489,4 +489,4 @@ export function shippingCost(
   return 0;
 }
 
-export const PICKUP_POINT = "Retiro coordinado en Santiago Centro (Metro U. de Chile)";
+export const PICKUP_POINT = "el lugar y horario acordados con el vendedor por el chat de la orden";

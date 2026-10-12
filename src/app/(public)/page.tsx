@@ -23,6 +23,7 @@ import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
 import { discountPctFor, getSiteSettings } from "@/lib/site-settings";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { Reveal } from "@/components/Reveal";
+import { HeroCards } from "@/components/HeroCards";
 import { NewsSlider, type NewsSlide } from "@/components/NewsSlider";
 import { GameLogo } from "@/components/GameLogo";
 import { StoreShowcase } from "@/components/store/StoreShowcase";
@@ -357,44 +358,7 @@ export default async function HomePage() {
             </dl>
           </div>
 
-          {/* Muestra de cartas: una por juego, rectas y del mismo tamaño */}
-          <div className="relative pb-8 sm:pb-10">
-            <div className="pointer-events-none absolute inset-x-4 bottom-2 h-24 rounded-full bg-brand-500/25 blur-3xl" />
-            <div className="relative mx-auto grid max-w-[320px] grid-cols-2 gap-x-4 gap-y-5 sm:max-w-none sm:grid-cols-4 sm:gap-4">
-              {HERO_CARDS.map((c, i) => (
-                <Link
-                  key={c.game}
-                  href={`/cartas?game=${c.game}`}
-                  aria-label={`Ver cartas de ${GAMES[c.game].short}`}
-                  className={`group block ${i % 2 === 1 ? "translate-y-5 sm:translate-y-9" : ""}`}
-                >
-                  <span
-                    className="relative block overflow-hidden rounded-[9px] bg-white/10 ring-1 ring-white/25 transition duration-500 tcg-card-shadow group-hover:-translate-y-2 group-hover:ring-gold-300/80 sm:rounded-xl"
-                    style={{ aspectRatio: "63 / 88" }}
-                  >
-                    <Image
-                      src={c.src}
-                      alt={c.alt}
-                      fill
-                      sizes="(max-width:640px) 150px, (max-width:1024px) 15vw, 170px"
-                      className="object-cover"
-                      priority
-                      unoptimized
-                    />
-                    <span className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/15 opacity-0 transition duration-500 group-hover:opacity-100" />
-                  </span>
-                  <span className="mt-3 block text-center">
-                    <span className="block truncate text-[11px] font-bold uppercase tracking-wide text-white sm:text-[12px]">
-                      {c.name}
-                    </span>
-                    <span className="mt-0.5 block truncate text-[10px] text-white/50 sm:text-[11px]">
-                      {c.detail}
-                    </span>
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
+          <HeroCards cards={HERO_CARDS} />
         </div>
       </section>
 

@@ -1,4 +1,7 @@
 import { emailNotVerifiedResponse } from "@/lib/verification";
+import { createHash } from "node:crypto";
+import { Prisma } from "@prisma/client";
+import { LEGAL_VERSION } from "@/lib/legal";
 import { mailOrderCreated } from "@/lib/order-mail";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -20,7 +23,7 @@ export const dynamic = "force-dynamic";
 
 class StockError extends Error {}
 
-export async function POST(req: Request) {
+async function checkout(req: Request) {
   let user;
   try {
     user = await requireUser();
@@ -57,6 +60,14 @@ export async function POST(req: Request) {
     );
   }
   const data = parsed.data;
+  const fingerprint = createHash("sha256").update(JSON.stringify(data)).digest("hex");
+  const previous = await prisma.checkoutRequest.findUnique({ where: { key: data.idempotencyKey } });
+  if (previous) {
+    if (previous.buyerId !== user.id || previous.fingerprint !== fingerprint) {
+      return NextResponse.json({ error: "Esta solicitud ya se utilizó para otra compra. Recarga la página." }, { status: 409 });
+    }
+    return NextResponse.json(previous.response);
+  }
 
   // Validación de dirección chilena.
   if (data.shipMethod === "SHIPPING") {
@@ -148,6 +159,8 @@ export async function POST(req: Request) {
     select: {
       id: true,
       name: true,
+      active: true,
+      role: true,
       bankName: true,
       bankAccountType: true,
       bankAccountNumber: true,
@@ -160,6 +173,13 @@ export async function POST(req: Request) {
   const sellerById = new Map(sellers.map((s) => [s.id, s]));
 
   for (const s of sellers) {
+    if (!s.active || !["SELLER", "ADMIN"].includes(s.role)) {
+      return NextResponse.json({ error: `${s.name} no está habilitado para vender.` }, { status: 409 });
+    }
+    if (data.paymentMethod === "TRANSFER" &&
+        ![s.bankName, s.bankAccountType, s.bankAccountNumber, s.bankHolderName, s.bankRut].every((v) => v?.trim())) {
+      return NextResponse.json({ error: `${s.name} debe completar sus datos bancarios antes de recibir transferencias.` }, { status: 409 });
+    }
     if (data.shipMethod === "SHIPPING" && !s.offersShipping) {
       return NextResponse.json(
         { error: `${s.name} no hace envíos. Elige retiro en persona o quita sus cartas del carrito.` },
@@ -206,20 +226,27 @@ export async function POST(req: Request) {
   try {
     const created = await prisma.$transaction(
       async (tx) => {
+        // La clave única se reclama dentro de la misma transacción que reserva el stock.
+        // Dos solicitudes simultáneas no pueden crear dos compras.
+        await tx.checkoutRequest.create({ data: {
+          key: data.idempotencyKey, buyerId: user.id, fingerprint, response: {},
+        } });
         const results = [];
         for (const [sellerId, items] of bySeller) {
           const seller = sellerById.get(sellerId);
-          if (!seller) continue;
+          if (!seller) throw new StockError("Un vendedor ya no está disponible");
 
           // Reserva atómica: el descuento solo ocurre si todavía hay stock, así
           // dos compradores a la vez nunca pueden llevarse la misma carta.
           for (const item of items) {
             const { count } = await tx.listing.updateMany({
-              where: { id: item.listingId, status: "ACTIVE", stock: { gte: item.quantity } },
+              where: { id: item.listingId, status: "ACTIVE", stock: { gte: item.quantity },
+                price: byId.get(item.listingId)!.price, offerPrice: byId.get(item.listingId)!.offerPrice,
+                seller: { active: true, role: { in: ["SELLER", "ADMIN"] } } },
               data: { stock: { decrement: item.quantity } },
             });
             if (count === 0) {
-              throw new StockError(`"${item.title}" se acaba de agotar`);
+              throw new StockError(`"${item.title}" cambió de precio o disponibilidad. Revisa tu carrito.`);
             }
           }
 
@@ -250,6 +277,8 @@ export async function POST(req: Request) {
           const order = await tx.order.create({
             data: {
               buyerId: user.id,
+              checkoutKey: data.idempotencyKey,
+              termsVersion: LEGAL_VERSION,
               sellerId: seller.id,
               buyerName: user.name,
               buyerEmail: user.email,
@@ -304,6 +333,11 @@ export async function POST(req: Request) {
                 : null,
           });
         }
+        if (results.reduce((sum, order) => sum + order.total, 0) !== data.expectedTotal) {
+          throw new StockError("El total cambió desde la cotización. Actualiza el carrito y revisa el nuevo monto antes de confirmar.");
+        }
+        await tx.checkoutRequest.update({ where: { key: data.idempotencyKey },
+          data: { response: { ok: true, orders: results } as Prisma.InputJsonValue } });
         return results;
       },
       { maxWait: 10_000, timeout: 20_000 }
@@ -317,10 +351,25 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, orders: created });
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      const replay = await prisma.checkoutRequest.findUnique({ where: { key: data.idempotencyKey } });
+      if (replay?.buyerId === user.id && replay.fingerprint === fingerprint) {
+        return NextResponse.json(replay.response);
+      }
+      return NextResponse.json({ error: "La solicitud ya está en uso. Revisa tus órdenes antes de reintentar." }, { status: 409 });
+    }
     if (error instanceof StockError) {
       return NextResponse.json({ error: error.message }, { status: 409 });
     }
     console.error("[checkout:POST]", error);
     return NextResponse.json({ error: "No se pudo procesar la orden" }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try { return await checkout(req); }
+  catch (error) {
+    console.error("[checkout] servicio no disponible", error);
+    return NextResponse.json({ error: "No pudimos comprobar la compra. Revisa tus órdenes y reintenta en unos momentos; no vuelvas a transferir si ya pagaste." }, { status: 503 });
   }
 }

@@ -129,8 +129,8 @@ const sections: LegalSection[] = [
           ]}
         />
         <P>
-          Si el pago no se confirma dentro del plazo, la orden se <B>cancela automáticamente</B> y el stock vuelve a
-          quedar disponible. Los descuentos por método de pago los define la administración de la plataforma y los
+          Si vence el plazo y la orden sigue pendiente sin comprobante, se <B>cancela automáticamente</B> y el stock vuelve a
+          quedar disponible. Las órdenes con comprobante quedan pendientes de revisión del vendedor; subirlo no acredita por sí solo el pago. Los descuentos por método de pago los define la administración de la plataforma y los
           cupones los define cada vendedor; se aplican al confirmar la compra y quedan registrados en la orden.
         </P>
         <Note title="Ojo con las transferencias">

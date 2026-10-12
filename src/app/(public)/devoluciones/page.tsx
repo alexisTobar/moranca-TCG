@@ -102,8 +102,8 @@ const sections: LegalSection[] = [
         <P>
           Si el vendedor actúa como <B>proveedor</B> en los términos de la Ley N° 19.496 sobre protección de los derechos
           de los consumidores (por ejemplo, una tienda), pueden corresponderte derechos como la garantía legal y el
-          derecho de retracto, en las condiciones y con las excepciones que establece la ley. En ese caso, es el vendedor
-          quien debe cumplirlos: exígeselos directamente. Puedes informarte o reclamar en el SERNAC.
+          derecho de retracto, en las condiciones y con las excepciones que establece la ley. Para productos nuevos defectuosos, la garantía legal permite elegir reparación, cambio o devolución durante seis meses desde la recepción, cuando corresponda. En compras a distancia, el retracto se ejerce generalmente dentro de diez días desde la recepción; si no se envía la confirmación escrita exigida, el plazo puede extenderse a noventa días. Las exclusiones legalmente permitidas deben informarse antes de comprar; no se excluye en bloque a todas las cartas o productos sellados. En ese caso, es el vendedor
+          quien debe cumplirlos, sin perjuicio de las responsabilidades legales de la plataforma. Puedes informarte o reclamar en el SERNAC. Estas políticas no implican renunciar a derechos irrenunciables.
         </P>
       </>
     ),

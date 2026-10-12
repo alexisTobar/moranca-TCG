@@ -27,5 +27,7 @@ jobs:
       - run: npx prisma generate
       - name: Tipos
         run: npx tsc --noEmit
+      - name: Regresiones de compra y privacidad
+        run: npm run test:regression
       - name: Build
         run: npx next build

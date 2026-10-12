@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 const schema = z.object({
   status: z.enum(["PAID", "SHIPPED", "DELIVERED", "CANCELLED"]),
+  refundReference: z.string().trim().min(5).max(120).optional(),
   /** Solo se usan al marcar el envío. */
   trackingCourier: z.string().trim().max(40).optional().nullable(),
   trackingCode: z
@@ -94,6 +95,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       );
     }
 
+    if (order.status === "PAID" && next === "CANCELLED" && !parsed.data.refundReference) {
+      return NextResponse.json({ error: "Para cancelar una orden pagada debes registrar la referencia del reembolso realizado al comprador. La plataforma no devuelve el dinero automáticamente." }, { status: 400 });
+    }
+
     const holdsStock = order.stockReserved || STOCK_HELD_STATUSES.includes(order.status);
 
     await prisma.$transaction(async (tx) => {
@@ -137,6 +142,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       }
 
       await recordOrderEvent(tx, id, user.id, next, `Cambio de ${order.status} a ${next}`);
+      if (order.status === "PAID" && next === "CANCELLED") {
+        await recordOrderEvent(tx, id, user.id, "REFUND_RECORDED", `El vendedor o administrador declara el reembolso externo: ${parsed.data.refundReference}`);
+      }
       await tx.orderMessage.create({
         data: { orderId: id, senderId: user.id, body: SYSTEM_MESSAGE[next] },
       });

@@ -55,7 +55,7 @@ export async function releaseOrderStock(
 export async function expireOverdueOrders(now = new Date()): Promise<number> {
   const expiredIds: string[] = [];
   const overdue = await prisma.order.findMany({
-    where: { status: "PENDING", paymentDueAt: { lt: now } },
+    where: { status: "PENDING", paymentDueAt: { lt: now }, receiptUploadId: null },
     select: {
       id: true,
       stockReserved: true,
@@ -69,7 +69,7 @@ export async function expireOverdueOrders(now = new Date()): Promise<number> {
     try {
       const done = await prisma.$transaction(async (tx) => {
         const { count } = await tx.order.updateMany({
-          where: { id: order.id, status: "PENDING" },
+          where: { id: order.id, status: "PENDING", paymentDueAt: { lt: now }, receiptUploadId: null },
           data: { status: "CANCELLED", stockReserved: false },
         });
         if (count === 0) return false;

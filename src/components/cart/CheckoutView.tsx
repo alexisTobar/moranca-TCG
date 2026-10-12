@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Banknote,
@@ -138,6 +138,9 @@ export function CheckoutView({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<OrderResult[] | null>(null);
+  const submitting = useRef(false);
+  const pendingRequest = useRef<{ body: string; key: string } | null>(null);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const sellerCount = useMemo(
     () => new Set(items.map((i) => i.sellerId).filter(Boolean)).size,
@@ -155,6 +158,8 @@ export function CheckoutView({
   const [couponError, setCouponError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+    setQuote(null);
     if (items.length === 0) {
       setQuote([]);
       return;
@@ -162,6 +167,7 @@ export function CheckoutView({
     const handle = setTimeout(async () => {
       try {
         const res = await fetch("/api/checkout/quote", {
+          signal: controller.signal,
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -181,7 +187,7 @@ export function CheckoutView({
         /* la cotización es solo un preview; el checkout real recalcula todo */
       }
     }, 400);
-    return () => clearTimeout(handle);
+    return () => { clearTimeout(handle); controller.abort(); };
   }, [items, method, region, effectivePayMethod, couponCode]);
 
   const couponDiscount = quote ? quote.reduce((a, s) => a + s.couponDiscount, 0) : 0;
@@ -276,7 +282,10 @@ export function CheckoutView({
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (submitting.current) return;
     setError(null);
+    if (!acceptTerms) { setError("Debes aceptar los términos de compra."); return; }
+    if (!quote?.length || couponError) { setError("Espera una cotización válida antes de confirmar."); return; }
 
     if (method === "SHIPPING" && (!region || !comuna)) {
       setError("Selecciona región y comuna para el despacho.");
@@ -285,26 +294,36 @@ export function CheckoutView({
 
     const form = new FormData(e.currentTarget);
     setLoading(true);
+    submitting.current = true;
 
     try {
+      const payload = {
+        items: items.map((i) => ({ listingId: i.listingId, quantity: i.quantity })),
+        shipMethod: method, shipRegion: method === "SHIPPING" ? region : null,
+        shipCity: method === "SHIPPING" ? comuna : null,
+        shipAddress: method === "SHIPPING" ? form.get("shipAddress") : null,
+        notes: form.get("notes"), paymentMethod: effectivePayMethod,
+        couponCode: couponCode.trim() || undefined, acceptTerms: true, expectedTotal: total,
+      };
+      const body = JSON.stringify(payload);
+      // Conserva la misma clave si se perdió la respuesta o se recargó la pestaña.
+      try {
+        const saved = sessionStorage.getItem("wc_checkout_request");
+        if (!pendingRequest.current && saved) pendingRequest.current = JSON.parse(saved);
+      } catch { /* El almacenamiento del navegador puede estar desactivado. */ }
+      if (pendingRequest.current?.body !== body) pendingRequest.current = { body, key: crypto.randomUUID() };
+      try { sessionStorage.setItem("wc_checkout_request", JSON.stringify(pendingRequest.current)); } catch {}
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map((i) => ({ listingId: i.listingId, quantity: i.quantity })),
-          shipMethod: method,
-          shipRegion: method === "SHIPPING" ? region : null,
-          shipCity: method === "SHIPPING" ? comuna : null,
-          shipAddress: method === "SHIPPING" ? form.get("shipAddress") : null,
-          notes: form.get("notes"),
-          paymentMethod: effectivePayMethod,
-          couponCode: couponCode.trim() || undefined,
-        }),
+        body: JSON.stringify({ ...payload, idempotencyKey: pendingRequest.current!.key }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "No se pudo procesar la orden");
 
       clear();
+      pendingRequest.current = null;
+      try { sessionStorage.removeItem("wc_checkout_request"); } catch {}
       setDone(data.orders as OrderResult[]);
       setLoading(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -312,6 +331,8 @@ export function CheckoutView({
     } catch (err) {
       setError((err as Error).message);
       setLoading(false);
+    } finally {
+      submitting.current = false;
     }
   }
 
@@ -329,6 +350,15 @@ export function CheckoutView({
       <p className="mt-1 text-[13px] text-ink-400">
         Comprando como <strong className="text-ink-200">{buyerName}</strong> ({buyerEmail})
       </p>
+
+      <section aria-label="Cómo funciona tu pago" className="mt-6 overflow-hidden rounded-2xl border border-ink-800 bg-carbon text-white">
+        <div className="border-b border-white/10 px-5 py-4"><p className="text-[11px] font-bold uppercase tracking-widest text-gold-300">Compra paso a paso</p><p className="mt-1 text-sm text-white/75">Aquí reservas tu pedido. El dinero se paga directamente a cada vendedor.</p></div>
+        <ol className="grid gap-4 p-5 text-sm sm:grid-cols-3">
+          <li><strong className="text-gold-300">01 · Revisa y reserva</strong><p className="mt-1 text-xs leading-relaxed text-white/65">Confirma el total y la entrega. Apartamos el stock para tu orden.</p></li>
+          <li><strong className="text-gold-300">02 · Realiza el pago</strong><p className="mt-1 text-xs leading-relaxed text-white/65">Transfiere a la cuenta indicada y sube el comprobante, o paga en efectivo al retirar.</p></li>
+          <li><strong className="text-gold-300">03 · Recibe tus cartas</strong><p className="mt-1 text-xs leading-relaxed text-white/65">El vendedor verifica el pago y coordina contigo el despacho o retiro.</p></li>
+        </ol>
+      </section>
 
       <form onSubmit={submit} className="mt-8 grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-5">
@@ -562,8 +592,13 @@ export function CheckoutView({
               </p>
             )}
 
-            <button disabled={loading} className="btn btn-primary btn-lg mt-5 w-full">
-              {loading ? "Reservando tus cartas…" : `Confirmar y reservar · ${clp(total)}`}
+            <label className="mt-5 flex items-start gap-2 text-xs leading-relaxed text-ink-300">
+              <input type="checkbox" required checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} className="mt-1" />
+              <span>Acepto los <Link href="/terminos-y-condiciones" target="_blank" className="underline">términos de compra</Link> y he leído las políticas de <Link href="/politica-de-privacidad" target="_blank" className="underline">privacidad</Link>, <Link href="/envios-y-pagos" target="_blank" className="underline">envíos y pagos</Link> y <Link href="/devoluciones" target="_blank" className="underline">devoluciones</Link>.</span>
+            </label>
+            {!quote?.length && <p role="status" className="mt-3 text-xs text-ink-400">Esperando la cotización actualizada. Si no aparece, revisa tu conexión o recarga la página.</p>}
+            <button disabled={loading || !acceptTerms || !quote?.length || !!couponError} className="btn btn-primary btn-lg mt-5 w-full">
+              {loading ? "Reservando tus cartas…" : !quote?.length ? "Comprobando el total…" : `Confirmar y reservar · ${clp(total)}`}
             </button>
 
             <p className="mt-3 text-center text-[11px] leading-relaxed text-ink-400">

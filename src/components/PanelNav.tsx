@@ -16,6 +16,7 @@ import {
   LifeBuoy,
   Flag,
   ClipboardList,
+  BarChart3,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { CountBadge, usePanelCounts, type Counts } from "@/components/panel/PanelCounts";
@@ -41,6 +42,7 @@ const ITEMS: Array<{
   { href: "/panel/tiendas", label: "Tiendas premium", icon: Gem, adminOnly: true, badge: "subscriptions" },
   { href: "/panel/reportes", label: "Reportes", icon: Flag, adminOnly: true, badge: "reports" },
   { href: "/panel/auditoria", label: "Auditoría", icon: ClipboardList, adminOnly: true },
+  { href: "/panel/analitica", label: "Analítica y respaldos", icon: BarChart3, adminOnly: true },
   { href: "/panel/configuracion", label: "Pagos y descuentos", icon: ShieldCheck, adminOnly: true },
 ];
 

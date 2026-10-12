@@ -1,0 +1,62 @@
+name: Respaldo semanal
+
+on:
+  schedule:
+    # Lunes 10:30 UTC (06:30 / 07:30 en Chile según horario estacional).
+    - cron: '30 10 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-database-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Validar configuración
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          test -n "$BACKUP_DATABASE_URL" || { echo 'Falta BACKUP_DATABASE_URL'; exit 1; }
+          test "${#BACKUP_PASSPHRASE}" -ge 32 || { echo 'BACKUP_PASSPHRASE debe tener al menos 32 caracteres'; exit 1; }
+      - name: Crear copia consistente y validar archivo
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/wctcg-backup"
+          chmod 700 "$RUNNER_TEMP/wctcg-backup"
+          # PostgreSQL 17 puede respaldar servidores 17 o anteriores.
+          # La URL no se pasa por argumentos ni se imprime en logs.
+          docker run --rm --env BACKUP_DATABASE_URL --env PGSSLMODE=require \
+            --volume "$RUNNER_TEMP/wctcg-backup:/backup" postgres:17 \
+            sh -ec 'export PGDATABASE="$BACKUP_DATABASE_URL"; pg_dump --format=custom --no-owner --no-acl --schema=public --file=/backup/database.dump; pg_restore --list /backup/database.dump > /backup/contents.txt'
+          test -s "$RUNNER_TEMP/wctcg-backup/database.dump"
+      - name: Cifrar respaldo
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 600000 \
+            -in "$RUNNER_TEMP/wctcg-backup/database.dump" \
+            -out "$RUNNER_TEMP/wctcg-backup/database.dump.enc" \
+            -pass env:BACKUP_PASSPHRASE
+          cd "$RUNNER_TEMP/wctcg-backup"
+          sha256sum database.dump.enc > database.dump.enc.sha256
+      - name: Guardar únicamente la copia cifrada
+        uses: actions/upload-artifact@v4
+        with:
+          name: wctcg-backup-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/wctcg-backup/database.dump.enc
+            ${{ runner.temp }}/wctcg-backup/database.dump.enc.sha256
+          retention-days: 90
+          if-no-files-found: error
+      - name: Limpiar archivos temporales
+        if: always()
+        run: |
+          docker run --rm --volume "$RUNNER_TEMP/wctcg-backup:/backup" postgres:17 sh -c 'rm -f /backup/database.dump /backup/contents.txt /backup/database.dump.enc /backup/database.dump.enc.sha256'

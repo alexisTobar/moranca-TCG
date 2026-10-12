@@ -14,6 +14,10 @@ correos, SEO…): **469 comprobaciones**. Viven en `tests/e2e/`.
 | `verificacion-2fa-google.mjs` | Confirmación de email, 2FA (TOTP), login con Google (con un Google falso que valida PKCE), CSRF |
 | `auditoria-reportes-datos.mjs` | Auditoría, reportes, descargar datos, eliminar cuenta |
 
+## Regresiones sin base de datos
+
+`npm run test:regression` ejecuta los handlers reales con adaptadores de base de datos controlados. Cubre idempotencia, cambios de total, datos bancarios, autorización de analítica, consentimiento, vencimiento de órdenes y declaración de reembolsos. No demuestra conectividad ni concurrencia real de PostgreSQL; las pruebas e2e de abajo requieren una base aislada.
+
 ## Cómo ejecutarlas
 
 Necesitas **una base PostgreSQL SOLO para pruebas** (nunca la de producción). Los datos de prueba se cargan solos,

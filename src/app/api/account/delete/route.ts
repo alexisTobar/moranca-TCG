@@ -51,6 +51,11 @@ export async function POST(req: Request) {
 
     const tag = crypto.randomBytes(4).toString("hex");
     await prisma.$transaction(async (tx) => {
+      // Las respuestas de reintentos pueden contener datos bancarios del vendedor.
+      const sellerOrders = await tx.order.findMany({ where: { sellerId: user.id, checkoutKey: { not: null } }, select: { checkoutKey: true } });
+      await tx.checkoutRequest.deleteMany({ where: { OR: [
+        { buyerId: user.id }, { key: { in: sellerOrders.flatMap((o) => o.checkoutKey ? [o.checkoutKey] : []) } },
+      ] } });
       // Tienda, cupones y publicaciones dejan de existir/mostrarse.
       await tx.store.deleteMany({ where: { sellerId: user.id } });
       await tx.coupon.deleteMany({ where: { sellerId: user.id } });

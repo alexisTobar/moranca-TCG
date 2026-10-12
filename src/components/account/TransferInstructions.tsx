@@ -255,7 +255,7 @@ export function TransferInstructions({ payment }: { payment: PaymentInfo }) {
           <Landmark className="h-3.5 w-3.5" strokeWidth={2} />
           Pago por transferencia
         </span>
-        {payment.dueAt && <DueBadge dueAt={payment.dueAt} />}
+        {payment.receiptUploadedAt ? <span className="text-xs font-semibold text-emerald-700">Comprobante en revisión</span> : payment.dueAt && <DueBadge dueAt={payment.dueAt} />}
       </div>
 
       {payment.bank ? (

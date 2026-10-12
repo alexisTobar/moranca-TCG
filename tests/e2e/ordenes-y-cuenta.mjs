@@ -1,3 +1,4 @@
+import { checkoutPayload } from "./checkout-payload.mjs";
 // Batería de pruebas de punta a punta. Ver tests/README.md para prepararla y ejecutarla.
 import pg from "pg";
 import fs from "node:fs";
@@ -31,6 +32,7 @@ const refOf = async (id) => (await db.query(`SELECT "paymentReference" r FROM "O
 class C {
   cookie = "";
   async req(path, { method = "GET", json } = {}) {
+    if (path === "/api/checkout" && json) json = await checkoutPayload(this, json);
     const res = await fetch(BASE + path, { method, headers: { cookie: this.cookie, ...(json ? { "content-type": "application/json" } : {}) }, body: json ? JSON.stringify(json) : undefined, redirect: "manual" });
     for (const c of res.headers.getSetCookie?.() ?? []) if (c.startsWith("dreamdeck_session=")) this.cookie = c.split(";")[0];
     const ct = res.headers.get("content-type") ?? "";

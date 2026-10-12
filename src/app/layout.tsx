@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
+import { UsageConsent } from "@/components/UsageConsent";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -59,6 +60,7 @@ export default function RootLayout({
     <html lang="es-CL" className={`${inter.variable} ${sora.variable}`}>
       <body className="min-h-dvh antialiased">
         {children}
+        <UsageConsent />
         <Toaster richColors position="top-right" />
       </body>
     </html>

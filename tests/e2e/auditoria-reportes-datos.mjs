@@ -1,3 +1,4 @@
+import { checkoutPayload } from "./checkout-payload.mjs";
 // Batería de pruebas de punta a punta. Ver tests/README.md para prepararla y ejecutarla.
 import pg from "pg";
 
@@ -12,6 +13,7 @@ class C {
   cookies = {};
   get cookie() { return Object.entries(this.cookies).map(([k, v]) => `${k}=${v}`).join("; "); }
   async req(path, { method = "GET", json, headers = {} } = {}) {
+    if (path === "/api/checkout" && json) json = await checkoutPayload(this, json);
     const res = await fetch(BASE + path, { method, headers: { cookie: this.cookie, ...(json ? { "content-type": "application/json" } : {}), ...headers }, body: json ? JSON.stringify(json) : undefined, redirect: "manual" });
     for (const c of res.headers.getSetCookie?.() ?? []) { const [kv] = c.split(";"); const i = kv.indexOf("="); const k = kv.slice(0, i), v = kv.slice(i + 1); if (/max-age=0/i.test(c) || /expires=Thu, 01 Jan 1970/i.test(c) || v === "") delete this.cookies[k]; else this.cookies[k] = v; }
     const ct = res.headers.get("content-type") ?? "";

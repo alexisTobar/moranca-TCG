@@ -15,6 +15,7 @@ export const dynamic = "force-dynamic";
 
 const MAX_BYTES = 4 * 1024 * 1024; // 4 MB
 const ALLOWED = [...IMAGE_SIGNATURES, PDF_SIGNATURE];
+class ReceiptConflict extends Error {}
 
 /** El comprador sube el comprobante de su transferencia. */
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -90,10 +91,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         select: { id: true },
       });
 
-      await tx.order.update({
-        where: { id: order.id },
+      const claimed = await tx.order.updateMany({
+        where: { id: order.id, status: "PENDING", receiptUploadId: order.receiptUploadId },
         data: { receiptUploadId: upload.id, receiptUploadedAt: new Date() },
       });
+      if (claimed.count !== 1) throw new ReceiptConflict("La orden cambió. Recarga antes de subir el comprobante.");
+      if (order.receiptUploadId) {
+        await tx.upload.deleteMany({ where: { id: order.receiptUploadId, uploadedBy: user.id, filename: `receipt:${order.id}` } });
+      }
 
       await recordOrderEvent(
         tx,
@@ -117,6 +122,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {
+    if (error instanceof ReceiptConflict) return NextResponse.json({ error: error.message }, { status: 409 });
     if (error instanceof AuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }

@@ -25,8 +25,15 @@ export function OrderStatusActions({
   const [code, setCode] = useState("");
 
   async function setStatus(next: "PAID" | "SHIPPED" | "CANCELLED") {
-    if (next === "CANCELLED" && !confirm("¿Cancelar este pedido? Esto no se puede deshacer.")) {
+    if (next === "CANCELLED" && !confirm("¿Cancelar este pedido? Esto no devuelve dinero automáticamente y no se puede deshacer.")) {
       return;
+    }
+    let refundReference: string | undefined;
+    if (next === "CANCELLED" && status === "PAID") {
+      const value = prompt("Primero devuelve el dinero al comprador. Registra la referencia de esa devolución (entre 5 y 120 caracteres):");
+      if (value === null) return;
+      if (value.trim().length < 5 || value.trim().length > 120) { setError("Ingresa una referencia de devolución válida."); return; }
+      refundReference = value.trim();
     }
     if (
       next === "PAID" &&
@@ -45,7 +52,7 @@ export function OrderStatusActions({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
-          next === "SHIPPED" ? { status: next, trackingCourier: courier || null, trackingCode: code || null } : { status: next }
+          next === "SHIPPED" ? { status: next, trackingCourier: courier || null, trackingCode: code || null } : { status: next, refundReference }
         ),
       });
       const data = await res.json();

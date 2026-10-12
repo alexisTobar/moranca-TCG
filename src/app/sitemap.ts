@@ -33,6 +33,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     u("/quienes-somos", 0.5, "monthly"),
     u("/terminos-y-condiciones", 0.3, "yearly"),
     u("/politica-de-privacidad", 0.3, "yearly"),
+    u("/politica-de-cookies", 0.3, "yearly"),
+    u("/envios-y-pagos", 0.3, "yearly"),
     u("/devoluciones", 0.4, "yearly"),
   ];
 

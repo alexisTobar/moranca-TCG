@@ -1,3 +1,4 @@
+import { checkoutPayload } from "./checkout-payload.mjs";
 // Batería de pruebas de punta a punta. Ver tests/README.md para prepararla y ejecutarla.
 import pg from "pg";
 import fs from "node:fs";
@@ -48,6 +49,7 @@ class C {
   cookies = {};
   get cookie() { return Object.entries(this.cookies).map(([k, v]) => `${k}=${v}`).join("; "); }
   async req(path, { method = "GET", json, headers = {} } = {}) {
+    if (path === "/api/checkout" && json) json = await checkoutPayload(this, json);
     const res = await fetch(BASE + path, { method, headers: { cookie: this.cookie, ...(json ? { "content-type": "application/json" } : {}), ...headers }, body: json ? JSON.stringify(json) : undefined, redirect: "manual" });
     for (const c of res.headers.getSetCookie?.() ?? []) { const [kv, ...attrs] = c.split(";"); const i = kv.indexOf("="); const k = kv.slice(0, i), v = kv.slice(i + 1); if (/max-age=0/i.test(c) || /expires=Thu, 01 Jan 1970/i.test(c) || v === "") delete this.cookies[k]; else this.cookies[k] = v; }
     const ct = res.headers.get("content-type") ?? "";
@@ -222,7 +224,7 @@ const gc = mkClaims({ email: `nuevo-${stamp}@gmail.test`, sub: `sub-${stamp}` })
 g = await googleLogin(gc);
 check("cuenta nueva con Google: entra a Mi cuenta con sesion", g.cb.status === 307 && g.cb.location?.endsWith("/cuenta") && g.C0.hasSession(), `${g.cb.status} ${g.cb.location}`);
 [row] = (await db.query(`SELECT id, role, "emailVerifiedAt" v, "termsAcceptedAt" t, "termsVersion" tv FROM "User" WHERE email=$1`, [gc.email])).rows;
-check("se crea como COMPRADOR, email verificado y terminos aceptados", row.role === "BUYER" && row.v && row.t && row.tv === "2026-09", JSON.stringify(row));
+check("se crea como COMPRADOR, email verificado y terminos aceptados", row.role === "BUYER" && row.v && row.t && row.tv === "2026-10-11", JSON.stringify(row));
 check("queda vinculada la cuenta de Google", (await db.query(`SELECT count(*) n FROM "OAuthAccount" WHERE "userId"=$1 AND provider='google' AND "providerAccountId"=$2`, [row.id, gc.sub])).rows[0].n === "1");
 check("puede comprar de inmediato (email ya verificado)", (await g.C0.req("/api/checkout", { method: "POST", json: cartJson })).status === 200);
 g = await googleLogin(gc);

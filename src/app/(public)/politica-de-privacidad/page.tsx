@@ -19,7 +19,7 @@ const sections: LegalSection[] = [
       <P>
         Win Condition TCG (“nosotros”) es el responsable del tratamiento de los datos personales que recopilamos en
         este sitio, conforme a la Ley N° 19.628 sobre protección de la vida privada y a la Ley N° 21.719 sobre protección
-        y tratamiento de los datos personales, en los plazos en que esta última entre en vigencia. Los datos de contacto
+        y tratamiento de los datos personales, que entra en vigencia el 1 de diciembre de 2026. Los datos de contacto
         están al final de esta página.
       </P>
     ),
@@ -40,6 +40,7 @@ const sections: LegalSection[] = [
             ["Ingreso con Google", "Nombre, email verificado e identificador de tu cuenta de Google. Nunca recibimos tu contraseña de Google.", "Solo si eliges ingresar con Google."],
             ["Verificación en dos pasos", "Una clave secreta (guardada cifrada) y códigos de respaldo (guardados con hash).", "Solo si activas esta protección."],
             ["Estadísticas de tienda", "Conteo diario de visitas y escaneos de QR, sin identificar a las personas.", "Cuando alguien visita una tienda premium."],
+            ["Analítica propia opcional", "Sección visitada e identificador de sesión transformado y distinto cada día; sin vincularlo con tu cuenta, nombre, correo o búsqueda.", "Solo si aceptas estadísticas; consulta y descarga exclusivas del administrador."],
           ]}
         />
         <P>No recopilamos datos de tarjetas: los pagos son transferencias directas entre las partes.</P>
@@ -105,7 +106,7 @@ const sections: LegalSection[] = [
           ]}
         />
         <P>
-          <B>No usamos cookies de publicidad ni herramientas de analítica de terceros.</B> Puedes borrar o bloquear las
+          <B>No usamos cookies de publicidad ni herramientas de analítica de terceros.</B> La analítica propia es opcional y puedes cambiar tu elección con el botón “Privacidad”. Consulta nuestra <Link href="/politica-de-cookies" className="underline">política de cookies y estadísticas</Link>. Puedes borrar o bloquear las
           cookies desde tu navegador; ten en cuenta que, si bloqueas la de sesión, no podrás iniciar sesión.
         </P>
       </>
@@ -118,7 +119,7 @@ const sections: LegalSection[] = [
       <>
         <UL
           items={[
-            "Las contraseñas se guardan cifradas con un algoritmo de hash (bcrypt).",
+            "Las contraseñas se guardan mediante hash bcrypt, no como texto recuperable.",
             "La comunicación viaja cifrada (HTTPS) y la sesión usa una cookie protegida.",
             "Los comprobantes de transferencia son privados: solo pueden verlos las partes de la orden y la administración.",
             "Aplicamos límites de intentos, validación de archivos y permisos por rol en cada acción.",
@@ -141,7 +142,7 @@ const sections: LegalSection[] = [
         Mantenemos los datos de tu cuenta mientras esté activa. Las órdenes, comprobantes y mensajes se conservan por el
         tiempo necesario para atender reclamos y cumplir obligaciones legales, incluidas las contables y tributarias. Los
         registros técnicos de límites anti-abuso se eliminan automáticamente al cabo de pocas horas. Cuando ya no sean
-        necesarios, los eliminamos o los anonimizamos.
+        necesarios, los eliminamos o los anonimizamos. Los eventos de analítica propia se eliminan al superar 90 días en la siguiente ejecución semanal; los informes agregados se conservan 52 semanas. Cuando el respaldo semanal está habilitado, las copias cifradas de la base se conservan hasta 90 días, tienen acceso restringido y se usan para recuperación. Una eliminación puede tardar hasta ese plazo en desaparecer de copias históricas. Al restaurar un respaldo deben reaplicarse las solicitudes de eliminación posteriores a su fecha.
       </P>
     ),
   },
