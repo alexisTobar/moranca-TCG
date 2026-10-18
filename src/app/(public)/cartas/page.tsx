@@ -3,11 +3,14 @@ import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { GAME_LIST, CONDITIONS, LANGUAGES, LISTING_TYPES, isGameId } from "@/lib/games";
-import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
+import { LISTING_CARD_SELECT } from "@/lib/catalog";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
-import { Reveal } from "@/components/Reveal";
+import { redirect } from "next/navigation";
 import { FilterDrawer } from "@/components/FilterDrawer";
 import { SearchX } from "lucide-react";
+import { catalogPage, catalogPrice, paginationWindow } from "@/lib/catalog-query";
+import { JsonLd } from "@/components/JsonLd";
+import { siteUrl } from "@/lib/seo";
 
 const TYPE_SEO: Record<string, string> = { SINGLE: "Singles", SEALED: "Sellados", DECK: "Mazos armados" };
 
@@ -22,18 +25,23 @@ export async function generateMetadata({
   const type = one(sp.type);
   const gameName = game && isGameId(game) ? GAME_LIST.find((g) => g.id === game)?.name : undefined;
   const typeName = type ? TYPE_SEO[type] : undefined;
+  const page = catalogPage(one(sp.page));
+  const filtered = ["q", "condition", "language", "sort", "min", "max"].some(key => !!one(sp[key]));
+  const pagination = page > 1 ? ` · Página ${page}` : "";
 
   if (!gameName && !typeName) {
     return {
-      title: "Catálogo de cartas TCG en Chile",
+      title: `Catálogo de cartas TCG en Chile${pagination}`,
       description: "Explora singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas con stock reservado y envíos a todo Chile.",
-      alternates: { canonical: "/cartas" },
+      alternates: { canonical: page > 1 ? `/cartas?page=${page}` : "/cartas" },
+      robots: filtered ? { index: false, follow: true } : undefined,
     };
   }
   const what = [typeName ?? "Cartas", gameName].filter(Boolean).join(" de ");
-  const canon = new URLSearchParams({ ...(gameName && game ? { game } : {}), ...(typeName && type ? { type } : {}) }).toString();
+  const canon = new URLSearchParams({ ...(gameName && game ? { game } : {}), ...(typeName && type ? { type } : {}), ...(page > 1 ? { page: String(page) } : {}) }).toString();
   return {
-    title: `${what} en Chile`,
+    title: `${what} en Chile${pagination}`,
+    robots: filtered ? { index: false, follow: true } : undefined,
     description: `${what} de vendedores chilenos: compara precios, elige idioma y estado, y compra con stock reservado y pago por transferencia.`,
     alternates: { canonical: `/cartas?${canon}` },
   };
@@ -62,17 +70,23 @@ export default async function CatalogPage({
   searchParams: SearchParams;
 }) {
   const sp = await searchParams;
-  const q = one(sp.q)?.trim() ?? "";
+  const q = (one(sp.q)?.trim() ?? "").slice(0, 120);
   const game = one(sp.game);
   const type = one(sp.type);
   const condition = one(sp.condition);
   const language = one(sp.language);
   const sort = one(sp.sort) ?? "recientes";
-  const min = Number(one(sp.min) ?? "") || undefined;
-  const max = Number(one(sp.max) ?? "") || undefined;
-  const page = Math.max(1, Number(one(sp.page) ?? "1") || 1);
+  const rawMin = catalogPrice(one(sp.min));
+  const rawMax = catalogPrice(one(sp.max));
+  const min = rawMin !== undefined && rawMax !== undefined ? Math.min(rawMin, rawMax) : rawMin;
+  const max = rawMin !== undefined && rawMax !== undefined ? Math.max(rawMin, rawMax) : rawMax;
+  const requestedPage = catalogPage(one(sp.page));
+  let unavailable = false;
+  async function catalogQuery<T>(query: () => Promise<T>, fallback: T): Promise<T> {
+    try { return await query(); } catch { unavailable = true; return fallback; }
+  }
 
-  const where: Prisma.ListingWhereInput = { status: "ACTIVE" };
+  const where: Prisma.ListingWhereInput = { status: "ACTIVE", seller: { active: true, role: { in: ["SELLER", "ADMIN"] } } };
   if (q) {
     where.OR = [
       { title: { contains: q, mode: "insensitive" } },
@@ -87,7 +101,7 @@ export default async function CatalogPage({
   }
   if (condition) where.condition = condition;
   if (language) where.language = language;
-  if (min || max) where.price = { ...(min ? { gte: min } : {}), ...(max ? { lte: max } : {}) };
+  if (min !== undefined || max !== undefined) where.price = { ...(min !== undefined ? { gte: min } : {}), ...(max !== undefined ? { lte: max } : {}) };
 
   // Las publicaciones vendidas (stock agotado) siguen apareciendo en el
   // catálogo con su badge "Vendido", pero no deben competir con las
@@ -96,13 +110,21 @@ export default async function CatalogPage({
   // se completa con lo vendido, también en ese orden.
   const availableWhere: Prisma.ListingWhereInput = { ...where, stock: { gt: 0 } };
   const soldWhere: Prisma.ListingWhereInput = { ...where, stock: { lte: 0 } };
-  const orderBy = SORTS[sort] ?? SORTS.recientes;
+  const orderBy = [SORTS[sort] ?? SORTS.recientes, { id: "asc" as const }];
 
   const [availableCount, total] = await Promise.all([
-    safeQuery(() => prisma.listing.count({ where: availableWhere }), 0),
-    safeQuery(() => prisma.listing.count({ where }), 0),
+    catalogQuery(() => prisma.listing.count({ where: availableWhere }), 0),
+    catalogQuery(() => prisma.listing.count({ where }), 0),
   ]);
 
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (!unavailable && requestedPage > pages) {
+    const corrected = new URLSearchParams();
+    for (const [key, value] of Object.entries(sp)) { const v = one(value); if (v !== undefined && key !== "page") corrected.set(key, v); }
+    if (pages > 1) corrected.set("page", String(pages));
+    redirect(`/cartas${corrected.size ? `?${corrected}` : ""}`);
+  }
+  const page = Math.min(requestedPage, pages);
   const startIndex = (page - 1) * PAGE_SIZE;
   const endIndex = startIndex + PAGE_SIZE;
 
@@ -113,7 +135,7 @@ export default async function CatalogPage({
 
   const [availableListings, soldListings] = await Promise.all([
     availableTake > 0
-      ? safeQuery(
+      ? catalogQuery(
           () =>
             prisma.listing.findMany({
               where: availableWhere,
@@ -126,7 +148,7 @@ export default async function CatalogPage({
         )
       : Promise.resolve([] as ListingCardData[]),
     soldTake > 0
-      ? safeQuery(
+      ? catalogQuery(
           () =>
             prisma.listing.findMany({
               where: soldWhere,
@@ -142,7 +164,6 @@ export default async function CatalogPage({
 
   const listings = [...availableListings, ...soldListings];
 
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const buildHref = (patch: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
@@ -153,8 +174,8 @@ export default async function CatalogPage({
       condition,
       language,
       sort: sort !== "recientes" ? sort : undefined,
-      min: min ? String(min) : undefined,
-      max: max ? String(max) : undefined,
+      min: min !== undefined ? String(min) : undefined,
+      max: max !== undefined ? String(max) : undefined,
       ...patch,
     };
     for (const [k, v] of Object.entries(current)) if (v) params.set(k, v);
@@ -163,7 +184,8 @@ export default async function CatalogPage({
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="catalog-editorial"><div className="mx-auto max-w-7xl px-4 py-8">
+      {!unavailable && <JsonLd data={{ "@context": "https://schema.org", "@type": "ItemList", itemListElement: listings.map((l, i) => ({ "@type": "ListItem", position: startIndex + i + 1, name: l.title, url: `${siteUrl()}/producto/${l.slug}` })) }} />}
       <nav className="mb-4 text-[12px] text-ink-400">
         <Link href="/" className="hover:text-carbon">
           Inicio
@@ -172,12 +194,12 @@ export default async function CatalogPage({
         <span className="text-ink-300">Catálogo</span>
       </nav>
 
-      <header className="mb-6">
+      <header className="catalog-heading mb-6">
         <h1 className="font-display text-3xl font-bold tracking-tight text-carbon sm:text-4xl">
           {q ? `Resultados para “${q}”` : "Catálogo"}
         </h1>
         <p className="mt-1 text-[13px] text-ink-400">
-          {total} {total === 1 ? "publicación encontrada" : "publicaciones encontradas"}
+          {unavailable ? "El catálogo no está disponible temporalmente." : `${total} ${total === 1 ? "publicación encontrada" : "publicaciones encontradas"}`}
         </p>
       </header>
 
@@ -257,9 +279,13 @@ export default async function CatalogPage({
             {q && <input type="hidden" name="q" value={q} />}
             {game && <input type="hidden" name="game" value={game} />}
             {type && <input type="hidden" name="type" value={type} />}
+            {condition && <input type="hidden" name="condition" value={condition} />}
+            {language && <input type="hidden" name="language" value={language} />}
+            <input type="hidden" name="sort" value={sort} />
             <div className="flex gap-2">
               <input
                 name="min"
+                aria-label="Precio mínimo en pesos chilenos"
                 type="number"
                 min={0}
                 defaultValue={min}
@@ -268,6 +294,7 @@ export default async function CatalogPage({
               />
               <input
                 name="max"
+                aria-label="Precio máximo en pesos chilenos"
                 type="number"
                 min={0}
                 defaultValue={max}
@@ -304,7 +331,7 @@ export default async function CatalogPage({
             ))}
           </div>
 
-          {listings.length === 0 ? (
+          {unavailable ? <div role="status" className="border-y border-ink-700 py-12"><h2 className="font-display text-2xl">No pudimos cargar las publicaciones</h2><p className="mt-3 max-w-lg text-sm text-ink-400">La conexión con el catálogo está interrumpida. Tus filtros se conservan; vuelve a intentarlo en unos momentos.</p><a href={buildHref({ page: String(page) })} className="btn btn-primary mt-5">Volver a intentar</a></div> : listings.length === 0 ? (
             <div className="flex flex-col items-center rounded-3xl border border-dashed border-ink-700 px-6 py-16 text-center">
               <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-850 text-ink-500">
                 <SearchX className="h-7 w-7" strokeWidth={1.5} />
@@ -318,17 +345,16 @@ export default async function CatalogPage({
               </Link>
             </div>
           ) : (
-            <Reveal className="stagger grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+            <div className="catalog-results">
               {listings.map((l) => (
                 <ListingCard key={l.id} listing={l} />
               ))}
-            </Reveal>
+            </div>
           )}
 
           {pages > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-2">
-              {Array.from({ length: pages }, (_, i) => i + 1)
-                .filter((p) => p === 1 || p === pages || Math.abs(p - page) <= 2)
+            <nav aria-label="Páginas del catálogo" className="mt-8 flex flex-wrap items-center justify-center gap-2">
+              {paginationWindow(page, pages)
                 .map((p, idx, arr) => (
                   <span key={p} className="flex items-center gap-2">
                     {idx > 0 && arr[idx - 1] !== p - 1 && (
@@ -337,17 +363,19 @@ export default async function CatalogPage({
                     <Link
                       href={buildHref({ page: String(p) })}
                       data-active={p === page}
+                      aria-current={p === page ? "page" : undefined}
+                      aria-label={`Página ${p}`}
                       className="pill !min-w-9 !justify-center"
                     >
                       {p}
                     </Link>
                   </span>
                 ))}
-            </div>
+            </nav>
           )}
         </div>
       </div>
-    </div>
+    </div></div>
   );
 }
 

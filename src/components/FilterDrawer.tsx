@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 
 /**
@@ -16,6 +16,7 @@ export function FilterDrawer({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const id = useId();
 
   return (
     <div className="h-fit lg:sticky lg:top-24">
@@ -23,6 +24,7 @@ export function FilterDrawer({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
+        aria-controls={id}
         className="btn btn-secondary w-full lg:hidden"
       >
         <SlidersHorizontal className="h-4 w-4" strokeWidth={2} />
@@ -35,6 +37,8 @@ export function FilterDrawer({
       </button>
 
       <aside
+        id={id}
+        aria-label="Filtros del catálogo"
         className={`${open ? "block" : "hidden"} mt-3 space-y-6 rounded-3xl card-surface p-5 lg:mt-0 lg:block`}
       >
         {children}

@@ -1,18 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Sora } from "next/font/google";
+import { DM_Sans, Fraunces } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { UsageConsent } from "@/components/UsageConsent";
 
-const inter = Inter({
+const inter = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-body",
   display: "swap",
 });
 
-const sora = Sora({
+const sora = Fraunces({
   subsets: ["latin"],
-  variable: "--font-sora",
+  variable: "--font-editorial",
   display: "swap",
 });
 

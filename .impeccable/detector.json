@@ -1,0 +1,33 @@
+[
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\Seba\\Desktop\\moranca-TCG\\src\\app\\globals.css",
+    "line": 168,
+    "snippet": "background-clip: text + gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\Seba\\Desktop\\moranca-TCG\\src\\app\\globals.css",
+    "line": 175,
+    "snippet": "background-clip: text + gradient"
+  },
+  {
+    "antipattern": "codex-grid-background",
+    "name": "Decorative grid-line background",
+    "description": "A decorative grid or line-field background drawn with hairline linear-gradient layers tiled by a fixed pixel cell is a recurring generated-UI signature. Reserve grid overlays for actual canvas, map, blueprint, or measurement surfaces; elsewhere use product structure or a plain surface.",
+    "severity": "advisory",
+    "category": "slop",
+    "file": "C:\\Users\\Seba\\Desktop\\moranca-TCG\\src\\app\\globals.css",
+    "line": 350,
+    "snippet": "two-axis grid-line gradient background",
+    "advisory": true
+  }
+]

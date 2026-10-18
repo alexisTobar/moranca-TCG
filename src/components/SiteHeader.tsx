@@ -27,7 +27,7 @@ export async function SiteHeader() {
   return (
     <>
       {/* Barra de anuncio: refleja el descuento que define el administrador */}
-      <div className="bg-gradient-to-r from-brand-700 via-brand-600 to-brand-700 text-white">
+      <div className="market-announcement text-white">
         <p className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-1.5 text-center text-[12px] font-semibold tracking-wide">
           <Sparkles className="h-3.5 w-3.5 shrink-0 text-gold-300" strokeWidth={2} />
           {transferPct > 0
@@ -37,7 +37,7 @@ export async function SiteHeader() {
       </div>
 
       {/* Solo esta barra queda fija al hacer scroll; lo demás se desplaza */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-carbon/90 backdrop-blur-xl">
+      <header className="market-navigation sticky top-0 z-50 border-b border-white/10 bg-carbon">
         <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4">
           <Link href="/" aria-label="Win Condition TCG - inicio" className="shrink-0">
             <Logo height={54} tone="light" />

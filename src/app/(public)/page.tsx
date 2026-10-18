@@ -257,7 +257,7 @@ export default async function HomePage() {
   ];
 
   return (
-    <>
+    <div className="editorial-home">
       <JsonLd
         data={[
           {
@@ -284,90 +284,23 @@ export default async function HomePage() {
           faqJsonLd(faqs),
         ]}
       />
-      {/* HERO */}
-      <section className="market-hero relative overflow-hidden">
-        <div className="bg-grid pointer-events-none absolute inset-0" />
-        <div className="animate-blob pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-brand-600/30 blur-3xl" />
-        <div
-          className="animate-blob pointer-events-none absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-gold-500/20 blur-3xl"
-          style={{ animationDelay: "-6s" }}
-        />
-
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-16 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)] lg:gap-8 lg:pb-24 lg:pt-20">
-          <div>
-            <span className="hero-eyebrow animate-fade-up inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em]">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-300" />
-              Marketplace TCG de Chile
-            </span>
-
-            <h1 className="animate-fade-up delay-1 mt-6 font-display text-[2.5rem] font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.25rem]">
-              Tu próxima
-              <br />
-              <span className="text-brand-gradient">gran jugada.</span>
-            </h1>
-
-            <p className="hero-description animate-fade-up delay-2 mt-6 max-w-xl text-[16px] leading-relaxed">
-              Compra y vende cartas TCG en Chile. Encuentra esa single que falta, descubre sellados o elige un mazo listo para jugar.
-            </p>
-
-            <form action="/cartas" className="hero-search animate-fade-up delay-2 mt-7 flex items-center gap-2 rounded-2xl bg-white p-2">
-              <Search className="ml-2 h-5 w-5 shrink-0 text-ink-400" aria-hidden="true" />
-              <label htmlFor="hero-query" className="sr-only">Buscar cartas en el catálogo</label>
-              <input id="hero-query" name="q" type="search" placeholder="¿Qué carta estás buscando?" className="min-w-0 flex-1 bg-transparent px-2 py-3 text-sm text-carbon" maxLength={120} />
-              <button className="btn btn-primary" type="submit">Buscar</button>
-            </form>
-
-            <div className="animate-fade-up delay-3 mt-8 flex flex-wrap gap-3">
-              <Link href="/cartas" className="btn btn-primary btn-lg">
-                Explorar catálogo
-                <ArrowRight className="h-4 w-4" strokeWidth={2.25} />
-              </Link>
-              <Link href="/cartas?type=DECK" className="btn btn-secondary btn-lg">
-                Ver mazos armados
-              </Link>
-            </div>
-
-            <p className="animate-fade-up delay-3 mt-4 text-[13px] text-white/60">
-              ¿Vendes cartas?{" "}
-              <Link href="/tiendas" className="font-semibold text-gold-300 underline-offset-4 transition hover:text-gold-200 hover:underline">
-                Abre tu tienda propia con link y QR →
-              </Link>
-            </p>
-
-            <div className="animate-fade-up delay-4 mt-6 flex flex-wrap gap-2">
-              {GAME_LIST.map((g) => (
-                <Link
-                  key={g.id}
-                  href={`/cartas?game=${g.id}`}
-                  className="rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 text-[12px] font-semibold text-white/80 transition hover:border-gold-400/60 hover:bg-white/15 hover:text-white"
-                >
-                  {g.short}
-                </Link>
-              ))}
-            </div>
-
-            <dl className="animate-fade-up delay-4 mt-10 grid max-w-md grid-cols-3 gap-x-6 gap-y-5">
-              {[
-                [String(GAME_LIST.length), "Juegos"],
-                [String(totalListings), "Publicaciones"],
-                transferPct > 0
-                  ? [`${transferPct}%`, "Dcto. transferencia"]
-                  : [`${settings.paymentWindowHours} h`, "Para pagar"],
-              ].map(([value, label]) => (
-                <div key={label}>
-                  <dt className="font-display text-2xl font-bold text-white sm:text-3xl">{value}</dt>
-                  <dd className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/50 sm:text-[11px]">
-                    {label}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+      <section className="editorial-hero">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="editorial-heading">
+            <h1>Tu próxima<br /><em>gran jugada.</em></h1>
+            <div className="editorial-intro"><p>Compra y vende cartas TCG en Chile. Encuentra esa single que falta, descubre sellados o elige un mazo listo para jugar.</p><Link href="/cartas">Explorar el catálogo <ArrowRight size={17} aria-hidden="true" /></Link></div>
           </div>
-
-          <div className="hero-collection rounded-[2rem] p-4 sm:p-6"><div className="flex items-center justify-between text-xs text-white/70"><span className="uppercase tracking-[0.18em]">Elige tu universo</span><span>01 — 04</span></div><HeroCards cards={HERO_CARDS} /><p className="border-t border-white/10 pt-4 text-center text-xs text-white/60">Magic · Pokémon · One Piece · Mitos y Leyendas</p></div>
+          <HeroCards cards={HERO_CARDS} />
+          <div className="editorial-search-row">
+            <form action="/cartas" className="editorial-search">
+              <Search size={19} aria-hidden="true" /><label htmlFor="hero-query" className="sr-only">Buscar cartas en el catálogo</label>
+              <input id="hero-query" name="q" type="search" placeholder="Nombre de carta o edición" maxLength={120} />
+              <button type="submit">Buscar <ArrowRight size={17} aria-hidden="true" /></button>
+            </form>
+            <nav aria-label="Explorar por juego" className="editorial-games">{GAME_LIST.map(g => <Link key={g.id} href={`/cartas?game=${g.id}`}>{g.short}</Link>)}</nav>
+          </div>
         </div>
       </section>
-
       {/* JUEGOS */}
       <section className="mx-auto max-w-7xl px-4 py-16">
         <SectionTitle
@@ -388,9 +321,9 @@ export default async function HomePage() {
               <Link
                 key={t.href}
                 href={t.href}
-                className="group lift flex items-start gap-4 rounded-2xl card-surface p-5"
+                className="group flex items-start gap-4 border-b border-ink-700 py-5"
               >
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-carbon text-gold-300 transition group-hover:scale-105 group-hover:bg-brand-600 group-hover:text-white">
+                <span className="flex h-10 w-8 shrink-0 items-center justify-center text-ink-300">
                   <Icon className="h-6 w-6" strokeWidth={1.6} />
                 </span>
                 <span className="min-w-0 flex-1">
@@ -466,64 +399,12 @@ export default async function HomePage() {
         />
       )}
 
-      {/* PAGO SEGURO */}
-      <section className="relative mt-10 overflow-hidden bg-carbon py-20 text-white">
-        <div className="bg-grid pointer-events-none absolute inset-0 opacity-60" />
-        <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-brand-600/25 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-gold-300">
-              Compra protegida
-            </p>
-            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              Así funciona cada compra en Win Condition
-            </h2>
-            <p className="mt-4 text-[15px] leading-relaxed text-white/60">
-              Un proceso claro de principio a fin: tus cartas apartadas, un pago identificable y un
-              vendedor que confirma antes de despachar.
-            </p>
-          </div>
-
-          <Reveal className="stagger mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {STEPS.map((s, i) => {
-              const Icon = s.icon;
-              return (
-                <div
-                  key={s.title}
-                  className="glass group relative rounded-2xl p-6 transition duration-300 hover:-translate-y-1 hover:bg-white/10"
-                >
-                  <span className="absolute right-5 top-4 font-display text-5xl font-bold text-white/[0.06]">
-                    {i + 1}
-                  </span>
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-gold-300 to-gold-500 text-[#2a1d00]">
-                    <Icon className="h-6 w-6" strokeWidth={1.75} />
-                  </span>
-                  <h3 className="mt-5 font-display text-[16px] font-bold">{s.title}</h3>
-                  <p className="mt-2 text-[13px] leading-relaxed text-white/60">{s.body}</p>
-                </div>
-              );
-            })}
-          </Reveal>
-
-          <div className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-x-8 gap-y-3 text-[13px] font-semibold text-white/70">
-            <span className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-gold-300" strokeWidth={2} />
-              Comprobante solo visible para las partes
-            </span>
-            <span className="flex items-center gap-2">
-              <Truck className="h-4 w-4 text-gold-300" strokeWidth={2} />
-              Envíos a todo Chile
-            </span>
-            {transferPct > 0 && (
-              <span className="flex items-center gap-2">
-                <Percent className="h-4 w-4 text-gold-300" strokeWidth={2} />
-                {transferPct}% de descuento pagando por transferencia
-              </span>
-            )}
-          </div>
-        </div>
+      <section className="editorial-process mx-auto max-w-7xl px-4 py-16">
+        <h2 className="font-display text-3xl">Así funciona cada compra en Win Condition</h2>
+        <p className="mt-4 max-w-2xl text-sm text-ink-400">Tus cartas apartadas, un pago identificable y un vendedor que confirma antes de despachar.</p>
+        <ol>{STEPS.map((step, i) => <li key={step.title}><span aria-hidden="true">{i + 1}</span><div><h3>{step.title}</h3><p>{step.body}</p></div></li>)}</ol>
+        <p className="mt-5 text-sm text-ink-400">Comprobante solo visible para las partes · Envíos a todo Chile{transferPct > 0 ? ` · ${transferPct}% de descuento pagando por transferencia` : ""}</p>
       </section>
-
       {/* NOTICIAS */}
       {newsSlides.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pt-16">
@@ -584,10 +465,6 @@ export default async function HomePage() {
           <div className="animate-blob pointer-events-none absolute -right-16 -top-10 h-64 w-64 rounded-full bg-gold-500/15 blur-3xl" />
           <div className="relative">
             <div className="mx-auto max-w-2xl text-center">
-              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold-300 to-gold-500 text-[#2a1d00]">
-                <Store className="h-7 w-7" strokeWidth={1.75} />
-              </span>
-              <p className="mt-5 text-[12px] font-bold uppercase tracking-[0.2em] text-gold-300">Para vendedores</p>
               <h2 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
                 Tu tienda propia, con tu marca al frente
               </h2>
@@ -621,12 +498,11 @@ export default async function HomePage() {
           <FaqList items={faqs} />
         </div>
       </section>
-    </>
+    </div>
   );
 }
 
 function SectionTitle({
-  eyebrow,
   title,
   subtitle,
   href,
@@ -639,11 +515,7 @@ function SectionTitle({
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
-        {eyebrow && (
-          <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-brand-600">
-            {eyebrow}
-          </p>
-        )}
+        
         <h2 className="mt-1.5 font-display text-2xl font-bold tracking-tight text-carbon sm:text-[2rem]">
           {title}
         </h2>
@@ -720,7 +592,6 @@ function ProductRow({ listings }: { listings: ListingCardData[] }) {
 }
 
 function Showcase({
-  eyebrow,
   title,
   subtitle,
   href,
@@ -734,7 +605,7 @@ function Showcase({
 }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8">
-      <SectionTitle eyebrow={eyebrow} title={title} subtitle={subtitle} href={href} />
+      <SectionTitle title={title} subtitle={subtitle} href={href} />
       <div className="mt-7">
         <ProductRow listings={listings} />
       </div>
@@ -756,9 +627,6 @@ function GameShowcase({
     <section className="mx-auto max-w-7xl px-4 py-5">
       <div
         className="overflow-hidden rounded-[2rem] border border-ink-800 p-5 sm:p-8"
-        style={{
-          background: `linear-gradient(135deg, ${game.accent}18 0%, ${game.accent}06 38%, transparent 70%)`,
-        }}
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
