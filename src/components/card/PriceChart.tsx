@@ -56,8 +56,9 @@ export function PriceChart({
       lo = Math.max(0, lo - lo * 0.1 - 100);
       hi = hi + hi * 0.1 + 100;
     }
-    const x = (i: number) =>
-      PAD.l + (points.length === 1 ? (W - PAD.l - PAD.r) / 2 : (i / (points.length - 1)) * (W - PAD.l - PAD.r));
+    const firstTime = Date.parse(points[0].day);
+    const timeRange = Date.parse(points[points.length-1].day) - firstTime;
+    const x = (i: number) => PAD.l + (timeRange === 0 ? (W-PAD.l-PAD.r)/2 : ((Date.parse(points[i].day)-firstTime)/timeRange)*(W-PAD.l-PAD.r));
     const y = (v: number) => PAD.t + (1 - (v - lo) / (hi - lo)) * (H - PAD.t - PAD.b);
     const line = (key: "market" | "min") =>
       points.map((p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(p[key]).toFixed(1)}`).join(" ");
@@ -81,7 +82,8 @@ export function PriceChart({
               key={l}
               type="button"
               data-active={lang === l}
-              onClick={() => setLang(l)}
+              aria-pressed={lang === l}
+              onClick={() => {setLang(l);setHover(null);}}
               className="pill !px-3 !py-1"
             >
               {languageLabels[l] ?? l}
@@ -94,7 +96,9 @@ export function PriceChart({
               key={r.label}
               type="button"
               data-active={days === r.days}
-              onClick={() => setDays(r.days)}
+              aria-pressed={days === r.days}
+              aria-label={`Últimos ${r.days} días`}
+              onClick={() => {setDays(r.days);setHover(null);}}
               className="pill !px-2.5 !py-1"
             >
               {r.label}
@@ -142,7 +146,8 @@ export function PriceChart({
             const px = ((e.clientX - rect.left) / rect.width) * W;
             if (points.length === 1) return setHover(0);
             const ratio = (px - PAD.l) / (W - PAD.l - PAD.r);
-            setHover(Math.max(0, Math.min(points.length - 1, Math.round(ratio * (points.length - 1)))));
+            const target = Date.parse(points[0].day) + ratio * (Date.parse(points[points.length-1].day)-Date.parse(points[0].day));
+            setHover(points.reduce((best,p,i)=>Math.abs(Date.parse(p.day)-target)<Math.abs(Date.parse(points[best].day)-target)?i:best,0));
           }}
         >
           <defs>
@@ -200,9 +205,10 @@ export function PriceChart({
           cómo evoluciona.
         </p>
       )}
+      <details className="mt-4 text-sm"><summary className="py-2">Ver datos del período</summary><div className="overflow-x-auto"><table className="w-full text-left text-xs"><caption className="sr-only">Precios publicados por fecha, en pesos chilenos</caption><thead><tr><th className="p-2">Fecha</th><th>Mínimo</th><th>Mediana</th><th>Ofertas</th></tr></thead><tbody>{points.map(p=><tr key={p.day} className="border-t border-ink-800"><td className="p-2">{dayLabel(p.day)}</td><td>{clp(p.min)}</td><td>{clp(p.market)}</td><td>{p.listings}</td></tr>)}</tbody></table></div></details>
       <div className="mt-2 flex flex-wrap gap-4 text-[11px] text-ink-400">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-0.5 w-4 rounded bg-brand-600" /> Precio de mercado
+          <span className="h-0.5 w-4 rounded bg-brand-600" /> Mediana de ofertas
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-0.5 w-4 rounded border-t-2 border-dashed border-emerald-500" /> Precio mínimo

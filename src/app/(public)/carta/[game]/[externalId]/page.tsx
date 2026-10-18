@@ -1,5 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
+import { CardArtwork } from "@/components/CardArtwork";
+import { JsonLd } from "@/components/JsonLd";
+import { cardMarketHref } from "@/lib/card-identity";
+import { siteUrl } from "@/lib/seo";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -38,7 +41,7 @@ type Params = Promise<{ game: string; externalId: string }>;
 async function load(params: Params) {
   const { game, externalId: raw } = await params;
   if (!isGameId(game)) return null;
-  const externalId = decodeURIComponent(raw);
+  const externalId = raw;
   const sample = await safeQuery(() => getCardSample(game, externalId), null);
   if (!sample) return null;
   return { game, externalId, sample };
@@ -50,6 +53,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return {
     title: `${data.sample.title} · vendedores y precios`,
     description: `Compara precios y vendedores de ${data.sample.title} (${gameName(data.game)}) en Win Condition TCG.`,
+    alternates: { canonical: cardMarketHref(data.game, data.externalId) },
     openGraph: { images: data.sample.imageUrl ? [data.sample.imageUrl] : undefined },
   };
 }
@@ -68,7 +72,7 @@ export default async function CardPage({ params }: { params: Params }) {
   const [history, sales, ext, sellerStats, cookieStore] = await Promise.all([
     safeQuery(() => getPriceHistory(game, externalId), {}),
     safeQuery(() => getRecentSales(game, externalId, 8), []),
-    externalPrice(game, externalId),
+    externalId.startsWith("manual:") ? Promise.resolve(null) : externalPrice(game, externalId),
     getSellerStats(offers.map((o) => o.seller.id)),
     cookies(),
   ]);
@@ -113,7 +117,8 @@ export default async function CardPage({ params }: { params: Params }) {
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
+    <div className="card-market-page mx-auto max-w-7xl px-4 py-8">
+      <JsonLd data={{"@context":"https://schema.org", "@type":"Product", name:sample.title, image:sample.imageUrl || undefined, url:`${siteUrl()}${cardMarketHref(game,externalId)}`, ...(stats.all ? {offers:{"@type":"AggregateOffer",priceCurrency:"CLP",lowPrice:stats.all.min,highPrice:stats.all.max,offerCount:offers.length,availability:"https://schema.org/InStock"}} : {})}} />
       <nav className="mb-6 flex flex-wrap items-center gap-1.5 text-[12px] text-ink-400">
         <Link href="/" className="hover:text-carbon">Inicio</Link>
         <span>/</span>
@@ -124,17 +129,11 @@ export default async function CardPage({ params }: { params: Params }) {
         <span className="truncate text-ink-300">{sample.title}</span>
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-[340px_1fr]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(240px,340px)_minmax(0,1fr)]">
         {/* IMAGEN Y FICHA */}
         <div className="lg:sticky lg:top-24 lg:h-fit">
           <div className="relative mx-auto aspect-[63/88] max-w-[340px] overflow-hidden rounded-2xl border border-ink-700 bg-ink-950 tcg-card-shadow">
-            {sample.imageUrl ? (
-              <Image src={sample.imageUrl} alt={sample.title} fill sizes="340px" className="object-contain" priority unoptimized />
-            ) : (
-              <div className="flex h-full items-center justify-center text-ink-700">
-                <ImageOff className="h-14 w-14" strokeWidth={1.5} />
-              </div>
-            )}
+            <CardArtwork src={sample.imageUrl} alt={sample.title} sizes="340px" className="object-contain" priority />
           </div>
           <dl className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
             {[
@@ -189,11 +188,22 @@ export default async function CardPage({ params }: { params: Params }) {
             </div>
           </div>
 
+      {rows.length > 0 && (
+        <div id="vendedores" className="mt-10 scroll-mt-28">
+          <CardSellers
+            offers={rows}
+            buyerRegion={buyerRegion}
+            imageUrl={sample.imageUrl}
+            title={sample.title}
+            game={game}
+          />
+        </div>
+      )}
           {/* REFERENCIA DE PRECIO */}
           <section className="rounded-3xl card-surface p-5 sm:p-6">
             <h2 className="font-display text-lg font-bold text-carbon">Referencia de precio</h2>
             <p className="mt-0.5 text-[12px] text-ink-400">
-              Calculado con las ofertas activas de esta carta. “Mercado” es el precio del medio.
+              Precios publicados en CLP, no precios de venta. La mediana combina estados y acabados; compara las condiciones antes de comprar.
             </p>
             {stats.byLanguage.length > 0 ? (
               <div className="mt-4 overflow-x-auto">
@@ -283,17 +293,7 @@ export default async function CardPage({ params }: { params: Params }) {
         </div>
       </div>
 
-      {rows.length > 0 && (
-        <div id="vendedores" className="mt-10 scroll-mt-28">
-          <CardSellers
-            offers={rows}
-            buyerRegion={buyerRegion}
-            imageUrl={sample.imageUrl}
-            title={sample.title}
-            game={game}
-          />
-        </div>
-      )}
+
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { GAMES, isGameId } from "@/lib/games";
 import { clp } from "@/lib/format";
 
 interface Suggestion {
+  href: string;
   slug: string;
   title: string;
   game: string;
@@ -30,6 +31,7 @@ const TYPE_LABEL: Record<string, string> = { SINGLE: "Single", SEALED: "Sellado"
 export function SearchBox({ className = "" }: { className?: string }) {
   const router = useRouter();
   const params = useSearchParams();
+  const type = params.get("type") === "SEALED" ? "SEALED" : params.get("type") === "DECK" ? "DECK" : "SINGLE";
   const listId = useId();
   const wrapRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -65,7 +67,7 @@ export function SearchBox({ className = "" }: { className?: string }) {
       const controller = new AbortController();
       abortRef.current = controller;
       try {
-        const res = await fetch(`/api/search/suggest?q=${encodeURIComponent(term)}`, {
+        const res = await fetch(`/api/search/suggest?type=${type}&q=${encodeURIComponent(term)}`, {
           signal: controller.signal,
         });
         const data = await res.json();
@@ -84,7 +86,7 @@ export function SearchBox({ className = "" }: { className?: string }) {
     }, 220);
 
     return () => clearTimeout(timer);
-  }, [value]);
+  }, [value,type]);
 
   // Cierra la lista al hacer clic fuera del buscador.
   useEffect(() => {
@@ -103,7 +105,7 @@ export function SearchBox({ className = "" }: { className?: string }) {
     const q = value.trim();
     setOpen(false);
     inputRef.current?.blur();
-    router.push(q ? `/cartas?q=${encodeURIComponent(q)}` : "/cartas");
+    router.push(`/cartas?type=${type}${q ? `&q=${encodeURIComponent(q)}` : ""}`);
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -133,7 +135,7 @@ export function SearchBox({ className = "" }: { className?: string }) {
         e.preventDefault();
         if (active >= 0 && results[active]) {
           setOpen(false);
-          router.push(`/producto/${results[active].slug}`);
+          router.push(results[active].href);
         } else {
           goSearch();
         }
@@ -205,7 +207,7 @@ export function SearchBox({ className = "" }: { className?: string }) {
                 return (
                   <li key={r.slug} role="option" aria-selected={active === i}>
                     <Link
-                      href={`/producto/${r.slug}`}
+                      href={r.href}
                       onClick={() => setOpen(false)}
                       onMouseEnter={() => setActive(i)}
                       className={`flex items-center gap-3 px-3 py-2.5 transition ${

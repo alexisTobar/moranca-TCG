@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { CardArtwork } from "./CardArtwork";
@@ -39,10 +40,10 @@ export function HeroCards({ cards }: { cards: HeroCard[] }) {
     cancelAnimationFrame(raf.current);
     root.current?.querySelectorAll<HTMLElement>("a").forEach(el => { el.style.setProperty("--tilt-x", "0deg"); el.style.setProperty("--tilt-y", "0deg"); });
   }, [stopped]);
-  return <div ref={root} className={styles.scene} data-entered={entered && !reduced} data-paused={stopped} aria-label="Cartas destacadas de los cuatro juegos">
+  return <LazyMotion features={domAnimation}><div ref={root} className={styles.scene} data-entered={entered && !reduced} data-paused={stopped} aria-label="Cartas destacadas de los cuatro juegos">
     <div className={styles.grid} key={replay}>
       {cards.map((card, i) => <div key={card.game} className={styles.arrival} style={{ "--index": i, "--angle": `${[-6, -2, 3, 7][i % 4]}deg`, "--offset": i % 2 ? "18px" : "0px" } as CSSProperties}>
-        <Link href={`/cartas?game=${card.game}`} aria-label={`Ver cartas de ${LABELS[card.game] || card.game}`} className={styles.link}
+        <m.div whileHover={stopped ? undefined : {y:-10}} transition={{type:"spring",stiffness:260,damping:24}}><Link href={`/cartas?game=${card.game}`} aria-label={`Ver cartas de ${LABELS[card.game] || card.game}`} className={styles.link}
           onPointerEnter={event => { bounds.current = event.currentTarget.getBoundingClientRect(); }}
           onPointerMove={event => {
             if (stopped || event.pointerType !== "mouse" || !bounds.current) return;
@@ -63,7 +64,7 @@ export function HeroCards({ cards }: { cards: HeroCard[] }) {
             <span className={styles.shine} aria-hidden="true" />
           </span>
           <span className={styles.caption}><span>{LABELS[card.game]}</span><strong>{card.name}</strong><span>{card.detail}</span></span>
-        </Link>
+        </Link></m.div>
       </div>)}
     </div>
     <div className={styles.controls}>
@@ -71,5 +72,5 @@ export function HeroCards({ cards }: { cards: HeroCard[] }) {
       <div><button type="button" disabled={reduced} onClick={() => { setReplay(n => n + 1); setPaused(false); }} aria-label="Repetir entrada de las cartas"><RotateCcw size={15} /> Repetir</button>
         <button type="button" disabled={reduced} onClick={() => setPaused(!paused)} aria-label={paused ? "Reanudar animación de cartas" : "Pausar animación de cartas"} aria-pressed={paused}>{paused ? <Play size={15} /> : <Pause size={15} />} {reduced ? "Movimiento reducido" : paused ? "Reanudar" : "Pausar"}</button></div>
     </div>
-  </div>;
+  </div></LazyMotion>;
 }

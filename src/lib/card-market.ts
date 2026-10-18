@@ -1,5 +1,13 @@
 import "server-only";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
+import { CARD_IDENTITY_SQL } from "./card-identity";
+
+async function identityWhere(game: string, identity: string): Promise<Prisma.ListingWhereInput> {
+  if (!identity.startsWith("manual:")) return { game, externalId: identity };
+  const rows = await prisma.$queryRaw<{id:string}[]>(Prisma.sql`SELECT l.id FROM "Listing" l WHERE l.game=${game} AND l.type='SINGLE' AND ${CARD_IDENTITY_SQL}=${identity}`);
+  return {game, id:{in:rows.map(row=>row.id)}};
+}
 
 /** Idioma vacío se agrupa como "Sin idioma". "*" es el resumen de todos. */
 export const ALL_LANGUAGES = "*";
@@ -39,7 +47,7 @@ export interface LanguageStat {
 /** Ofertas activas (con stock) de una misma carta, ordenadas de menor a mayor precio. */
 export async function getCardOffers(game: string, externalId: string): Promise<CardOffer[]> {
   const rows = await prisma.listing.findMany({
-    where: { game, externalId, type: "SINGLE", status: "ACTIVE", stock: { gt: 0 } },
+    where: { ...await identityWhere(game, externalId), type: "SINGLE", status: "ACTIVE", stock: { gt: 0 }, seller: {active:true, role:{in:["SELLER","ADMIN"]}} },
     select: {
       id: true,
       slug: true,
@@ -96,7 +104,7 @@ export async function getCardOffers(game: string, externalId: string): Promise<C
 /** Datos de la carta (nombre, imagen, edición…) tomados de cualquier publicación suya, aunque esté agotada. */
 export async function getCardSample(game: string, externalId: string) {
   return prisma.listing.findFirst({
-    where: { game, externalId, type: "SINGLE", status: { not: "DRAFT" } },
+    where: { ...await identityWhere(game, externalId), type: "SINGLE", status: { in: ["ACTIVE", "SOLD"] }, seller:{active:true, role:{in:["SELLER","ADMIN"]}} },
     orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
     select: {
       title: true,
@@ -222,7 +230,7 @@ export interface RecentSale {
 export async function getRecentSales(game: string, externalId: string, take = 8): Promise<RecentSale[]> {
   const rows = await prisma.orderItem.findMany({
     where: {
-      listing: { game, externalId },
+      listing: { ...await identityWhere(game, externalId), type: "SINGLE" },
       order: { status: { in: ["PAID", "SHIPPED", "DELIVERED"] } },
     },
     orderBy: { order: { createdAt: "desc" } },
@@ -249,10 +257,7 @@ export async function getRecentSales(game: string, externalId: string, take = 8)
  * para que el historial no dependa de que alguien visite cada carta.
  */
 export async function snapshotAllPrices(): Promise<number> {
-  const groups = await prisma.listing.groupBy({
-    by: ["game", "externalId"],
-    where: { type: "SINGLE", status: "ACTIVE", stock: { gt: 0 }, externalId: { not: null } },
-  });
+  const groups = await prisma.$queryRaw<{game:string; externalId:string}[]>(Prisma.sql`SELECT DISTINCT l.game, ${CARD_IDENTITY_SQL} AS "externalId" FROM "Listing" l JOIN "User" u ON u.id=l."sellerId" WHERE l.type='SINGLE' AND l.status='ACTIVE' AND l.stock>0 AND u.active=true AND u.role IN ('SELLER','ADMIN')`);
   let done = 0;
   for (const g of groups) {
     if (!g.externalId) continue;

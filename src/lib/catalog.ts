@@ -27,7 +27,7 @@ export const LISTING_CARD_SELECT = {
  * Ejecuta una consulta tolerando que la base de datos aún no exista
  * (útil en el primer despliegue o en desarrollo sin DATABASE_URL).
  */
-export async function safeQuery<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+export async function safeQuery<T, F>(fn: () => Promise<T>, fallback: F): Promise<T | F> {
   try {
     return await fn();
   } catch (error) {

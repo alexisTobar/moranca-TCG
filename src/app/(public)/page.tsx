@@ -225,7 +225,6 @@ export default async function HomePage() {
   }));
 
   const countByGame = new Map(counts.map((c) => [c.game, c._count._all]));
-  const totalListings = counts.reduce((a, c) => a + c._count._all, 0);
   const transferPct = discountPctFor(settings, "TRANSFER");
   const plans = await getMarketingPlans();
 
@@ -515,7 +514,7 @@ function SectionTitle({
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
-        
+
         <h2 className="mt-1.5 font-display text-2xl font-bold tracking-tight text-carbon sm:text-[2rem]">
           {title}
         </h2>

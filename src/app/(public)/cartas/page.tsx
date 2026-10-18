@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/db";
+import { catalogMarket } from "@/lib/catalog-market";
+import { cardMarketHref } from "@/lib/card-identity";
 import { GAME_LIST, CONDITIONS, LANGUAGES, LISTING_TYPES, isGameId } from "@/lib/games";
 import { LISTING_CARD_SELECT } from "@/lib/catalog";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
@@ -22,9 +23,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const sp = await searchParams;
   const game = one(sp.game);
-  const type = one(sp.type);
+  const type = one(sp.type) === "SEALED" ? "SEALED" : one(sp.type) === "DECK" ? "DECK" : "SINGLE";
   const gameName = game && isGameId(game) ? GAME_LIST.find((g) => g.id === game)?.name : undefined;
-  const typeName = type ? TYPE_SEO[type] : undefined;
+  const typeName = TYPE_SEO[type];
   const page = catalogPage(one(sp.page));
   const filtered = ["q", "condition", "language", "sort", "min", "max"].some(key => !!one(sp[key]));
   const pagination = page > 1 ? ` · Página ${page}` : "";
@@ -38,12 +39,12 @@ export async function generateMetadata({
     };
   }
   const what = [typeName ?? "Cartas", gameName].filter(Boolean).join(" de ");
-  const canon = new URLSearchParams({ ...(gameName && game ? { game } : {}), ...(typeName && type ? { type } : {}), ...(page > 1 ? { page: String(page) } : {}) }).toString();
+  const canon = new URLSearchParams({ ...(gameName && game ? { game } : {}), ...(type !== "SINGLE" ? { type } : {}), ...(page > 1 ? { page: String(page) } : {}) }).toString();
   return {
     title: `${what} en Chile${pagination}`,
     robots: filtered ? { index: false, follow: true } : undefined,
     description: `${what} de vendedores chilenos: compara precios, elige idioma y estado, y compra con stock reservado y pago por transferencia.`,
-    alternates: { canonical: `/cartas?${canon}` },
+    alternates: { canonical: canon ? `/cartas?${canon}` : "/cartas" },
   };
 }
 
@@ -72,7 +73,7 @@ export default async function CatalogPage({
   const sp = await searchParams;
   const q = (one(sp.q)?.trim() ?? "").slice(0, 120);
   const game = one(sp.game);
-  const type = one(sp.type);
+  const type = one(sp.type) === "SEALED" ? "SEALED" : one(sp.type) === "DECK" ? "DECK" : "SINGLE";
   const condition = one(sp.condition);
   const language = one(sp.language);
   const sort = one(sp.sort) ?? "recientes";
@@ -86,84 +87,15 @@ export default async function CatalogPage({
     try { return await query(); } catch { unavailable = true; return fallback; }
   }
 
-  const where: Prisma.ListingWhereInput = { status: "ACTIVE", seller: { active: true, role: { in: ["SELLER", "ADMIN"] } } };
-  if (q) {
-    where.OR = [
-      { title: { contains: q, mode: "insensitive" } },
-      { setName: { contains: q, mode: "insensitive" } },
-      { description: { contains: q, mode: "insensitive" } },
-      { deckCards: { some: { name: { contains: q, mode: "insensitive" } } } },
-    ];
-  }
-  if (game && isGameId(game)) where.game = game;
-  if (type && ["SINGLE", "SEALED", "DECK"].includes(type)) {
-    where.type = type as Prisma.ListingWhereInput["type"];
-  }
-  if (condition) where.condition = condition;
-  if (language) where.language = language;
-  if (min !== undefined || max !== undefined) where.price = { ...(min !== undefined ? { gte: min } : {}), ...(max !== undefined ? { lte: max } : {}) };
-
-  // Las publicaciones vendidas (stock agotado) siguen apareciendo en el
-  // catálogo con su badge "Vendido", pero no deben competir con las
-  // disponibles por posición: se arma la página en dos tramos — primero
-  // todo lo disponible con el orden elegido, y recién cuando eso se agota
-  // se completa con lo vendido, también en ese orden.
-  const availableWhere: Prisma.ListingWhereInput = { ...where, stock: { gt: 0 } };
-  const soldWhere: Prisma.ListingWhereInput = { ...where, stock: { lte: 0 } };
-  const orderBy = [SORTS[sort] ?? SORTS.recientes, { id: "asc" as const }];
-
-  const [availableCount, total] = await Promise.all([
-    catalogQuery(() => prisma.listing.count({ where: availableWhere }), 0),
-    catalogQuery(() => prisma.listing.count({ where }), 0),
-  ]);
-
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const result = await catalogQuery(() => catalogMarket({ type, game: game && isGameId(game) ? game : undefined, q, condition, language, min, max, sort, page: requestedPage }), {total:0, pages:1, page:1, listings:[]});
+  const {total, pages, page, listings} = result;
   if (!unavailable && requestedPage > pages) {
     const corrected = new URLSearchParams();
-    for (const [key, value] of Object.entries(sp)) { const v = one(value); if (v !== undefined && key !== "page") corrected.set(key, v); }
-    if (pages > 1) corrected.set("page", String(pages));
-    redirect(`/cartas${corrected.size ? `?${corrected}` : ""}`);
+    for (const [key, value] of Object.entries(sp)) { const v=one(value); if (v !== undefined && key !== "page") corrected.set(key,v); }
+    if (pages > 1) corrected.set("page",String(pages));
+    redirect('/cartas' + (corrected.size ? '?' + corrected : ''));
   }
-  const page = Math.min(requestedPage, pages);
-  const startIndex = (page - 1) * PAGE_SIZE;
-  const endIndex = startIndex + PAGE_SIZE;
-
-  const availableSkip = Math.min(startIndex, availableCount);
-  const availableTake = Math.max(0, Math.min(endIndex, availableCount) - availableSkip);
-  const soldSkip = Math.max(0, startIndex - availableCount);
-  const soldTake = PAGE_SIZE - availableTake;
-
-  const [availableListings, soldListings] = await Promise.all([
-    availableTake > 0
-      ? catalogQuery(
-          () =>
-            prisma.listing.findMany({
-              where: availableWhere,
-              select: LISTING_CARD_SELECT,
-              orderBy,
-              skip: availableSkip,
-              take: availableTake,
-            }),
-          [] as ListingCardData[]
-        )
-      : Promise.resolve([] as ListingCardData[]),
-    soldTake > 0
-      ? catalogQuery(
-          () =>
-            prisma.listing.findMany({
-              where: soldWhere,
-              select: LISTING_CARD_SELECT,
-              orderBy,
-              skip: soldSkip,
-              take: soldTake,
-            }),
-          [] as ListingCardData[]
-        )
-      : Promise.resolve([] as ListingCardData[]),
-  ]);
-
-  const listings = [...availableListings, ...soldListings];
-
+  const startIndex = (page-1)*PAGE_SIZE;
 
   const buildHref = (patch: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
@@ -185,7 +117,7 @@ export default async function CatalogPage({
 
   return (
     <div className="catalog-editorial"><div className="mx-auto max-w-7xl px-4 py-8">
-      {!unavailable && <JsonLd data={{ "@context": "https://schema.org", "@type": "ItemList", itemListElement: listings.map((l, i) => ({ "@type": "ListItem", position: startIndex + i + 1, name: l.title, url: `${siteUrl()}/producto/${l.slug}` })) }} />}
+      {!unavailable && <JsonLd data={{ "@context": "https://schema.org", "@type": "ItemList", itemListElement: listings.map((l, i) => ({ "@type": "ListItem", position: startIndex + i + 1, name: l.title, url: `${siteUrl()}${l.market ? cardMarketHref(l.game,l.market.identity) : `/producto/${l.slug}`}` })) }} />}
       <nav className="mb-4 text-[12px] text-ink-400">
         <Link href="/" className="hover:text-carbon">
           Inicio
@@ -196,10 +128,10 @@ export default async function CatalogPage({
 
       <header className="catalog-heading mb-6">
         <h1 className="font-display text-3xl font-bold tracking-tight text-carbon sm:text-4xl">
-          {q ? `Resultados para “${q}”` : "Catálogo"}
+          {q ? `Resultados para “${q}”` : type === "SINGLE" ? "Cartas" : type === "SEALED" ? "Sellados" : "Mazos"}
         </h1>
         <p className="mt-1 text-[13px] text-ink-400">
-          {unavailable ? "El catálogo no está disponible temporalmente." : `${total} ${total === 1 ? "publicación encontrada" : "publicaciones encontradas"}`}
+          {unavailable ? "El catálogo no está disponible temporalmente." : `${total} ${type === "SINGLE" ? "cartas · compara vendedores y precios" : "publicaciones encontradas"}`}
         </p>
       </header>
 
@@ -221,17 +153,14 @@ export default async function CatalogPage({
             ))}
           </FilterGroup>
 
-          <FilterGroup label="Tipo">
-            <FilterPill href={buildHref({ type: undefined, page: undefined })} active={!type}>
-              Todos
-            </FilterPill>
+          <FilterGroup label="Categoría">
             {LISTING_TYPES.map((t) => (
               <FilterPill
                 key={t.value}
                 href={buildHref({ type: t.value, page: undefined })}
                 active={type === t.value}
               >
-                {t.label}
+                {t.value === "SINGLE" ? "Cartas" : t.value === "SEALED" ? "Sellados" : "Mazos"}
               </FilterPill>
             ))}
           </FilterGroup>
@@ -306,7 +235,7 @@ export default async function CatalogPage({
           </form>
 
           <Link
-            href="/cartas"
+            href={type === "SINGLE" ? "/cartas" : `/cartas?type=${type}`}
             className="block text-center text-[11px] font-semibold uppercase tracking-widest text-ink-400 hover:text-carbon"
           >
             Limpiar filtros
@@ -314,7 +243,7 @@ export default async function CatalogPage({
         </FilterDrawer>
 
         {/* RESULTADOS */}
-        <div>
+        <div className="min-w-0">
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <span className="text-[11px] font-bold uppercase tracking-widest text-ink-400">
               Ordenar
@@ -326,7 +255,7 @@ export default async function CatalogPage({
                 data-active={sort === s}
                 className="pill capitalize"
               >
-                {s.replace("-", " ")}
+                {{recientes:"Más recientes","precio-asc":"Menor precio","precio-desc":"Mayor precio",nombre:"Nombre"}[s]}
               </Link>
             ))}
           </div>
@@ -340,8 +269,8 @@ export default async function CatalogPage({
               <p className="mt-1.5 text-[13px] text-ink-400">
                 Prueba con otro término o quita algunos filtros.
               </p>
-              <Link href="/cartas" className="btn btn-primary btn-sm mt-5">
-                Ver todo el catálogo
+              <Link href={type === "SINGLE" ? "/cartas" : `/cartas?type=${type}`} className="btn btn-primary btn-sm mt-5">
+                Quitar filtros de esta categoría
               </Link>
             </div>
           ) : (

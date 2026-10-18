@@ -25,6 +25,7 @@
     "bcryptjs": "^2.4.3",
     "jose": "^5.9.6",
     "lucide-react": "^1.41.0",
+    "motion": "^14.3.0",
     "next": "^15.1.6",
     "qrcode-generator": "^2.0.4",
     "react": "^19.0.0",
@@ -33,16 +34,22 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.10.7",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
-    "prisma": "^6.2.1",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.3"
   },
   "prisma": {
     "seed": "node prisma/seed.mjs"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.31"
+    }
   }
 }

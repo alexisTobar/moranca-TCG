@@ -1,0 +1,581 @@
+   ▲ Next.js 15.5.28
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 11.9s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/30) ...
+prisma:error 
+Invalid `prisma.listing.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.listing.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.user.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.store.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.newsItem.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+   Generating static pages (7/30) 
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.listing.count()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.user.count()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.store.count()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.listing.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.listing.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.listing.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.listing.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.listing.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.listing.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.listing.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.user.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.listing.groupBy()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.newsItem.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.newsItem.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.newsItem.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.newsItem.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.newsItem.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.siteSetting.findUnique()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.storePlan.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+prisma:error 
+Invalid `prisma.store.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+[site-settings] usando valores por defecto Error [PrismaClientInitializationError]: 
+Invalid `prisma.paymentDiscount.findMany()` invocation:
+
+
+The provided database string is invalid. Error parsing connection string: invalid domain character in database URL. Please refer to the documentation in https://www.prisma.io/docs/reference/database-reference/connection-urls for constructing a correct connection string. In some cases, certain characters must be escaped. Please check the string for any illegal characters.
+    at async f (C:\Users\Seba\Desktop\moranca-TCG\.next\server\chunks\5019.js:1:22490)
+    at async K (C:\Users\Seba\Desktop\moranca-TCG\.next\server\app\(public)\page.js:2:11287) {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+   Generating static pages (14/30) 
+   Generating static pages (22/30) 
+ ✓ Generating static pages (30/30)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                   Size  First Load JS  Revalidate  Expire
+┌ ƒ /                                      51.8 kB         163 kB
+├ ○ /_not-found                              299 B         103 kB
+├ ƒ /api/account/2fa                         299 B         103 kB
+├ ƒ /api/account/delete                      299 B         103 kB
+├ ƒ /api/account/export                      299 B         103 kB
+├ ƒ /api/account/password                    299 B         103 kB
+├ ƒ /api/account/profile                     299 B         103 kB
+├ ƒ /api/account/seller-request              299 B         103 kB
+├ ƒ /api/account/sessions                    299 B         103 kB
+├ ƒ /api/account/verify-email                299 B         103 kB
+├ ƒ /api/admin/analytics                     299 B         103 kB
+├ ƒ /api/admin/consents                      299 B         103 kB
+├ ƒ /api/admin/payment-discounts             299 B         103 kB
+├ ƒ /api/admin/payment-discounts/[id]        299 B         103 kB
+├ ƒ /api/admin/reports/[id]                  299 B         103 kB
+├ ƒ /api/admin/settings                      299 B         103 kB
+├ ƒ /api/admin/store-plans/[id]              299 B         103 kB
+├ ƒ /api/admin/store-subscriptions/[id]      299 B         103 kB
+├ ƒ /api/admin/stores/[id]                   299 B         103 kB
+├ ƒ /api/auth/2fa                            299 B         103 kB
+├ ƒ /api/auth/forgot-password                299 B         103 kB
+├ ƒ /api/auth/google                         299 B         103 kB
+├ ƒ /api/auth/google/callback                299 B         103 kB
+├ ƒ /api/auth/login                          299 B         103 kB
+├ ƒ /api/auth/logout                         299 B         103 kB
+├ ƒ /api/auth/register                       299 B         103 kB
+├ ƒ /api/auth/reset-password                 299 B         103 kB
+├ ƒ /api/auth/verify-email                   299 B         103 kB
+├ ƒ /api/cards/bulk-preview                  299 B         103 kB
+├ ƒ /api/cards/magic-sets                    299 B         103 kB
+├ ƒ /api/cards/search                        299 B         103 kB
+├ ƒ /api/checkout                            299 B         103 kB
+├ ƒ /api/checkout/quote                      299 B         103 kB
+├ ƒ /api/consent                             299 B         103 kB
+├ ƒ /api/cron/expire-orders                  299 B         103 kB
+├ ƒ /api/cron/news                           299 B         103 kB
+├ ƒ /api/cron/weekly-report                  299 B         103 kB
+├ ƒ /api/health                              299 B         103 kB
+├ ƒ /api/listings                            299 B         103 kB
+├ ƒ /api/listings/[id]                       299 B         103 kB
+├ ƒ /api/listings/bulk                       299 B         103 kB
+├ ƒ /api/orders/[id]/messages                299 B         103 kB
+├ ƒ /api/orders/[id]/receipt                 299 B         103 kB
+├ ƒ /api/orders/[id]/review                  299 B         103 kB
+├ ƒ /api/orders/[id]/status                  299 B         103 kB
+├ ƒ /api/panel/counts                        299 B         103 kB
+├ ƒ /api/reports                             299 B         103 kB
+├ ƒ /api/search/suggest                      299 B         103 kB
+├ ƒ /api/seller/coupons                      299 B         103 kB
+├ ƒ /api/seller/coupons/[id]                 299 B         103 kB
+├ ƒ /api/store                               299 B         103 kB
+├ ƒ /api/store/subscribe                     299 B         103 kB
+├ ƒ /api/store/subscriptions/[id]            299 B         103 kB
+├ ƒ /api/store/subscriptions/[id]/receipt    299 B         103 kB
+├ ƒ /api/support/tickets                     299 B         103 kB
+├ ƒ /api/support/tickets/[id]                299 B         103 kB
+├ ƒ /api/support/tickets/[id]/messages       299 B         103 kB
+├ ƒ /api/uploads                             299 B         103 kB
+├ ƒ /api/uploads/[id]                        299 B         103 kB
+├ ƒ /api/usage                               299 B         103 kB
+├ ƒ /api/users                               299 B         103 kB
+├ ƒ /api/users/[id]                          299 B         103 kB
+├ ƒ /ayuda                                   299 B         103 kB
+├ ƒ /carrito                                1.9 kB         117 kB
+├ ƒ /carta/[game]/[externalId]             3.15 kB         122 kB
+├ ƒ /cartas                                4.57 kB         116 kB
+├ ƒ /checkout                                12 kB         126 kB
+├ ƒ /cuenta                                8.62 kB         126 kB
+├ ƒ /devoluciones                            837 B         107 kB
+├ ƒ /envios-y-pagos                          837 B         107 kB
+├ ○ /icon                                    299 B         103 kB
+├ ƒ /ingresar                              2.53 kB         114 kB
+├ ƒ /ingresar/verificacion                  2.3 kB         108 kB
+├ ƒ /noticias                                839 B         112 kB
+├ ƒ /noticias/[id]                           839 B         112 kB
+├ ○ /opengraph-image                         299 B         103 kB
+├ ƒ /panel                                   839 B         112 kB
+├ ƒ /panel/analitica                         299 B         103 kB
+├ ƒ /panel/auditoria                         820 B         107 kB
+├ ƒ /panel/configuracion                   4.17 kB         107 kB
+├ ƒ /panel/consentimientos                   167 B         106 kB
+├ ƒ /panel/descuentos                      2.33 kB         105 kB
+├ ƒ /panel/ordenes                         5.86 kB         114 kB
+├ ƒ /panel/perfil                          7.66 kB         125 kB
+├ ƒ /panel/publicaciones                     796 B         112 kB
+├ ƒ /panel/publicaciones/[id]                136 B         132 kB
+├ ƒ /panel/publicar                          136 B         132 kB
+├ ƒ /panel/publicar/masivo                 5.46 kB         113 kB
+├ ƒ /panel/reportes                        2.44 kB         112 kB
+├ ƒ /panel/soporte                         2.53 kB         108 kB
+├ ƒ /panel/soporte/[id]                    2.64 kB         112 kB
+├ ƒ /panel/tienda                          10.7 kB         122 kB
+├ ƒ /panel/tiendas                          5.8 kB         112 kB
+├ ƒ /panel/usuarios                        2.56 kB         105 kB
+├ ƒ /politica-de-cookies                     837 B         107 kB
+├ ƒ /politica-de-privacidad                  837 B         107 kB
+├ ƒ /producto/[slug]                         210 B         117 kB
+├ ○ /qa-gallery                            1.35 kB         121 kB
+├ ƒ /quienes-somos                         1.11 kB         107 kB
+├ ƒ /recuperar                             1.02 kB         112 kB
+├ ƒ /recuperar/[token]                     2.64 kB         110 kB
+├ ƒ /registro                              2.82 kB         114 kB
+├ ○ /robots.txt                              299 B         103 kB
+├ ○ /sitemap.xml                             299 B         103 kB          1h      1y
+├ ƒ /t/[slug]                                299 B         103 kB
+├ ƒ /terminos-y-condiciones                  837 B         107 kB
+├ ƒ /tienda/[slug]                         6.07 kB         117 kB
+├ ƒ /tienda/[slug]/producto/[productSlug]    210 B         117 kB
+├ ƒ /tiendas                               1.13 kB         112 kB
+├ ƒ /v/[slug]                                299 B         103 kB
+├ ƒ /vendedor/[slug]                       2.53 kB         119 kB
+├ ƒ /vendedores                            4.15 kB         115 kB
+└ ƒ /verificar/[token]                     2.03 kB         108 kB
++ First Load JS shared by all               103 kB
+  ├ chunks/1255-60d8dc7c8c9309a1.js        46.3 kB
+  ├ chunks/4bd1b696-100b9d70ed4e49c1.js    54.2 kB
+  └ other shared chunks (total)            2.02 kB
+
+
+ƒ Middleware                               40.7 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

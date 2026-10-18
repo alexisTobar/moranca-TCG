@@ -102,6 +102,8 @@ export function CardSellers({
   const [language, setLanguage] = useState("all");
   const [delivery, setDelivery] = useState<Delivery>("all");
   const [nearOnly, setNearOnly] = useState(false);
+  const [condition, setCondition] = useState("all");
+  const [finish, setFinish] = useState("all");
   const [sort, setSort] = useState<Sort>("price-asc");
 
   const languages = useMemo(
@@ -113,6 +115,8 @@ export function CardSellers({
     const filtered = offers.filter(
       (o) =>
         (language === "all" || o.language === language) &&
+        (condition === "all" || o.condition === condition) &&
+        (finish === "all" || o.isFoil === (finish === "foil")) &&
         (delivery === "all" ||
           (delivery === "shipping" ? o.seller.offersShipping : o.seller.offersPickup)) &&
         (!nearOnly || o.seller.near)
@@ -124,7 +128,7 @@ export function CardSellers({
       sales: (a, b) => b.seller.sales - a.seller.sales || a.price - b.price,
     };
     return [...filtered].sort(cmp[sort]);
-  }, [offers, language, delivery, nearOnly, sort]);
+  }, [offers, language, delivery, nearOnly, sort, condition, finish]);
 
   const base = { title, imageUrl, game, type: "SINGLE" };
   const sellerCount = new Set(offers.map((o) => o.seller.id)).size;
@@ -173,8 +177,11 @@ export function CardSellers({
             Retiro en persona
           </button>
         </div>
+        <label className="flex items-center gap-2 text-xs">Estado<select className="input !w-auto" value={condition} onChange={e=>setCondition(e.target.value)}><option value="all">Todos</option>{[...new Set(offers.map(o=>o.condition).filter(Boolean))].map(c=><option key={c} value={c!}>{c}</option>)}</select></label>
+        <label className="flex items-center gap-2 text-xs">Acabado<select className="input !w-auto" value={finish} onChange={e=>setFinish(e.target.value)}><option value="all">Todos</option><option value="foil">Foil</option><option value="normal">Normal</option></select></label>
         <button
           type="button"
+          aria-pressed={nearOnly}
           data-active={nearOnly}
           disabled={!buyerRegion}
           title={buyerRegion ? `Vendedores de ${buyerRegion}` : "Elige tu región arriba para usar este filtro"}

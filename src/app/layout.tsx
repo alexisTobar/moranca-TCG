@@ -1,18 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Fraunces } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { UsageConsent } from "@/components/UsageConsent";
 
-const inter = DM_Sans({
+const bodyFont = DM_Sans({
   subsets: ["latin"],
   variable: "--font-body",
-  display: "swap",
-});
-
-const sora = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-editorial",
   display: "swap",
 });
 
@@ -57,7 +51,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es-CL" className={`${inter.variable} ${sora.variable}`}>
+    <html lang="es-CL" className={bodyFont.variable}>
       <body className="min-h-dvh antialiased">
         {children}
         <UsageConsent />
