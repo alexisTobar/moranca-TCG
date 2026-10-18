@@ -5,6 +5,8 @@ import { createSession, hashPassword, uniqueUserSlug } from "@/lib/auth";
 import { registerSchema } from "@/lib/validators";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
 import { LEGAL_VERSION } from "@/lib/legal";
+import { CONSENT_STATEMENTS } from "@/lib/consent-policy";
+import { randomUUID } from "node:crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,6 +54,7 @@ export async function POST(req: Request) {
       address: data.address,
       termsAcceptedAt: new Date(),
       termsVersion: LEGAL_VERSION,
+      consentRecords: { create: { subject: randomUUID(), kind: "terms", accepted: true, version: LEGAL_VERSION, statement: CONSENT_STATEMENTS.terms, source: "registration_checkbox" } },
     },
     select: { id: true, name: true, email: true, role: true },
   });

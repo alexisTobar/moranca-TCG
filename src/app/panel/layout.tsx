@@ -32,7 +32,8 @@ export default async function PanelLayout({
 
   return (
     <PanelCountsProvider initial={counts}>
-    <div className="flex min-h-dvh flex-col">
+    <div className="panel-shell flex min-h-dvh flex-col">
+      <a href="#main-content" className="skip-link">Saltar al contenido</a>
       <header className="sticky top-0 z-50 border-b border-white/10 bg-carbon/90 backdrop-blur-xl">
         <div className="mx-auto flex h-20 max-w-[1400px] items-center gap-4 px-4">
           <Link href="/">
@@ -60,7 +61,7 @@ export default async function PanelLayout({
 
       <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-6 px-4 py-6 lg:flex-row">
         <PanelNav isAdmin={isAdmin} />
-        <main className="min-w-0 flex-1">{children}</main>
+        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">{children}</main>
       </div>
     </div>
     </PanelCountsProvider>

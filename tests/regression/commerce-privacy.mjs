@@ -33,6 +33,7 @@ function fixture() {
   const state = { records: new Map(), orders: [], stock: 3, user: { id: "buyer", name: "Comprador", email: "test@example.test" },
     seller: { id: "seller", name: "Vendedor", active: true, role: "SELLER", offersPickup: true, offersShipping: true, bankName: "Banco", bankAccountType: "Vista", bankAccountNumber: "123", bankHolderName: "Vendedor", bankRut: "123" } };
   const db = {
+    consentRecord: { create: async ({ data }) => { assert.equal(data.userId, state.user.id); assert.equal(data.accepted, true); return data; } },
     checkoutRequest: {
       findUnique: async ({ where }) => state.records.get(where.key) ?? null,
       create: async ({ data }) => { state.records.set(data.key, data); return data; },
@@ -66,7 +67,7 @@ test("checkout rechaza sesión ausente", async () => { const f = fixture(); f.st
 test("checkout exige aceptación y no acepta productos duplicados", async () => { const f = fixture(); assert.equal((await f.post({ ...valid, acceptTerms: false })).status, 400); assert.equal((await f.post({ ...valid, items: [valid.items[0], valid.items[0]] })).status, 400); assert.equal(f.state.stock, 3); });
 test("transferencia sin banco completo no reserva stock", async () => { const f = fixture(); f.state.seller.bankRut = " "; assert.equal((await f.post()).status, 409); assert.equal(f.state.orders.length, 0); assert.equal(f.state.stock, 3); });
 test("vendedor desactivado no puede recibir compras", async () => { const f = fixture(); f.state.seller.active = false; assert.equal((await f.post()).status, 409); assert.equal(f.state.stock, 3); });
-test("reintento idéntico devuelve la misma orden y descuenta stock una vez", async () => { const f = fixture(); const first = await f.post(); assert.equal(first.status, 200); const response = await first.json(); const retry = await f.post(); assert.deepEqual(await retry.json(), response); assert.equal(f.state.orders.length, 1); assert.equal(f.state.stock, 2); assert.equal(f.state.orders[0].termsVersion, "2026-10-11"); });
+test("reintento idéntico devuelve la misma orden y descuenta stock una vez", async () => { const f = fixture(); const first = await f.post(); assert.equal(first.status, 200); const response = await first.json(); const retry = await f.post(); assert.deepEqual(await retry.json(), response); assert.equal(f.state.orders.length, 1); assert.equal(f.state.stock, 2); assert.equal(f.state.orders[0].termsVersion, "2026-10-17"); });
 test("una clave no se puede reutilizar con otro carrito ni comprador", async () => { const f = fixture(); await f.post(); assert.equal((await f.post({ ...valid, notes: "otra compra" })).status, 409); f.state.user = { ...f.state.user, id: "other" }; assert.equal((await f.post()).status, 409); assert.equal(f.state.orders.length, 1); });
 test("cambio de total exige nueva confirmación y revierte reserva", async () => { const f = fixture(); assert.equal((await f.post({ ...valid, expectedTotal: 900 })).status, 409); assert.equal(f.state.stock, 3); assert.equal(f.state.orders.length, 0); assert.equal(f.state.records.size, 0); });
 test("efectivo no exige banco pero sí retiro", async () => { const f = fixture(); f.state.seller.bankRut = null; assert.equal((await f.post({ ...valid, paymentMethod: "CASH" })).status, 200); const g = fixture(); assert.equal((await g.post({ ...valid, paymentMethod: "CASH", shipMethod: "SHIPPING" })).status, 400); });
@@ -111,4 +112,64 @@ test("semana cerrada y categorías no exponen identificadores de las rutas", () 
   const { previousWeek, usagePage } = load("src/lib/usage-policy.ts");
   assert.deepEqual(previousWeek(new Date("2026-10-12T10:00:00Z")), { start: new Date("2026-10-05"), end: new Date("2026-10-12") });
   assert.equal(usagePage("/producto/private-id"), "producto"); assert.equal(usagePage("/panel/analitica"), null); assert.equal(usagePage("/recuperar/secret-token"), null);
+});
+
+function consentFixture({ user = null, fail = false, allowed = true } = {}) {
+  const records = [];
+  const route = load("src/app/api/consent/route.ts", {
+    "next/headers": { cookies: async () => ({ get: () => undefined }) },
+    "@/lib/auth": { getCurrentUser: async () => user },
+    "@/lib/rate-limit": { clientKey: () => "test", memoryRateLimit: () => ({ allowed }) },
+    "@/lib/db": { prisma: { consentRecord: { create: async ({ data }) => { if (fail) throw new Error("offline"); records.push(data); return data; } } } },
+  });
+  const post = (body = { accepted: true, version: "2026-10-17" }, headers = {}) => route.POST(new Request("http://localhost/api/consent", { method: "POST", headers, body: JSON.stringify(body) }));
+  return { post, records };
+}
+test("consentimiento guarda decisión y versión antes de habilitar cookies", async () => {
+  const f = consentFixture({ user: { id: "buyer" } });
+  const response = await f.post();
+  assert.equal(response.status, 200);
+  assert.equal(f.records.length, 1);
+  assert.equal(f.records[0].userId, "buyer");
+  assert.equal(f.records[0].version, "2026-10-17");
+  assert.ok(f.records[0].statement.includes("retirar"));
+  assert.match(response.headers.get("set-cookie"), /wc_analytics=yes/);
+  assert.match(response.headers.get("set-cookie"), /HttpOnly/i);
+});
+test("rechazo anónimo también deja respaldo sin inventar usuario", async () => {
+  const f = consentFixture();
+  const response = await f.post({ accepted: false, version: "2026-10-17" });
+  assert.equal(response.status, 200); assert.equal(f.records[0].accepted, false);
+  assert.equal(f.records[0].userId, undefined); assert.match(f.records[0].subject, /^[a-f0-9-]{36}$/);
+  assert.match(response.headers.get("set-cookie"), /wc_analytics=no/);
+});
+test("consentimiento rechaza versión antigua y propiedades inyectadas", async () => {
+  const f = consentFixture();
+  for (const body of [{ accepted: true, version: "old" }, { accepted: true, version: "2026-10-17", userId: "admin" }, { accepted: "true", version: "2026-10-17" }]) assert.equal((await f.post(body)).status, 400);
+  assert.equal(f.records.length, 0);
+});
+test("fallo de persistencia no entrega una cookie de aceptación", async () => {
+  const f = consentFixture({ fail: true }); const response = await f.post();
+  assert.equal(response.status, 503); assert.equal(response.headers.get("set-cookie"), null);
+});
+test("señales DNT y GPC prevalecen sobre estadísticas opcionales", async () => {
+  for (const header of ["dnt", "sec-gpc"]) {
+    const f = consentFixture(); const response = await f.post(undefined, { [header]: "1" });
+    assert.equal((await response.json()).accepted, false); assert.equal(f.records[0].accepted, false);
+  }
+});
+test("limitación de frecuencia evita escribir decisiones abusivas", async () => {
+  const f = consentFixture({ allowed: false }); assert.equal((await f.post()).status, 429); assert.equal(f.records.length, 0);
+});
+test("respaldo de consentimientos exige administrador antes de leer", async () => {
+  for (const status of [401, 403]) {
+    let reads = 0;
+    const route = load("src/app/api/admin/consents/route.ts", { "@/lib/auth": { AuthError, requireAdmin: async () => { throw new AuthError("Denegado", status); } }, "@/lib/db": { prisma: { consentRecord: { findMany: async () => { reads++; return []; } } } } });
+    assert.equal((await route.GET(new Request("http://localhost/api/admin/consents"))).status, status); assert.equal(reads, 0);
+  }
+});
+test("analítica no acepta una cookie de consentimiento de versión anterior", async () => {
+  let writes = 0;
+  const route = load("src/app/api/usage/route.ts", { "next/headers": { cookies: async () => ({ get: (key) => ({ value: key === "wc_analytics" ? "yes" : "old" }) }) }, "@/lib/db": { prisma: { usageEvent: { createMany: async () => { writes++; } } } } });
+  assert.equal((await route.POST(new Request("http://localhost/api/usage", { method: "POST" }))).status, 204); assert.equal(writes, 0);
 });

@@ -184,7 +184,7 @@ r = await anon.req("/ingresar");
 check("/ingresar muestra 'Continuar con Google' (hay credenciales)", r.data.includes("Continuar con Google") && r.data.includes("/api/auth/google"));
 check("/registro muestra 'Registrarme con Google'", (await anon.req("/registro")).data.includes("Registrarme con Google"));
 const G = new C();
-r = await G.req("/api/auth/google?next=//evil.com");
+r = await G.req("/api/auth/google?acceptTerms=yes&next=//evil.com");
 const au = new URL(r.location ?? "http://x");
 check("inicia el flujo: redirige a accounts.google.com", r.status === 307 && au.host === "accounts.google.com" && au.pathname === "/o/oauth2/v2/auth", r.location);
 check("con client_id, scope, PKCE S256, state y redirect_uri correctos", au.searchParams.get("client_id") === "testid" && au.searchParams.get("response_type") === "code" && au.searchParams.get("scope") === "openid email profile" && au.searchParams.get("code_challenge_method") === "S256" && au.searchParams.get("code_challenge")?.length >= 40 && au.searchParams.get("state")?.length >= 32 && au.searchParams.get("redirect_uri") === `${BASE}/api/auth/google/callback`);
@@ -194,7 +194,7 @@ const state = au.searchParams.get("state"), challenge = au.searchParams.get("cod
 const mkClaims = (over = {}) => ({ iss: "https://accounts.google.com", aud: "testid", sub: "g-" + crypto.randomBytes(6).toString("hex"), email: `g-${crypto.randomBytes(4).toString("hex")}@gmail.test`, email_verified: true, name: "Persona Google", exp: Math.floor(Date.now() / 1000) + 600, ...over });
 async function googleLogin(claims, { badState = false, noCookie = false, tamperVerifier = false } = {}) {
   const C0 = new C();
-  const start = await C0.req("/api/auth/google");
+  const start = await C0.req("/api/auth/google?acceptTerms=yes");
   const u = new URL(start.location);
   const st = u.searchParams.get("state"), ch = u.searchParams.get("code_challenge");
   const code = "code-" + crypto.randomBytes(6).toString("hex");
@@ -224,7 +224,7 @@ const gc = mkClaims({ email: `nuevo-${stamp}@gmail.test`, sub: `sub-${stamp}` })
 g = await googleLogin(gc);
 check("cuenta nueva con Google: entra a Mi cuenta con sesion", g.cb.status === 307 && g.cb.location?.endsWith("/cuenta") && g.C0.hasSession(), `${g.cb.status} ${g.cb.location}`);
 [row] = (await db.query(`SELECT id, role, "emailVerifiedAt" v, "termsAcceptedAt" t, "termsVersion" tv FROM "User" WHERE email=$1`, [gc.email])).rows;
-check("se crea como COMPRADOR, email verificado y terminos aceptados", row.role === "BUYER" && row.v && row.t && row.tv === "2026-10-11", JSON.stringify(row));
+check("se crea como COMPRADOR, email verificado y terminos aceptados", row.role === "BUYER" && row.v && row.t && row.tv === "2026-10-17", JSON.stringify(row));
 check("queda vinculada la cuenta de Google", (await db.query(`SELECT count(*) n FROM "OAuthAccount" WHERE "userId"=$1 AND provider='google' AND "providerAccountId"=$2`, [row.id, gc.sub])).rows[0].n === "1");
 check("puede comprar de inmediato (email ya verificado)", (await g.C0.req("/api/checkout", { method: "POST", json: cartJson })).status === 200);
 g = await googleLogin(gc);
@@ -266,11 +266,11 @@ await db.query(`UPDATE "User" SET active=false WHERE email=$1`, [emD]);
 g = await googleLogin(mkClaims({ email: emD }));
 check("cuenta desactivada: no entra (google_inactive)", g.cb.location?.includes("error=google_inactive") && !g.C0.hasSession(), g.cb.location);
 // next seguro
-const N = new C(); const st2 = await N.req("/api/auth/google?next=/carrito"); const u2 = new URL(st2.location); const code2 = "c2-" + stamp;
+const N = new C(); const st2 = await N.req("/api/auth/google?acceptTerms=yes&next=/carrito"); const u2 = new URL(st2.location); const code2 = "c2-" + stamp;
 grants.set(code2, { challenge: u2.searchParams.get("code_challenge"), claims: mkClaims() });
 const cb2 = await N.req(`/api/auth/google/callback?code=${code2}&state=${u2.searchParams.get("state")}`);
 check("respeta un 'next' interno (/carrito)", cb2.location?.endsWith("/carrito"), cb2.location);
-const N2 = new C(); const st3 = await N2.req("/api/auth/google?next=https://evil.com"); const u3 = new URL(st3.location); const code3 = "c3-" + stamp;
+const N2 = new C(); const st3 = await N2.req("/api/auth/google?acceptTerms=yes&next=https://evil.com"); const u3 = new URL(st3.location); const code3 = "c3-" + stamp;
 grants.set(code3, { challenge: u3.searchParams.get("code_challenge"), claims: mkClaims() });
 const cb3 = await N2.req(`/api/auth/google/callback?code=${code3}&state=${u3.searchParams.get("state")}`);
 check("un 'next' externo (https://evil.com) nunca se sigue", !cb3.location?.includes("evil.com") && cb3.location?.endsWith("/cuenta"), cb3.location);

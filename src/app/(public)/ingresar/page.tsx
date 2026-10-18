@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 };
 
 const GOOGLE_ERRORS: Record<string, string> = {
+  terms_required: "Revisa y acepta los términos antes de continuar con Google.",
   google_off: "El ingreso con Google no está disponible por ahora.",
   google_cancelled: "Cancelaste el ingreso con Google.",
   google_failed: "No pudimos ingresar con Google. Inténtalo de nuevo.",

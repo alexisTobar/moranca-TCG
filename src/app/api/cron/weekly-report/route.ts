@@ -14,6 +14,9 @@ export async function GET(req: Request) {
     await prisma.usageReport.upsert({ where: { weekStart: start }, create: { weekStart: start, weekEnd: end, data }, update: {} });
     await prisma.usageEvent.deleteMany({ where: { day: { lt: new Date(Date.now() - 90 * 86400000) } } });
     await prisma.usageReport.deleteMany({ where: { weekStart: { lt: new Date(Date.now() - 364 * 86400000) } } });
+    const consentCutoff = new Date();
+    consentCutoff.setUTCFullYear(consentCutoff.getUTCFullYear() - 2);
+    await prisma.consentRecord.deleteMany({ where: { createdAt: { lt: consentCutoff } } });
     return NextResponse.json({ ok: true, weekStart: start.toISOString() });
   } catch (error) {
     console.error("[weekly-report]", error);

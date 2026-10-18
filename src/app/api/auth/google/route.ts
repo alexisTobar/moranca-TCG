@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { signPurposeToken } from "@/lib/auth";
 import { OAUTH_COOKIE, authorizationUrl, googleEnabled, newPkce } from "@/lib/google";
 import { siteOrigin } from "@/lib/store";
+import { LEGAL_VERSION } from "@/lib/legal";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,13 +14,14 @@ export async function GET(req: Request) {
   if (!googleEnabled()) return NextResponse.redirect(`${origin}/ingresar?error=google_off`);
 
   const url = new URL(req.url);
+  if (url.searchParams.get("acceptTerms") !== "yes") return NextResponse.redirect(`${origin}/ingresar?error=terms_required`);
   const rawNext = url.searchParams.get("next") ?? "";
   // Solo rutas internas: nunca redirigir a otro sitio.
   const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "";
 
   const state = crypto.randomBytes(24).toString("hex");
   const { verifier, challenge } = newPkce();
-  const token = await signPurposeToken("oauth", { state, verifier, next }, 600);
+  const token = await signPurposeToken("oauth", { state, verifier, next, termsVersion: LEGAL_VERSION }, 600);
 
   const res = NextResponse.redirect(authorizationUrl(origin, state, challenge));
   res.cookies.set(OAUTH_COOKIE, token, {

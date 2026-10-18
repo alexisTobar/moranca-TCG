@@ -79,6 +79,7 @@ export async function GET(req: Request) {
     await audit({ id: user.id, name: user.name }, "security.data_exported", { type: "User", id: user.id });
 
     const body = {
+      consentimientos: await prisma.consentRecord.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } }),
       generadoEl: new Date().toISOString(),
       nota: "Copia de los datos personales de tu cuenta en Win Condition TCG. No incluye contraseñas ni claves secretas.",
       perfil: profile,

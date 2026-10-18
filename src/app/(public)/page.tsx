@@ -285,7 +285,7 @@ export default async function HomePage() {
         ]}
       />
       {/* HERO */}
-      <section className="bg-hero relative overflow-hidden text-white">
+      <section className="market-hero relative overflow-hidden">
         <div className="bg-grid pointer-events-none absolute inset-0" />
         <div className="animate-blob pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-brand-600/30 blur-3xl" />
         <div
@@ -295,28 +295,34 @@ export default async function HomePage() {
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-16 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)] lg:gap-8 lg:pb-24 lg:pt-20">
           <div>
-            <span className="animate-fade-up glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-gold-200">
+            <span className="hero-eyebrow animate-fade-up inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em]">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-300" />
               Marketplace TCG de Chile
             </span>
 
             <h1 className="animate-fade-up delay-1 mt-6 font-display text-[2.5rem] font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.25rem]">
-              Compra y vende
+              Tu próxima
               <br />
-              <span className="text-gold-gradient">cartas TCG</span> en Chile.
+              <span className="text-brand-gradient">gran jugada.</span>
             </h1>
 
-            <p className="animate-fade-up delay-2 mt-6 max-w-xl text-[16px] leading-relaxed text-white/70">
-              <strong className="font-semibold text-white">Las cartas que te hacen ganar.</strong> Singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas. Compras con
-              stock reservado, pagas por transferencia con referencia única y recibes en todo Chile.
+            <p className="hero-description animate-fade-up delay-2 mt-6 max-w-xl text-[16px] leading-relaxed">
+              Compra y vende cartas TCG en Chile. Encuentra esa single que falta, descubre sellados o elige un mazo listo para jugar.
             </p>
 
+            <form action="/cartas" className="hero-search animate-fade-up delay-2 mt-7 flex items-center gap-2 rounded-2xl bg-white p-2">
+              <Search className="ml-2 h-5 w-5 shrink-0 text-ink-400" aria-hidden="true" />
+              <label htmlFor="hero-query" className="sr-only">Buscar cartas en el catálogo</label>
+              <input id="hero-query" name="q" type="search" placeholder="¿Qué carta estás buscando?" className="min-w-0 flex-1 bg-transparent px-2 py-3 text-sm text-carbon" maxLength={120} />
+              <button className="btn btn-primary" type="submit">Buscar</button>
+            </form>
+
             <div className="animate-fade-up delay-3 mt-8 flex flex-wrap gap-3">
-              <Link href="/cartas" className="btn btn-gold btn-lg">
+              <Link href="/cartas" className="btn btn-primary btn-lg">
                 Explorar catálogo
                 <ArrowRight className="h-4 w-4" strokeWidth={2.25} />
               </Link>
-              <Link href="/cartas?type=DECK" className="btn btn-glass btn-lg">
+              <Link href="/cartas?type=DECK" className="btn btn-secondary btn-lg">
                 Ver mazos armados
               </Link>
             </div>
@@ -358,7 +364,7 @@ export default async function HomePage() {
             </dl>
           </div>
 
-          <HeroCards cards={HERO_CARDS} />
+          <div className="hero-collection rounded-[2rem] p-4 sm:p-6"><div className="flex items-center justify-between text-xs text-white/70"><span className="uppercase tracking-[0.18em]">Elige tu universo</span><span>01 — 04</span></div><HeroCards cards={HERO_CARDS} /><p className="border-t border-white/10 pt-4 text-center text-xs text-white/60">Magic · Pokémon · One Piece · Mitos y Leyendas</p></div>
         </div>
       </section>
 

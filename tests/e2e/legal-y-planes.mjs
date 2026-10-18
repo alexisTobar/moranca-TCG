@@ -95,7 +95,7 @@ check("las cuentas rechazadas no se crearon", Number(before) === 0);
 x = await post("/api/auth/register", { ...base, acceptTerms: true });
 check("aceptando: cuenta creada (201)", x.status === 201, `${x.status} ${JSON.stringify(x.data)}`);
 const [u] = (await db.query(`SELECT "termsAcceptedAt", "termsVersion" FROM "User" WHERE email=$1`, [base.email])).rows;
-check("queda la constancia: fecha y version de los terminos", u?.termsAcceptedAt && Math.abs(Date.now() - new Date(u.termsAcceptedAt).getTime()) < 6 * 3600 * 1000 && u.termsVersion === "2026-10-11", JSON.stringify(u));
+check("queda la constancia: fecha y version de los terminos", u?.termsAcceptedAt && Math.abs(Date.now() - new Date(u.termsAcceptedAt).getTime()) < 6 * 3600 * 1000 && u.termsVersion === "2026-10-17", JSON.stringify(u));
 await db.query(`DELETE FROM "User" WHERE email=$1`, [base.email]);
 
 console.log("\n== Planes base (mas accesibles) y marketing honesto ==");

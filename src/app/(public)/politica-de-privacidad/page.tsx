@@ -32,6 +32,7 @@ const sections: LegalSection[] = [
         <Table
           head={["Categoría", "Qué datos", "Cuándo"]}
           rows={[
+            ["Decisiones de privacidad", "Aceptación o rechazo, fecha, versión, texto informado, origen e identificador aleatorio; cuenta asociada si has iniciado sesión.", "Al registrarte o elegir tus preferencias de cookies. Historial por 24 meses, con eliminación en la limpieza semanal; acceso exclusivo del administrador y acceso a tus propios registros en la descarga de datos."],
             ["Cuenta", "Nombre, email, RUT, teléfono, dirección y contraseña (guardada cifrada; nosotros no podemos verla).", "Al registrarte y al editar tu perfil."],
             ["Vendedores", "Cuenta bancaria (banco, tipo, número, titular y RUT), comuna y región, foto o logo y descripción.", "Cuando pides ser vendedor y completas tu perfil."],
             ["Compras y ventas", "Productos, montos, dirección y método de envío, notas de la orden, comprobantes de transferencia, mensajes del chat y reseñas.", "Cuando compras, vendes o conversas en una orden."],

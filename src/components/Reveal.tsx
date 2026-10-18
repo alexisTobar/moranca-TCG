@@ -16,11 +16,13 @@ export function Reveal({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setVisible(false);
 
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -29,7 +31,7 @@ export function Reveal({
           io.disconnect();
         }
       },
-      { threshold: 0.1, rootMargin: "0px 0px -80px 0px" }
+      { threshold: 0, rootMargin: "0px 0px 40px 0px" }
     );
     io.observe(el);
     return () => io.disconnect();

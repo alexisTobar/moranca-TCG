@@ -387,9 +387,16 @@ guardado con hash SHA-256). Sin `RESEND_API_KEY` configurado, el link de
 recuperación no se manda por correo: queda en los logs del servidor para
 poder probar el flujo igual (ver `.env.example`).
 
-**Login con Google:** no está implementado todavía — necesita credenciales
-OAuth propias (Client ID/Secret) desde Google Cloud Console, que solo se
-pueden crear desde tu cuenta. Se agrega cuando las tengas.
+**Login con Google:** implementado con PKCE y estado firmado. Se habilita con
+`GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`; requiere aceptación explícita de términos.
+
+### Historial de consentimientos
+
+En **Panel → Consentimientos**, el administrador consulta y descarga las decisiones
+de cookies y aceptaciones de términos (registro, Google y compra), con fecha y versión.
+Las cookies opcionales se pueden rechazar y retirar desde **Privacidad**. Los eventos
+se conservan 24 meses; el cron semanal elimina los vencidos. Consulta
+`docs/QA-INTERFAZ-PRIVACIDAD.md` para alcance, pruebas y límites del respaldo.
 
 ---
 

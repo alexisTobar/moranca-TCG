@@ -62,6 +62,30 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Shared visual system: clear surfaces, purposeful motion and visible focus. */
+.skip-link { position: fixed; top: 12px; left: 12px; z-index: 100; transform: translateY(-160%); padding: 12px 20px; border-radius: 12px; background: var(--color-carbon); color: white; }
+.skip-link:focus { transform: translateY(0); }
+.market-hero { background: radial-gradient(ellipse at 0% 15%, #fae9ed 0, transparent 48%), #f7f8fb; color: var(--color-carbon); border-bottom: 1px solid var(--color-ink-800); }
+.market-hero > .bg-grid, .market-hero > .animate-blob { display: none; }
+.hero-eyebrow { color: var(--color-brand-700); background: #f5e4e9; border: 1px solid #eacbd4; }
+.hero-eyebrow > span { background: var(--color-brand-600); }
+.hero-description { color: var(--color-ink-400); }
+.hero-search { border: 1px solid var(--color-ink-700); box-shadow: 0 8px 30px -20px #3f173b50; }
+.hero-search:focus-within { border-color: var(--color-brand-500); box-shadow: 0 0 0 4px var(--ring); }
+.hero-collection { background: radial-gradient(ellipse at 50% 0, #343349, transparent 75%), #101522; box-shadow: 0 28px 65px -35px #1f203a80; border: 1px solid #353746; }
+.market-hero p.text-white\/60 { color: var(--color-ink-400); }
+.market-hero p a.text-gold-300 { color: var(--color-brand-700); }
+.market-hero a.rounded-full { color: var(--color-ink-300); background: white; border-color: var(--color-ink-700); }
+.market-hero a.rounded-full:hover { border-color: var(--color-brand-500); color: var(--color-brand-700); }
+.market-hero dt { color: var(--color-carbon); }
+.market-hero dd { color: var(--color-ink-400); }
+.panel-shell { background: #f6f7fa; }
+.panel-shell > div > nav { border: 1px solid var(--color-ink-800); border-radius: 20px; background: white; padding: 12px; }
+.panel-shell > div > main { padding: 12px; }
+@media (min-width: 1024px) { .panel-shell > div > nav { align-self: flex-start; position: sticky; top: 100px; } .panel-shell > div > main { padding: 16px 20px; } }
+@media (max-width: 639px) { .hero-search .btn { padding-inline: 14px; } .hero-collection { margin-top: 4px; } input, select, textarea { font-size: max(16px, 1em); } }
+@media (hover: hover) { .card-surface { transition: border-color .2s ease, box-shadow .2s ease; } .card-surface:hover { border-color: #bdc5d5; } }
+
 ::selection {
   background: var(--color-brand-500);
   color: #ffffff;

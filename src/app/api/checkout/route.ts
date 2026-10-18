@@ -1,7 +1,8 @@
 import { emailNotVerifiedResponse } from "@/lib/verification";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { LEGAL_VERSION } from "@/lib/legal";
+import { CONSENT_STATEMENTS } from "@/lib/consent-policy";
 import { mailOrderCreated } from "@/lib/order-mail";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -231,6 +232,7 @@ async function checkout(req: Request) {
         await tx.checkoutRequest.create({ data: {
           key: data.idempotencyKey, buyerId: user.id, fingerprint, response: {},
         } });
+        await tx.consentRecord.create({ data: { userId: user.id, subject: randomUUID(), kind: "terms", accepted: true, version: LEGAL_VERSION, statement: CONSENT_STATEMENTS.terms, source: "checkout_checkbox" } });
         const results = [];
         for (const [sellerId, items] of bySeller) {
           const seller = sellerById.get(sellerId);

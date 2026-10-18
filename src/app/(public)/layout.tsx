@@ -11,8 +11,9 @@ export default function PublicLayout({
   return (
     <CartProvider>
       <div className="flex min-h-dvh flex-col">
+        <a href="#main-content" className="skip-link">Saltar al contenido</a>
         <SiteHeader />
-        <main className="flex-1">{children}</main>
+        <main id="main-content" tabIndex={-1} className="flex-1">{children}</main>
         <SiteFooter />
         <CartDrawer />
       </div>

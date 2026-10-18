@@ -2,8 +2,8 @@
  * Datos comunes de las páginas legales. Los datos de la empresa se leen del entorno para no dejar
  * información inventada en el código: si no están configurados, simplemente no se muestran.
  */
-export const LEGAL_VERSION = "2026-10-11";
-export const LEGAL_UPDATED = "11 de octubre de 2026";
+export const LEGAL_VERSION = "2026-10-17";
+export const LEGAL_UPDATED = "17 de octubre de 2026";
 
 export const LEGAL_LINKS = [
   { href: "/terminos-y-condiciones", label: "Términos y condiciones" },

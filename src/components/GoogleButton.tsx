@@ -1,10 +1,14 @@
 /** Botón "Continuar con Google". Es un enlace normal: el flujo completo vive en /api/auth/google. */
 export function GoogleButton({ next, label = "Continuar con Google" }: { next?: string; label?: string }) {
-  const href = `/api/auth/google${next ? `?next=${encodeURIComponent(next)}` : ""}`;
   return (
-    <div>
-      <a
-        href={href}
+    <form action="/api/auth/google" method="get">
+      {next && <input type="hidden" name="next" value={next} />}
+      <label className="mb-3 flex items-start gap-2 text-xs leading-relaxed text-ink-400">
+        <input type="checkbox" name="acceptTerms" value="yes" required className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600" />
+        <span>Acepto los <a href="/terminos-y-condiciones" target="_blank" rel="noopener noreferrer" className="underline">Términos y condiciones</a> y he leído la <a href="/politica-de-privacidad" target="_blank" rel="noopener noreferrer" className="underline">Política de privacidad</a>.</span>
+      </label>
+      <button
+        type="submit"
         className="flex w-full items-center justify-center gap-3 rounded-xl border border-ink-700 bg-white px-4 py-3 text-[14px] font-semibold text-carbon transition hover:border-ink-500 hover:bg-ink-900"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -14,9 +18,9 @@ export function GoogleButton({ next, label = "Continuar con Google" }: { next?: 
           <path fill="#EA4335" d="M12 4.75c1.76 0 3.34.6 4.58 1.8l3.44-3.44A11.96 11.96 0 0 0 12 0 12 12 0 0 0 1.4 6.6l3.96 3.1A7.16 7.16 0 0 1 12 4.75Z" />
         </svg>
         {label}
-      </a>
+      </button>
       <p className="mt-2 text-center text-[11px] leading-relaxed text-ink-400">
-        Al continuar aceptas los{" "}
+        Consulta los{" "}
         <a href="/terminos-y-condiciones" target="_blank" className="font-semibold text-brand-600 hover:text-brand-700">
           Términos
         </a>{" "}
@@ -26,7 +30,7 @@ export function GoogleButton({ next, label = "Continuar con Google" }: { next?: 
         </a>
         .
       </p>
-    </div>
+    </form>
   );
 }
 

@@ -42,6 +42,7 @@ const ITEMS: Array<{
   { href: "/panel/tiendas", label: "Tiendas premium", icon: Gem, adminOnly: true, badge: "subscriptions" },
   { href: "/panel/reportes", label: "Reportes", icon: Flag, adminOnly: true, badge: "reports" },
   { href: "/panel/auditoria", label: "Auditoría", icon: ClipboardList, adminOnly: true },
+  { href: "/panel/consentimientos", label: "Consentimientos", icon: ShieldCheck, adminOnly: true },
   { href: "/panel/analitica", label: "Analítica y respaldos", icon: BarChart3, adminOnly: true },
   { href: "/panel/configuracion", label: "Pagos y descuentos", icon: ShieldCheck, adminOnly: true },
 ];
@@ -62,6 +63,7 @@ export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
             <li key={item.href} className="shrink-0">
               <Link
                 href={item.href}
+                aria-current={active ? "page" : undefined}
                 className={`flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-[13px] font-semibold transition ${
                   active
                     ? "bg-carbon text-paper shadow-lg shadow-carbon/20"

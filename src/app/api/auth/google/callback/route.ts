@@ -5,6 +5,7 @@ import { hashPassword, uniqueUserSlug, verifyPurposeToken } from "@/lib/auth";
 import { completeLogin } from "@/lib/login";
 import { OAUTH_COOKIE, exchangeCode, googleEnabled } from "@/lib/google";
 import { LEGAL_VERSION } from "@/lib/legal";
+import { CONSENT_STATEMENTS } from "@/lib/consent-policy";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { siteOrigin } from "@/lib/store";
 
@@ -31,6 +32,7 @@ export async function GET(req: Request) {
   const raw = cookieHeader.split(";").map((c) => c.trim()).find((c) => c.startsWith(`${OAUTH_COOKIE}=`))?.slice(OAUTH_COOKIE.length + 1);
   const saved = raw ? await verifyPurposeToken("oauth", raw) : null;
   if (!saved || typeof saved.state !== "string" || typeof saved.verifier !== "string") return fail("google_state");
+  if (saved.termsVersion !== LEGAL_VERSION) return fail("terms_required");
   const a = Buffer.from(saved.state);
   const b = Buffer.from(state);
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return fail("google_state");
@@ -76,6 +78,7 @@ export async function GET(req: Request) {
           role: "BUYER",
           termsAcceptedAt: new Date(),
           termsVersion: LEGAL_VERSION,
+          consentRecords: { create: { subject: crypto.randomUUID(), kind: "terms", accepted: true, version: LEGAL_VERSION, statement: CONSENT_STATEMENTS.terms, source: "google_checkbox" } },
         },
         select: { id: true },
       });
@@ -86,9 +89,13 @@ export async function GET(req: Request) {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, name: true, role: true, active: true, tokenVersion: true, totpEnabledAt: true, emailVerifiedAt: true },
+    select: { id: true, email: true, name: true, role: true, active: true, tokenVersion: true, totpEnabledAt: true, emailVerifiedAt: true, termsVersion: true },
   });
   if (!user || !user.active) return fail("google_inactive");
+  if (user.termsVersion !== LEGAL_VERSION) await prisma.user.update({ where: { id: user.id }, data: {
+    termsAcceptedAt: new Date(), termsVersion: LEGAL_VERSION,
+    consentRecords: { create: { subject: crypto.randomUUID(), kind: "terms", accepted: true, version: LEGAL_VERSION, statement: CONSENT_STATEMENTS.terms, source: "google_checkbox" } },
+  } });
   // Google ya verificó este email.
   if (!user.emailVerifiedAt) await prisma.user.update({ where: { id: user.id }, data: { emailVerifiedAt: new Date() } });
 

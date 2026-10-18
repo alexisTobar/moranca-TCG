@@ -8,6 +8,7 @@ nextEnv.loadEnvConfig(process.cwd());
 const prisma = new PrismaClient({ datasourceUrl: process.env.DIRECT_URL || process.env.DATABASE_URL });
 try {
   await prisma.$transaction([
+    prisma.$executeRaw`ALTER TABLE "ConsentRecord" ENABLE ROW LEVEL SECURITY`,
     prisma.$executeRaw`ALTER TABLE "CheckoutRequest" ENABLE ROW LEVEL SECURITY`,
     prisma.$executeRaw`ALTER TABLE "UsageEvent" ENABLE ROW LEVEL SECURITY`,
     prisma.$executeRaw`ALTER TABLE "UsageReport" ENABLE ROW LEVEL SECURITY`,

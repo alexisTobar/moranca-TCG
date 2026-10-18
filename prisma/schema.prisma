@@ -64,6 +64,7 @@ model NewsItem {
 }
 
 model User {
+  consentRecords ConsentRecord[]
   id        String    @id @default(cuid())
   email     String    @unique
   name      String
@@ -134,6 +135,23 @@ model User {
   writtenReviews  Review[] @relation("BuyerReviews")
 
   @@index([active])
+}
+
+/// Historial de decisiones. La aplicación solo permite insertar y consultar.
+model ConsentRecord {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  subject   String
+  kind      String
+  accepted  Boolean
+  version   String
+  statement String
+  source    String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt, id])
 }
 
 model PasswordReset {
