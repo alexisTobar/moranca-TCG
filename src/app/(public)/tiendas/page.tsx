@@ -152,7 +152,7 @@ export default async function StoresLandingPage() {
       />
 
       {/* HERO */}
-      <section className="bg-hero relative overflow-hidden text-white">
+      <section className="light-promo relative overflow-hidden text-white">
         <div className="bg-grid pointer-events-none absolute inset-0" />
         <div className="animate-blob pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-brand-600/30 blur-3xl" />
         <div className="relative mx-auto max-w-4xl px-4 pb-20 pt-16 text-center lg:pb-28 lg:pt-24">
@@ -337,7 +337,7 @@ export default async function StoresLandingPage() {
 
       {/* CIERRE */}
       <section className="mx-auto max-w-7xl px-4 pt-14">
-        <div className="bg-hero relative overflow-hidden rounded-[2rem] px-6 py-14 text-center text-white sm:px-14">
+        <div className="light-promo relative overflow-hidden rounded-[2rem] px-6 py-14 text-center text-white sm:px-14">
           <div className="bg-grid pointer-events-none absolute inset-0 opacity-50" />
           <div className="relative mx-auto max-w-2xl">
             <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">Lleva tus cartas a otro nivel</h2>

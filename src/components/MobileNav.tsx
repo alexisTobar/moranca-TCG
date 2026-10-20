@@ -42,7 +42,7 @@ export function MobileNav({
   // filtro se mide contra ese padre (68 px de alto) y no contra la pantalla.
   const menu = (
     <div
-      className="animate-fade-up fixed inset-0 z-[100] flex flex-col bg-carbon xl:hidden"
+      className="market-mobile-menu animate-fade-up fixed inset-0 z-[100] flex flex-col bg-carbon xl:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Menú principal"

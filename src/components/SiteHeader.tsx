@@ -14,7 +14,7 @@ const NAV = [
   { href: "/cartas", label: "Cartas" },
   { href: "/cartas?type=SEALED", label: "Sellados" },
   { href: "/cartas?type=DECK", label: "Mazos" },
-  { href: "/vendedores", label: "Vendedores" },
+  { href: "/explorar", label: "Tiendas por región" },
   { href: "/tiendas", label: "Abre tu tienda" },
   { href: "/noticias", label: "Noticias" },
   { href: "/ayuda", label: "Ayuda" },
@@ -40,7 +40,7 @@ export async function SiteHeader() {
       <header className="market-navigation sticky top-0 z-50 border-b border-white/10 bg-carbon">
         <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4">
           <Link href="/" aria-label="Win Condition TCG - inicio" className="shrink-0">
-            <Logo height={54} tone="light" />
+            <Logo height={54} tone="dark" />
           </Link>
 
           <div className="ml-2 hidden flex-1 lg:block">
@@ -87,7 +87,7 @@ export async function SiteHeader() {
         </div>
       </header>
 
-      <div className="bg-carbon">
+      <div className="market-games">
         {/* Juegos */}
         <div className="border-t border-white/[0.06]">
           <div className="mx-auto flex max-w-7xl items-center gap-1.5 overflow-x-auto px-4 py-2 no-scrollbar">

@@ -38,7 +38,7 @@ function FooterCol({
 
 export function SiteFooter() {
   return (
-    <footer className="mt-24 bg-carbon text-white">
+    <footer className="market-footer mt-24">
       <div className="border-b border-white/10">
         <div className="mx-auto grid max-w-7xl gap-6 px-4 py-9 sm:grid-cols-2 lg:grid-cols-4">
           {TRUST.map((t) => {
@@ -60,7 +60,7 @@ export function SiteFooter() {
 
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
         <div>
-          <Logo height={96} tone="light" />
+          <Logo height={96} tone="dark" />
           <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-white/55">
             Marketplace chileno de cartas coleccionables. Singles, sellados y mazos armados de
             vendedores de todo Chile.
@@ -83,7 +83,7 @@ export function SiteFooter() {
             { href: "/cartas?type=SINGLE", label: "Singles" },
             { href: "/cartas?type=SEALED", label: "Sellados" },
             { href: "/cartas?type=DECK", label: "Mazos armados" },
-            { href: "/vendedores", label: "Vendedores" },
+            { href: "/explorar", label: "Tiendas por región" },
           ]}
         />
         <FooterCol

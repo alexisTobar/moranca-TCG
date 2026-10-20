@@ -284,22 +284,22 @@ export default async function HomePage() {
         ]}
       />
       <section className="editorial-hero">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="editorial-heading">
-            <h1>Tu próxima<br /><em>gran jugada.</em></h1>
-            <div className="editorial-intro"><p>Compra y vende cartas TCG en Chile. Encuentra esa single que falta, descubre sellados o elige un mazo listo para jugar.</p><Link href="/cartas">Explorar el catálogo <ArrowRight size={17} aria-hidden="true" /></Link></div>
-          </div>
-          <HeroCards cards={HERO_CARDS} />
-          <div className="editorial-search-row">
+        <div className="home-stage max-w-7xl">
+          <div className="home-copy">
+            <h1>La carta que falta.<br/><em>La jugada que viene.</em></h1>
+            <p>Tu próximo mazo empieza aquí. Compara cartas de tiendas y coleccionistas de todo Chile y encuentra tu mejor jugada.</p>
             <form action="/cartas" className="editorial-search">
-              <Search size={19} aria-hidden="true" /><label htmlFor="hero-query" className="sr-only">Buscar cartas en el catálogo</label>
-              <input id="hero-query" name="q" type="search" placeholder="Nombre de carta o edición" maxLength={120} />
-              <button type="submit">Buscar <ArrowRight size={17} aria-hidden="true" /></button>
+              <Search size={20} aria-hidden="true"/><label htmlFor="hero-query" className="sr-only">Buscar cartas</label>
+              <input id="hero-query" name="q" type="search" placeholder="¿Qué carta estás buscando?" maxLength={120}/>
+              <button type="submit">Buscar <ArrowRight size={17}/></button>
             </form>
-            <nav aria-label="Explorar por juego" className="editorial-games">{GAME_LIST.map(g => <Link key={g.id} href={`/cartas?game=${g.id}`}>{g.short}</Link>)}</nav>
+            <nav className="home-categories" aria-label="Tipo de producto"><Link href="/cartas">Cartas <ArrowRight size={16}/></Link><Link href="/cartas?type=SEALED">Sellados <ArrowRight size={16}/></Link><Link href="/cartas?type=DECK">Mazos <ArrowRight size={16}/></Link></nav>
+            <Link className="home-local-link" href="/explorar"><Store size={18}/> Encuentra tiendas cerca de ti <ArrowRight size={17}/></Link>
           </div>
+          <div className="home-card-stage"><HeroCards cards={HERO_CARDS}/></div>
         </div>
       </section>
+      <section className="home-discovery max-w-7xl" aria-labelledby="nearby-title"><div><h2 id="nearby-title">Tu comunidad también juega cerca.</h2><p>Explora Chile por región y comuna. Descubre vendedores, sus juegos y el stock disponible.</p></div><Link href="/explorar">Buscar tiendas en el mapa <ArrowRight size={20}/></Link></section>
       {/* JUEGOS */}
       <section className="mx-auto max-w-7xl px-4 py-16">
         <SectionTitle
@@ -459,7 +459,7 @@ export default async function HomePage() {
 
       {/* TU TIENDA: planes */}
       <section id="tu-tienda" className="mx-auto max-w-7xl scroll-mt-24 px-4 pt-16">
-        <div className="bg-hero relative overflow-hidden rounded-[2rem] px-5 py-14 text-white sm:px-12 lg:py-16">
+        <div className="light-promo relative overflow-hidden rounded-[2rem] px-5 py-14 text-white sm:px-12 lg:py-16">
           <div className="bg-grid pointer-events-none absolute inset-0 opacity-50" />
           <div className="animate-blob pointer-events-none absolute -right-16 -top-10 h-64 w-64 rounded-full bg-gold-500/15 blur-3xl" />
           <div className="relative">
