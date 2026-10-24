@@ -4,14 +4,14 @@ import Image from "next/image";
 import { ImageOff } from "lucide-react";
 import { useState } from "react";
 
-export function ProductGallery({ title, imageUrl, imageUrls, isFoil = false }: {
-  title: string; imageUrl: string | null; imageUrls: string[]; isFoil?: boolean;
+export function ProductGallery({ title, imageUrl, imageUrls, isFoil = false, shape = "card" }: {
+  title: string; imageUrl: string | null; imageUrls: string[]; isFoil?: boolean; shape?: "card" | "square";
 }) {
   const images = [...new Set([imageUrl, ...imageUrls].filter((url): url is string => Boolean(url)))];
   const [selected, setSelected] = useState(0);
   const current = images[selected] ?? images[0];
   return <div>
-    <div className="relative aspect-[63/88] overflow-hidden rounded-2xl border border-ink-700 bg-ink-950 tcg-card-shadow">
+    <div className={`relative ${shape === "square" ? "aspect-square" : "aspect-[63/88]"} overflow-hidden rounded-2xl border border-ink-700 bg-ink-950 tcg-card-shadow`}>
       {current ? <Image src={current} alt={`${title} · foto ${selected + 1}`} fill sizes="(max-width: 640px) 90vw, 380px" className="object-contain" priority unoptimized /> : <div className="flex h-full items-center justify-center text-ink-700"><ImageOff size={56} /></div>}
       {isFoil && selected === 0 && <span className="foil-shimmer foil-shimmer-auto" aria-hidden="true" />}
     </div>

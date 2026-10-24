@@ -348,6 +348,7 @@ export function ListingForm({
       {/* IMAGEN — sirve para los tres tipos: si la carta no está en ninguna API,
           o si prefieres mostrar la foto real de tu producto, la subes aquí. */}
       <ImageUploader
+        shape={values.type === "ACCESSORY" ? "square" : "card"}
         onBusyChange={setPrimaryUploading}
         value={values.imageUrl}
         onChange={(url) => set("imageUrl", url)}
@@ -691,7 +692,7 @@ export function ListingForm({
             <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-ink-400">
               Vista previa
             </p>
-            <div className="relative aspect-[63/88] overflow-hidden rounded-lg border border-ink-700 bg-ink-950">
+            <div className={`relative ${values.type === "ACCESSORY" ? "aspect-square" : "aspect-[63/88]"} overflow-hidden rounded-lg border border-ink-700 bg-ink-950`}>
               {(values.imageUrl ?? values.imageUrls[0]) ? (
                 <Image
                   src={(values.imageUrl ?? values.imageUrls[0])!}

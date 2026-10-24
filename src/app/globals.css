@@ -749,8 +749,8 @@ textarea:focus-visible {
 .editorial-process li p { margin-top:10px; font-size:14px; line-height:1.65; max-width:55ch; color:#57524a; }
 @media(max-width:639px) { .editorial-process ol { grid-template-columns:1fr; } }
 
-/* Brand-aligned, fluid marketplace across public pages and management views. */
-.max-w-7xl { max-width:none; width:100%; padding-inline:clamp(16px,3vw,64px); }
+/* Center content on large monitors while retaining the notebook/mobile spacing. */
+.max-w-7xl { max-width:1440px; width:100%; margin-inline:auto; padding-inline:clamp(16px,3vw,48px); }
 main { min-width:0; }
 img,svg { max-width:100%; }
 .editorial-home,.catalog-editorial { background:#f7f8fa; }
@@ -782,22 +782,24 @@ img,svg { max-width:100%; }
 .card-market-page h1 { overflow-wrap:anywhere; }
 .card-market-page #vendedores { margin-top:24px; }
 .card-market-page table { font-variant-numeric:tabular-nums; }
-@media(min-width:1600px) { .catalog-results { grid-template-columns:repeat(5,minmax(0,1fr)); } }
-@media(min-width:1920px) { .catalog-results { grid-template-columns:repeat(6,minmax(0,1fr)); } }
 @media(max-width:767px) { .editorial-heading { grid-template-columns:1fr; gap:18px; } .listing-copy h3 { font-size:16px; } .listing-price strong {font-size:17px;} }
 @media(max-width:359px) { .catalog-results { column-gap:12px; } .listing-specs {gap:3px;} }
-/* Light marketplace: open composition, logo carmine, restrained gold. */
-.market-navigation {background:#e8ecf2;border-color:#cbd2dd;color:#242732;}
-.market-navigation :is(.nav-link,.icon-btn,.btn-glass),.market-games a {color:#434956;}
-.market-navigation .nav-link:hover,.market-games a:hover {color:#a01c36;background:#f9eef1;}
+/* Profile-colored navigation and footer; the page content remains light. */
+.market-navigation {background:#080b16;border-color:#2b3242;color:#fff;}
+.market-navigation :is(.nav-link,.icon-btn,.btn-glass) {color:#e8ebf2;}
+.market-navigation :is(.icon-btn,.btn-glass) {background:#ffffff0d;border-color:#ffffff26;}
+.market-navigation .nav-link:hover {color:#f1d27a;background:#ffffff0d;}
+.market-games a {color:#434956;}
+.market-games a:hover {color:#a01c36;background:#f9eef1;}
 .market-games {background:#f3f4f6;border-bottom:1px solid #e3e5e9;}
 :is(.market-navigation,.market-games) form[role=search] > svg {color:#626977;}
 :is(.market-navigation,.market-games) input[role=combobox] {background:#f4f5f7;color:#242732;border:1px solid #d8dce3;backdrop-filter:none;}
 :is(.market-navigation,.market-games) input::placeholder {color:#626977;}
-.market-footer {background:#e1e6ed;color:#252a34;border-top:1px solid #cbd2dd;}
-.market-footer [class*='text-white'] {color:#596171;}
-.market-footer [class*='text-gold'] {color:#8e1931;}
-.market-footer [class*='border-white'] {border-color:#d8dce3;}
+.market-footer {background:#080b16;color:#fff;border-top:1px solid #2b3242;}
+.market-footer [class*='text-white'] {color:#bcc4d4;}
+.market-footer [class*='text-gold'] {color:#f1d27a;}
+.market-footer [class*='border-white'] {border-color:#2b3242;}
+.market-footer a:hover {color:#fff;}
 .market-mobile-menu {background:#fff;color:#252a34;}
 .market-mobile-menu [class*='text-white'],.market-mobile-menu .icon-btn {color:#434956;}
 .market-mobile-menu [class*='text-gold'] {color:#a01c36;}
@@ -881,7 +883,7 @@ img,svg { max-width:100%; }
 
 /* More legible brand artwork while preserving the original transparent assets. */
 .brand-logo-readable {filter:brightness(.70) saturate(1.08);object-fit:contain;flex-shrink:0;}
-.market-navigation .nav-link {white-space:nowrap;padding-inline:clamp(6px,.65vw,12px);}
+.market-navigation .nav-link {white-space:nowrap;padding-inline:clamp(6px,.55vw,8px);}
 .market-navigation nav {flex-shrink:0;}
 .market-navigation form[role=search] {min-width:0;}
 .market-navigation input[role=combobox] {min-width:0;}

@@ -22,7 +22,7 @@ export function ListingCard({ listing, href }: { listing: ListingCardData; href?
   const price = hasOffer ? listing.offerPrice! : listing.price;
   const target = href ?? (listing.market ? cardMarketHref(listing.game, listing.market.identity) : `/producto/${listing.slug}`);
   return <article className="listing-sheet">
-    <Link href={target} className="listing-art" aria-label={`Ver ${listing.title}`}>
+    <Link href={target} className="listing-art" style={listing.type === "ACCESSORY" ? {aspectRatio:"1 / 1"} : undefined} aria-label={`Ver ${listing.title}`}>
       <CardArtwork src={listing.imageUrl} alt={listing.title} sizes="(max-width:639px) 45vw, (max-width:1023px) 30vw, 230px" className="object-contain" />
       {listing.stock <= 0 && <span className="listing-sold">Vendido</span>}
     </Link>

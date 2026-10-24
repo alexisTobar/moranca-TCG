@@ -174,8 +174,8 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
               {store.name}
             </Link>
             <span>/</span>
-            <Link href={`/tienda/${store.slug}?game=${listing.game}#catalogo`} className="hover:text-carbon">
-              {gameName(listing.game)}
+            <Link href={`/tienda/${store.slug}?${listing.type === "ACCESSORY" ? "type=ACCESSORY" : `game=${listing.game}`}#catalogo`} className="hover:text-carbon">
+              {listing.type === "ACCESSORY" ? "Accesorios" : gameName(listing.game)}
             </Link>
           </>
         ) : (
@@ -188,8 +188,8 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
               Catálogo
             </Link>
             <span>/</span>
-            <Link href={`/cartas?game=${listing.game}`} className="hover:text-carbon">
-              {gameName(listing.game)}
+            <Link href={listing.type === "ACCESSORY" ? "/cartas?type=ACCESSORY" : `/cartas?game=${listing.game}`} className="hover:text-carbon">
+              {listing.type === "ACCESSORY" ? "Accesorios" : gameName(listing.game)}
             </Link>
           </>
         )}
@@ -197,10 +197,10 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
         <span className="truncate text-ink-300">{listing.title}</span>
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
+      <div className="grid gap-8 lg:grid-cols-[380px_minmax(0,1fr)]">
         {/* IMAGEN */}
-        <div className={`lg:sticky lg:h-fit ${store ? "lg:top-48" : "lg:top-24"}`}>
-          <ProductGallery title={listing.title} imageUrl={listing.imageUrl} imageUrls={listing.imageUrls} isFoil={listing.isFoil} />
+        <div className={`mx-auto w-full max-w-[380px] lg:sticky lg:h-fit ${store ? "lg:top-48" : "lg:top-24"}`}>
+          <ProductGallery title={listing.title} imageUrl={listing.imageUrl} imageUrls={listing.imageUrls} isFoil={listing.isFoil} shape={listing.type === "ACCESSORY" ? "square" : "card"} />
 
           <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
             {listing.type !== "ACCESSORY" && <Spec label="Juego" value={gameName(listing.game)} />}
