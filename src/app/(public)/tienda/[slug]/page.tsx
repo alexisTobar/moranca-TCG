@@ -26,6 +26,7 @@ const TYPES = [
   { value: "SINGLE", label: "Singles" },
   { value: "SEALED", label: "Sellados" },
   { value: "DECK", label: "Mazos" },
+  { value: "ACCESSORY", label: "Accesorios" },
 ];
 const SORTS: Record<string, { label: string; order: Prisma.ListingOrderByWithRelationInput }> = {
   recientes: { label: "Recientes", order: { createdAt: "desc" } },

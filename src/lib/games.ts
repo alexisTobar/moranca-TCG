@@ -84,7 +84,7 @@ export function isGameId(value: string): value is GameId {
 }
 
 export function gameName(id: string): string {
-  return isGameId(id) ? GAMES[id].name : id;
+  return id === "generic" ? "Universal / otros TCG" : isGameId(id) ? GAMES[id].name : id;
 }
 
 export const CONDITIONS = [
@@ -111,4 +111,16 @@ export const LISTING_TYPES = [
   { value: "SINGLE", label: "Single", hint: "Una carta individual" },
   { value: "SEALED", label: "Sellado", hint: "Sobres, cajas, bundles" },
   { value: "DECK", label: "Mazo", hint: "Un deck completo con su lista" },
+  { value: "ACCESSORY", label: "Accesorios", hint: "Protectores, portamazos, tapetes y más" },
 ];
+
+export const ACCESSORY_CATEGORIES = [
+  { value: "SLEEVES", label: "Protectores / sleeves" },
+  { value: "DECK_BOX", label: "Portamazos" },
+  { value: "PLAYMAT", label: "Tapetes / playmats" },
+  { value: "BINDER", label: "Carpetas / álbumes" },
+  { value: "STORAGE", label: "Cajas y almacenamiento" },
+  { value: "TOPLOADER", label: "Toploaders y protectores rígidos" },
+  { value: "DICE", label: "Dados y contadores" },
+  { value: "OTHER", label: "Otros accesorios" },
+] as const;

@@ -1,3 +1,5 @@
+import { ProductGallery } from "@/components/product/ProductGallery";
+import { ACCESSORY_CATEGORIES } from "@/lib/games";
 import { ReportButton } from "@/components/ReportButton";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,6 +21,7 @@ const TYPE_LABEL: Record<string, string> = {
   SINGLE: "Carta individual",
   SEALED: "Producto sellado",
   DECK: "Mazo armado",
+  ACCESSORY: "Accesorio",
 };
 
 export async function getProductListing(slug: string) {
@@ -51,6 +54,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
     const baseWhere = {
       status: "ACTIVE" as const,
       game: listing.game,
+      type: listing.type,
       id: { not: listing.id },
       stock: { gt: 0 },
       ...(store ? { sellerId: listing.sellerId } : {}),
@@ -134,7 +138,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
 
   const totalCards = listing.deckCards.reduce((a, c) => a + c.quantity, 0);
   const conditionLabel =
-    CONDITIONS.find((c) => c.value === listing.condition)?.label ?? listing.condition;
+    (listing.condition === "NEW" ? "Nuevo" : listing.condition === "USED" ? "Usado" : CONDITIONS.find((c) => c.value === listing.condition)?.label) ?? listing.condition;
   const languageLabel =
     LANGUAGES.find((l) => l.value === listing.language)?.label ?? listing.language;
 
@@ -144,7 +148,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
     "@context": "https://schema.org",
     "@type": "Product",
     name: listing.title,
-    ...(listing.imageUrl ? { image: [listing.imageUrl] } : {}),
+    ...(listing.imageUrl ? { image: [...new Set([listing.imageUrl, ...listing.imageUrls])] } : {}),
     description: listing.description ?? `${listing.title} — ${gameName(listing.game)}`,
     category: TYPE_LABEL[listing.type] ?? listing.type,
     ...(listing.cardNumber ? { sku: `${listing.game}-${listing.cardNumber}` } : {}),
@@ -196,35 +200,12 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
       <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
         {/* IMAGEN */}
         <div className={`lg:sticky lg:h-fit ${store ? "lg:top-48" : "lg:top-24"}`}>
-          <div className="relative aspect-[63/88] overflow-hidden rounded-2xl border border-ink-700 bg-ink-950 tcg-card-shadow">
-            {listing.imageUrl ? (
-              <Image
-                src={listing.imageUrl}
-                alt={listing.title}
-                fill
-                sizes="380px"
-                className="object-contain"
-                priority
-            unoptimized
-          />
-            ) : (
-              <div className="flex h-full items-center justify-center text-ink-700">
-                <ImageOff className="h-14 w-14" strokeWidth={1.5} />
-              </div>
-            )}
-            {listing.isFoil && (
-              <>
-                <span className="foil-shimmer foil-shimmer-auto" aria-hidden="true" />
-                <span className="absolute right-3 top-3 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 px-2.5 py-1 text-[11px] font-bold uppercase text-paper">
-                  Foil
-                </span>
-              </>
-            )}
-          </div>
+          <ProductGallery title={listing.title} imageUrl={listing.imageUrl} imageUrls={listing.imageUrls} isFoil={listing.isFoil} />
 
           <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
             <Spec label="Juego" value={gameName(listing.game)} />
             <Spec label="Tipo" value={TYPE_LABEL[listing.type] ?? listing.type} />
+            {listing.type === "ACCESSORY" && <SpecWide label="Accesorio" value={ACCESSORY_CATEGORIES.find(c => c.value === listing.accessoryCategory)?.label ?? "Otros accesorios"} />}
             {listing.setName && (
               <SpecWide label="Edición" value={listing.setName} />
             )}

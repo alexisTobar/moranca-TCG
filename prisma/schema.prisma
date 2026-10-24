@@ -18,6 +18,7 @@ enum ListingType {
   SINGLE
   SEALED
   DECK
+  ACCESSORY
 }
 
 enum ListingStatus {
@@ -239,6 +240,8 @@ model Listing {
   title       String
   slug        String        @unique
   imageUrl    String?
+  imageUrls   String[]      @default([])
+  accessoryCategory String?
   price       Int
   offerPrice  Int?
   stock       Int           @default(1)

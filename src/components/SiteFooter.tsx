@@ -83,6 +83,7 @@ export function SiteFooter() {
             { href: "/cartas?type=SINGLE", label: "Singles" },
             { href: "/cartas?type=SEALED", label: "Sellados" },
             { href: "/cartas?type=DECK", label: "Mazos armados" },
+  { href: "/cartas?type=ACCESSORY", label: "Accesorios" },
             { href: "/explorar", label: "Tiendas por región" },
           ]}
         />

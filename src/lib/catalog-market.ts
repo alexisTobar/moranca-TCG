@@ -5,14 +5,15 @@ import { CARD_IDENTITY_SQL } from "./card-identity";
 import { LISTING_CARD_SELECT } from "./catalog";
 
 export interface MarketFilters {
-  type: "SINGLE" | "SEALED" | "DECK"; game?: string; q?: string;
-  condition?: string; language?: string; min?: number; max?: number; sort: string; page: number;
+  type: "SINGLE" | "SEALED" | "DECK" | "ACCESSORY"; game?: string; q?: string;
+  accessoryCategory?: string; condition?: string; language?: string; min?: number; max?: number; sort: string; page: number;
 }
 const PRICE = Prisma.sql`LEAST(l.price, COALESCE(l."offerPrice", l.price))`;
 
 /** Filtering, cheapest-offer selection, deduplication and pagination happen in PostgreSQL. */
 export async function catalogMarket(filters: MarketFilters) {
   const clauses = [Prisma.sql`l.status = 'ACTIVE' AND l.type = ${filters.type}::"ListingType" AND u.active = true AND u.role IN ('SELLER','ADMIN')`];
+  if (filters.accessoryCategory && filters.type === "ACCESSORY") clauses.push(Prisma.sql`l."accessoryCategory" = ${filters.accessoryCategory}`);
   if (filters.game) clauses.push(Prisma.sql`l.game = ${filters.game}`);
   if (filters.condition) clauses.push(Prisma.sql`l.condition = ${filters.condition}`);
   if (filters.language) clauses.push(Prisma.sql`l.language = ${filters.language}`);

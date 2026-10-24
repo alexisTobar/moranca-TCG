@@ -22,7 +22,7 @@ export async function GET(req: Request) {
 
   try {
     const requested = new URL(req.url).searchParams.get("type");
-    const type = requested === "SEALED" ? "SEALED" : requested === "DECK" ? "DECK" : "SINGLE";
+    const type = requested === "ACCESSORY" ? "ACCESSORY" : requested === "SEALED" ? "SEALED" : requested === "DECK" ? "DECK" : "SINGLE";
     const {listings, total} = await catalogMarket({type,q,sort:"recientes",page:1});
     const results = listings.slice(0,7).map(r=>({slug:r.slug,href:r.market ? cardMarketHref(r.game,r.market.identity) : '/producto/'+r.slug,title:r.title,game:r.game,type:r.type,imageUrl:r.imageUrl,price:effectivePrice(r.price,r.offerPrice),stock:r.market?.stock ?? r.stock,setName:r.setName,condition:r.condition,isFoil:r.isFoil}));
     return NextResponse.json({ ok: true, results, total });

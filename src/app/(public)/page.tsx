@@ -111,6 +111,7 @@ const TYPE_TILES: Array<{
     text: "Listos para jugar, con su lista carta por carta.",
     icon: Swords,
   },
+  { href: "/cartas?type=ACCESSORY", title: "Accesorios", text: "Protectores, portamazos, tapetes y todo para tu colección.", icon: Boxes },
 ];
 
 const STEPS: Array<{ title: string; body: string; icon: LucideIcon }> = [
@@ -137,7 +138,7 @@ const STEPS: Array<{ title: string; body: string; icon: LucideIcon }> = [
 ];
 
 export default async function HomePage() {
-  const [byGame, latest, decks, sealed, sellers, counts, news, settings] = await Promise.all([
+  const [byGame, latest, decks, sealed, accessories, sellers, counts, news, settings] = await Promise.all([
     // Se pide el top de cada juego por separado — si se pidiera un único top
     // global, un juego con muchas publicaciones (ej. Magic) desplazaría por
     // completo a los juegos con pocas, que quedarían sin mostrarse nunca.
@@ -185,6 +186,10 @@ export default async function HomePage() {
         }),
       [] as ListingCardData[]
     ),
+    safeQuery(() => prisma.listing.findMany({
+      where: { status: "ACTIVE", type: "ACCESSORY", stock: { gt: 0 } },
+      select: LISTING_CARD_SELECT, orderBy: { createdAt: "desc" }, take: 6,
+    }), [] as ListingCardData[]),
     safeQuery(
       () =>
         prisma.user.findMany({
@@ -293,7 +298,7 @@ export default async function HomePage() {
               <input id="hero-query" name="q" type="search" placeholder="¿Qué carta estás buscando?" maxLength={120}/>
               <button type="submit">Buscar <ArrowRight size={17}/></button>
             </form>
-            <nav className="home-categories" aria-label="Tipo de producto"><Link href="/cartas">Cartas <ArrowRight size={16}/></Link><Link href="/cartas?type=SEALED">Sellados <ArrowRight size={16}/></Link><Link href="/cartas?type=DECK">Mazos <ArrowRight size={16}/></Link></nav>
+            <nav className="home-categories" aria-label="Tipo de producto"><Link href="/cartas">Cartas <ArrowRight size={16}/></Link><Link href="/cartas?type=SEALED">Sellados <ArrowRight size={16}/></Link><Link href="/cartas?type=DECK">Mazos <ArrowRight size={16}/></Link><Link href="/cartas?type=ACCESSORY">Accesorios <ArrowRight size={16}/></Link></nav>
             <Link className="home-local-link" href="/explorar"><Store size={18}/> Encuentra tiendas cerca de ti <ArrowRight size={17}/></Link>
           </div>
           <div className="home-card-stage"><HeroCards cards={HERO_CARDS}/></div>
@@ -313,7 +318,7 @@ export default async function HomePage() {
           ))}
         </Reveal>
 
-        <Reveal className="stagger mt-4 grid gap-4 md:grid-cols-3">
+        <Reveal className="stagger mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {TYPE_TILES.map((t) => {
             const Icon = t.icon;
             return (
@@ -397,6 +402,8 @@ export default async function HomePage() {
           listings={sealed}
         />
       )}
+
+      {accessories.length > 0 && <Showcase eyebrow="" title="Accesorios" subtitle="Protectores, portamazos, tapetes y más" href="/cartas?type=ACCESSORY" listings={accessories} />}
 
       <section className="editorial-process mx-auto max-w-7xl px-4 py-16">
         <h2 className="font-display text-3xl">Así funciona cada compra en Win Condition</h2>

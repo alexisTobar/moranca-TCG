@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import { catalogMarket } from "@/lib/catalog-market";
 import { cardMarketHref } from "@/lib/card-identity";
-import { GAME_LIST, CONDITIONS, LANGUAGES, LISTING_TYPES, isGameId } from "@/lib/games";
+import { GAME_LIST, ACCESSORY_CATEGORIES, CONDITIONS, LANGUAGES, LISTING_TYPES, isGameId } from "@/lib/games";
 import { LISTING_CARD_SELECT } from "@/lib/catalog";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { redirect } from "next/navigation";
@@ -13,7 +13,7 @@ import { catalogPage, catalogPrice, paginationWindow } from "@/lib/catalog-query
 import { JsonLd } from "@/components/JsonLd";
 import { siteUrl } from "@/lib/seo";
 
-const TYPE_SEO: Record<string, string> = { SINGLE: "Singles", SEALED: "Sellados", DECK: "Mazos armados" };
+const TYPE_SEO: Record<string, string> = { SINGLE: "Singles", SEALED: "Sellados", DECK: "Mazos armados", ACCESSORY: "Accesorios" };
 
 /** Título y canonical propios por juego y tipo, para que cada vista posicione por lo que muestra. */
 export async function generateMetadata({
@@ -23,11 +23,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const sp = await searchParams;
   const game = one(sp.game);
-  const type = one(sp.type) === "SEALED" ? "SEALED" : one(sp.type) === "DECK" ? "DECK" : "SINGLE";
+  const type = one(sp.type) === "ACCESSORY" ? "ACCESSORY" : one(sp.type) === "SEALED" ? "SEALED" : one(sp.type) === "DECK" ? "DECK" : "SINGLE";
   const gameName = game && isGameId(game) ? GAME_LIST.find((g) => g.id === game)?.name : undefined;
   const typeName = TYPE_SEO[type];
   const page = catalogPage(one(sp.page));
-  const filtered = ["q", "condition", "language", "sort", "min", "max"].some(key => !!one(sp[key]));
+  const filtered = ["q", "accessory", "condition", "language", "sort", "min", "max"].some(key => !!one(sp[key]));
   const pagination = page > 1 ? ` · Página ${page}` : "";
 
   if (!gameName && !typeName) {
@@ -73,7 +73,8 @@ export default async function CatalogPage({
   const sp = await searchParams;
   const q = (one(sp.q)?.trim() ?? "").slice(0, 120);
   const game = one(sp.game);
-  const type = one(sp.type) === "SEALED" ? "SEALED" : one(sp.type) === "DECK" ? "DECK" : "SINGLE";
+  const type = one(sp.type) === "ACCESSORY" ? "ACCESSORY" : one(sp.type) === "SEALED" ? "SEALED" : one(sp.type) === "DECK" ? "DECK" : "SINGLE";
+  const accessoryCategory = type === "ACCESSORY" ? ACCESSORY_CATEGORIES.find(c => c.value === one(sp.accessory))?.value : undefined;
   const condition = one(sp.condition);
   const language = one(sp.language);
   const sort = one(sp.sort) ?? "recientes";
@@ -87,7 +88,7 @@ export default async function CatalogPage({
     try { return await query(); } catch { unavailable = true; return fallback; }
   }
 
-  const result = await catalogQuery(() => catalogMarket({ type, game: game && isGameId(game) ? game : undefined, q, condition, language, min, max, sort, page: requestedPage }), {total:0, pages:1, page:1, listings:[]});
+  const result = await catalogQuery(() => catalogMarket({ type, accessoryCategory, game: game && (isGameId(game) || (type === "ACCESSORY" && game === "generic")) ? game : undefined, q, condition, language, min, max, sort, page: requestedPage }), {total:0, pages:1, page:1, listings:[]});
   const {total, pages, page, listings} = result;
   if (!unavailable && requestedPage > pages) {
     const corrected = new URLSearchParams();
@@ -103,6 +104,7 @@ export default async function CatalogPage({
       q: q || undefined,
       game,
       type,
+      accessory: accessoryCategory,
       condition,
       language,
       sort: sort !== "recientes" ? sort : undefined,
@@ -128,7 +130,7 @@ export default async function CatalogPage({
 
       <header className="catalog-heading mb-6">
         <h1 className="font-display text-3xl font-bold tracking-tight text-carbon sm:text-4xl">
-          {q ? `Resultados para “${q}”` : type === "SINGLE" ? "Cartas" : type === "SEALED" ? "Sellados" : "Mazos"}
+          {q ? `Resultados para “${q}”` : type === "SINGLE" ? "Cartas" : type === "SEALED" ? "Sellados" : type === "ACCESSORY" ? "Accesorios" : "Mazos"}
         </h1>
         <p className="mt-1 text-[13px] text-ink-400">
           {unavailable ? "El catálogo no está disponible temporalmente." : `${total} ${type === "SINGLE" ? "cartas · compara vendedores y precios" : "publicaciones encontradas"}`}
@@ -137,11 +139,12 @@ export default async function CatalogPage({
 
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         {/* FILTROS */}
-        <FilterDrawer activeCount={[game, type, condition, language, min, max].filter(Boolean).length}>
+        <FilterDrawer activeCount={[game, type, accessoryCategory, condition, language, min, max].filter(Boolean).length}>
           <FilterGroup label="Juego">
             <FilterPill href={buildHref({ game: undefined, page: undefined })} active={!game}>
               Todos
             </FilterPill>
+            {type === "ACCESSORY" && <FilterPill href={buildHref({ game: "generic", page: undefined })} active={game === "generic"}>Universal / otros TCG</FilterPill>}
             {GAME_LIST.map((g) => (
               <FilterPill
                 key={g.id}
@@ -157,13 +160,18 @@ export default async function CatalogPage({
             {LISTING_TYPES.map((t) => (
               <FilterPill
                 key={t.value}
-                href={buildHref({ type: t.value, page: undefined })}
+                href={buildHref({ type: t.value, page: undefined, ...(type !== t.value ? { condition: undefined, language: undefined, accessory: undefined, ...(game === "generic" ? { game: undefined } : {}) } : {}) })}
                 active={type === t.value}
               >
-                {t.value === "SINGLE" ? "Cartas" : t.value === "SEALED" ? "Sellados" : "Mazos"}
+                {t.value === "SINGLE" ? "Cartas" : t.value === "SEALED" ? "Sellados" : t.value === "ACCESSORY" ? "Accesorios" : "Mazos"}
               </FilterPill>
             ))}
           </FilterGroup>
+
+          {type === "ACCESSORY" && <FilterGroup label="Tipo de accesorio">
+            <FilterPill href={buildHref({ accessory: undefined, page: undefined })} active={!accessoryCategory}>Todos</FilterPill>
+            {ACCESSORY_CATEGORIES.map(c => <FilterPill key={c.value} href={buildHref({ accessory: c.value, page: undefined })} active={accessoryCategory === c.value}>{c.label}</FilterPill>)}
+          </FilterGroup>}
 
           <FilterGroup label="Estado">
             <FilterPill
@@ -172,18 +180,18 @@ export default async function CatalogPage({
             >
               Todos
             </FilterPill>
-            {CONDITIONS.map((c) => (
+            {(type === "ACCESSORY" ? [{value:"NEW",label:"Nuevo"},{value:"USED",label:"Usado"}] : CONDITIONS).map((c) => (
               <FilterPill
                 key={c.value}
                 href={buildHref({ condition: c.value, page: undefined })}
                 active={condition === c.value}
               >
-                {c.value}
+                {type === "ACCESSORY" ? c.label : c.value}
               </FilterPill>
             ))}
           </FilterGroup>
 
-          <FilterGroup label="Idioma">
+          {type !== "ACCESSORY" && <FilterGroup label="Idioma">
             <FilterPill
               href={buildHref({ language: undefined, page: undefined })}
               active={!language}
@@ -201,10 +209,13 @@ export default async function CatalogPage({
             ))}
           </FilterGroup>
 
+          }
+
           <form action="/cartas" className="space-y-2">
             <p className="text-[11px] font-bold uppercase tracking-widest text-ink-300">
               Precio (CLP)
             </p>
+            {accessoryCategory && <input type="hidden" name="accessory" value={accessoryCategory} />}
             {q && <input type="hidden" name="q" value={q} />}
             {game && <input type="hidden" name="game" value={game} />}
             {type && <input type="hidden" name="type" value={type} />}

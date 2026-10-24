@@ -15,9 +15,9 @@ function load(file, imports) {
 test('catálogo SQL: agrupa por impresión, elige stock/precio real, filtra y pagina sin duplicados', async()=>{
   const db=new PGlite();
   try {
-    await db.exec(`CREATE TYPE "ListingType" AS ENUM ('SINGLE','SEALED','DECK');
+    await db.exec(`CREATE TYPE "ListingType" AS ENUM ('SINGLE','SEALED','DECK','ACCESSORY');
       CREATE TABLE "User"(id text primary key, active boolean, role text);
-      CREATE TABLE "Listing"(id text primary key, game text, title text, "sellerId" text, stock int, "createdAt" timestamp default now(), price int, "offerPrice" int, "externalId" text, "setName" text, "cardNumber" text, type "ListingType", status text default 'ACTIVE', condition text default 'NM', language text default 'EN', description text);
+      CREATE TABLE "Listing"(id text primary key, game text, title text, "sellerId" text, stock int, "createdAt" timestamp default now(), price int, "offerPrice" int, "externalId" text, "setName" text, "cardNumber" text, type "ListingType", status text default 'ACTIVE', condition text default 'NM', language text default 'EN', description text, "accessoryCategory" text);
       CREATE TABLE "DeckCard"("listingId" text,name text);
       INSERT INTO "User" VALUES ('a',true,'SELLER'),('b',true,'SELLER'),('blocked',false,'SELLER'),('buyer',true,'BUYER');`);
     const insert=async(id,external,price,stock=1,seller='a',type='SINGLE',offer=null,set='Set A',title='Carta')=>db.query(`INSERT INTO "Listing"(id,game,title,"sellerId",stock,price,"offerPrice","externalId","setName","cardNumber",type) VALUES($1,'pokemon',$2,$3,$4,$5,$6,$7,$8,'01',$9::"ListingType")`,[id,title,seller,stock,price,offer,external,set,type]);
@@ -29,6 +29,9 @@ test('catálogo SQL: agrupa por impresión, elige stock/precio real, filtra y pa
     await insert('other-set','card-b',900);
     await insert('box','card-a',200,'1','a','SEALED');
     await insert('deck','card-a',300,1,'a','DECK');
+    await insert('sleeves',null,4500,1,'a','ACCESSORY');
+    await insert('box2',null,6000,1,'b','ACCESSORY');
+    await db.exec(`UPDATE "Listing" SET "accessoryCategory"='SLEEVES' WHERE id='sleeves'`);
     await insert('manual-a',null,700,1,'a');
     await insert('manual-b',null,600,2,'b');
     await insert('manual-other',null,500,1,'a','SINGLE',null,'Set B');
@@ -47,6 +50,8 @@ test('catálogo SQL: agrupa por impresión, elige stock/precio real, filtra y pa
     assert.equal(result.listings.find(x=>x.id==='manual-b').market.stock,3);
     assert.deepEqual((await catalogMarket({...base,type:'SEALED'})).listings.map(x=>x.id),['box']);
     assert.deepEqual((await catalogMarket({...base,type:'DECK'})).listings.map(x=>x.id),['deck']);
+    assert.equal((await catalogMarket({...base,type:'ACCESSORY'})).total,2);
+    assert.deepEqual((await catalogMarket({...base,type:'ACCESSORY',accessoryCategory:'SLEEVES'})).listings.map(x=>x.id),['sleeves']);
     assert.deepEqual((await catalogMarket({...base,min:750,max:850})).listings.map(x=>x.id),['b1']);
     assert.equal((await catalogMarket({...base,q:"'; DROP TABLE"})).total,0);
     assert.equal((await catalogMarket({...base,q:'%'})).total,0);

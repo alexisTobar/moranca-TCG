@@ -12,7 +12,7 @@ import { StoreHeader } from "@/components/store/StoreHeader";
 
 export const dynamic = "force-dynamic";
 
-const TYPES = ["SINGLE", "SEALED", "DECK"];
+const TYPES = ["SINGLE", "SEALED", "DECK", "ACCESSORY"];
 
 async function loadStore(slug: string) {
   return safeQuery(

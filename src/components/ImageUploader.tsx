@@ -15,6 +15,7 @@ interface Props {
   shape?: "card" | "wide" | "square";
   /** Permite pegar una URL de internet. Las tiendas solo aceptan imágenes subidas. */
   allowUrl?: boolean;
+  onBusyChange?: (busy: boolean) => void;
 }
 
 const PREVIEW: Record<NonNullable<Props["shape"]>, { box: string; fit: string; size: string }> = {
@@ -23,7 +24,7 @@ const PREVIEW: Record<NonNullable<Props["shape"]>, { box: string; fit: string; s
   square: { box: "h-[120px] w-[120px]", fit: "object-cover", size: "120px" },
 };
 
-export function ImageUploader({ value, onChange, hint, title, shape = "card", allowUrl = true }: Props) {
+export function ImageUploader({ value, onChange, hint, title, shape = "card", allowUrl = true, onBusyChange }: Props) {
   const preview = PREVIEW[shape];
   const inputRef = useRef<HTMLInputElement>(null);
   const [subiendo, setSubiendo] = useState(false);
@@ -34,7 +35,9 @@ export function ImageUploader({ value, onChange, hint, title, shape = "card", al
 
   async function subir(file: File) {
     setError(null);
+    if (subiendo) return;
     setSubiendo(true);
+    onBusyChange?.(true);
     try {
       const body = new FormData();
       body.append("file", file);
@@ -46,6 +49,7 @@ export function ImageUploader({ value, onChange, hint, title, shape = "card", al
       setError((err as Error).message);
     } finally {
       setSubiendo(false);
+      onBusyChange?.(false);
     }
   }
 

@@ -25,6 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     u("/cartas?type=SINGLE", 0.8, "daily"),
     u("/cartas?type=SEALED", 0.8, "daily"),
     u("/cartas?type=DECK", 0.8, "daily"),
+    u("/cartas?type=ACCESSORY", 0.8, "daily"),
     ...GAME_LIST.map((g) => u(`/cartas?game=${g.id}`, 0.8, "daily")),
     u("/tiendas", 0.8, "weekly"),
     u("/explorar", 0.8, "daily"),

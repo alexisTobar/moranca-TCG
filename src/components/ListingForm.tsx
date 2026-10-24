@@ -7,10 +7,12 @@ import { ImageOff } from "lucide-react";
 import { toast } from "sonner";
 import { CardSearch, type CardResult } from "./CardSearch";
 import { ImageUploader } from "./ImageUploader";
+import { ListingPhotos } from "./ListingPhotos";
 import {
   CONDITIONS,
   LANGUAGES,
   LISTING_TYPES,
+  ACCESSORY_CATEGORIES,
   gameName,
   type GameId,
 } from "@/lib/games";
@@ -27,11 +29,13 @@ export interface DeckEntry {
 
 export interface ListingFormValues {
   id?: string;
-  type: "SINGLE" | "SEALED" | "DECK";
+  type: "SINGLE" | "SEALED" | "DECK" | "ACCESSORY";
   status: "DRAFT" | "ACTIVE" | "PAUSED" | "SOLD";
-  game: GameId;
+  game: GameId | "generic";
   title: string;
   imageUrl: string | null;
+  imageUrls: string[];
+  accessoryCategory: string | null;
   price: number;
   offerPrice: number | null;
   stock: number;
@@ -58,7 +62,7 @@ export interface SellerOption {
 
 // One Piece, Magic y Pokémon casi siempre se venden en su edición en inglés;
 // Mitos y Leyendas solo se imprime en español.
-function defaultLanguage(game: GameId): string {
+function defaultLanguage(game: string): string {
   return game === "myl" ? "ES" : "EN";
 }
 
@@ -68,6 +72,8 @@ const EMPTY: ListingFormValues = {
   game: "magic",
   title: "",
   imageUrl: null,
+  imageUrls: [],
+  accessoryCategory: null,
   price: 0,
   offerPrice: null,
   stock: 1,
@@ -106,6 +112,8 @@ export function ListingForm({
   });
   const [reference, setReference] = useState<CardResult | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [primaryUploading, setPrimaryUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isEdit = Boolean(initial?.id);
 
@@ -183,6 +191,7 @@ export function ListingForm({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (uploading || primaryUploading) return;
     setError(null);
 
     if (!values.title.trim()) return setError("Ponle un título a la publicación.");
@@ -198,6 +207,9 @@ export function ListingForm({
     try {
       const payload = {
         ...values,
+        imageUrl: values.imageUrl ?? values.imageUrls[0] ?? null,
+        accessoryCategory: values.type === "ACCESSORY" ? values.accessoryCategory ?? "OTHER" : null,
+        externalId: values.type === "SINGLE" ? values.externalId : null,
         price: Math.round(values.price),
         offerPrice: values.offerPrice != null ? Math.round(values.offerPrice) : null,
         stock: Math.round(values.stock),
@@ -246,16 +258,22 @@ export function ListingForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-5">
+    <form onSubmit={submit}>
+      <fieldset disabled={saving || uploading || primaryUploading} className="min-w-0 space-y-5">
       {/* TIPO */}
       <div className="rounded-2xl card-surface p-5">
         <h3 className="text-sm font-semibold text-carbon">¿Qué vas a vender?</h3>
-        <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
+        <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
           {LISTING_TYPES.map((t) => (
             <button
               key={t.value}
               type="button"
-              onClick={() => set("type", t.value as ListingFormValues["type"])}
+              aria-pressed={values.type === t.value}
+              onClick={() => {
+                if (values.type === t.value) return;
+                setReference(null);
+                setValues(v => ({ ...v, type: t.value as ListingFormValues["type"], game: t.value === "ACCESSORY" ? "generic" : v.game === "generic" ? "magic" : v.game, externalId: null, condition: null, language: t.value === "ACCESSORY" ? null : defaultLanguage(v.game), isFoil: false, setName: null, cardNumber: null, rarity: null, family: null, illustrator: null }));
+              }}
               className={`rounded-xl border p-4 text-left transition ${
                 values.type === t.value
                   ? "border-carbon bg-carbon/5"
@@ -276,9 +294,9 @@ export function ListingForm({
       </div>
 
       {/* BUSCADOR */}
-      {values.type !== "SEALED" && (
+      {(values.type === "SINGLE" || values.type === "DECK") && (
         <CardSearch
-          game={values.game}
+          game={values.game === "generic" ? "magic" : values.game}
           onGameChange={pickGame}
           onPick={pickCard}
           label={
@@ -294,10 +312,11 @@ export function ListingForm({
         />
       )}
 
-      {values.type === "SEALED" && (
+      {(values.type === "SEALED" || values.type === "ACCESSORY") && (
         <div className="rounded-2xl card-surface p-5">
           <h3 className="text-sm font-semibold text-carbon">Juego del producto</h3>
           <div className="mt-3 flex flex-wrap gap-1.5">
+            {values.type === "ACCESSORY" && <button type="button" onClick={() => set("game", "generic")} aria-pressed={values.game === "generic"} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${values.game === "generic" ? "bg-carbon text-paper" : "border-ink-700 text-carbon"}`}>Universal / otros TCG</button>}
             {(["magic", "pokemon", "onepiece", "myl"] as GameId[]).map((g) => (
               <button
                 key={g}
@@ -319,16 +338,32 @@ export function ListingForm({
       {/* IMAGEN — sirve para los tres tipos: si la carta no está en ninguna API,
           o si prefieres mostrar la foto real de tu producto, la subes aquí. */}
       <ImageUploader
+        onBusyChange={setPrimaryUploading}
         value={values.imageUrl}
         onChange={(url) => set("imageUrl", url)}
         hint={
-          values.type === "SEALED"
+          values.type === "ACCESSORY"
+            ? "Sube una foto del accesorio. Puedes agregar más fotos abajo."
+            : values.type === "SEALED"
             ? "Sube la foto de tu producto sellado."
             : values.type === "DECK"
               ? "Portada del mazo. Si no subes nada, se usa la primera carta."
-              : "Se completa sola al elegir una carta del buscador. Si la carta no aparece, sube la foto tú mismo."
+              : "Se completa al elegir una carta. Agrega fotos reales abajo sin perder la imagen del catálogo."
         }
       />
+
+      <ListingPhotos value={values.imageUrls} onChange={urls => set("imageUrls", urls)} onBusyChange={setUploading} />
+
+      {values.type === "ACCESSORY" && (
+        <div className="card-surface rounded-2xl p-5">
+          <label className="block text-sm font-semibold text-carbon">Tipo de accesorio
+            <select className="input mt-2" value={values.accessoryCategory ?? "OTHER"} onChange={e => set("accessoryCategory", e.target.value)}>
+              {ACCESSORY_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+            </select>
+          </label>
+          <p className="mt-2 text-xs text-ink-400">Indica marca, tamaño, capacidad y compatibilidad en la descripción.</p>
+        </div>
+      )}
 
       {/* LISTA DEL MAZO */}
       {values.type === "DECK" && (
@@ -423,7 +458,7 @@ export function ListingForm({
                 onChange={(e) => set("title", e.target.value)}
                 required
                 maxLength={180}
-                placeholder="Ej: Charizard VMAX · Darkness Ablaze"
+                placeholder={values.type === "ACCESSORY" ? "Ej: Protectores Dragon Shield · 100 unidades" : "Ej: Charizard VMAX · Darkness Ablaze"}
                 className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
               />
             </label>
@@ -539,7 +574,7 @@ export function ListingForm({
                   className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 >
                   <option value="">—</option>
-                  {CONDITIONS.map((c) => (
+                  {(values.type === "ACCESSORY" ? [{value:"NEW",label:"Nuevo"},{value:"USED",label:"Usado"}] : CONDITIONS).map((c) => (
                     <option key={c.value} value={c.value}>
                       {c.label}
                     </option>
@@ -547,6 +582,7 @@ export function ListingForm({
                 </select>
               </label>
 
+              {values.type !== "ACCESSORY" && <>
               <label className="block">
                 <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
                   Idioma
@@ -610,9 +646,10 @@ export function ListingForm({
                   className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
                 />
               </label>
+              </>}
             </div>
 
-            <label className="mt-4 flex items-center gap-2.5">
+            {values.type === "SINGLE" && <label className="mt-4 flex items-center gap-2.5">
               <input
                 type="checkbox"
                 checked={values.isFoil}
@@ -620,7 +657,7 @@ export function ListingForm({
                 className="h-4 w-4 accent-[#9d2f38]"
               />
               <span className="text-[13px] text-ink-200">Es foil / holográfica</span>
-            </label>
+            </label>}
 
             <label className="mt-4 block">
               <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
@@ -645,9 +682,9 @@ export function ListingForm({
               Vista previa
             </p>
             <div className="relative aspect-[63/88] overflow-hidden rounded-lg border border-ink-700 bg-ink-950">
-              {values.imageUrl ? (
+              {(values.imageUrl ?? values.imageUrls[0]) ? (
                 <Image
-                  src={values.imageUrl}
+                  src={(values.imageUrl ?? values.imageUrls[0])!}
                   alt=""
                   fill
                   sizes="240px"
@@ -737,7 +774,7 @@ export function ListingForm({
           )}
 
           <button
-            disabled={saving}
+            disabled={saving || uploading}
             className="btn btn-primary btn-lg w-full"
           >
             {saving
@@ -748,6 +785,7 @@ export function ListingForm({
           </button>
         </div>
       </div>
+      </fieldset>
     </form>
   );
 }

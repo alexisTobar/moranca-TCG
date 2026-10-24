@@ -14,7 +14,7 @@ export interface ListingCardData {
   externalId?: string | null;
   market?: {identity: string; sellers: number; stock: number};
 }
-const TYPE_LABEL: Record<string, string> = { SINGLE: "Single", SEALED: "Sellado", DECK: "Mazo" };
+const TYPE_LABEL: Record<string, string> = { SINGLE: "Single", SEALED: "Sellado", DECK: "Mazo", ACCESSORY: "Accesorios" };
 
 export function ListingCard({ listing, href }: { listing: ListingCardData; href?: string }) {
   const hasOffer = listing.offerPrice != null && listing.offerPrice < listing.price;

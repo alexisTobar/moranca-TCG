@@ -274,6 +274,7 @@ export function CardSellers({
                     {o.stock} {o.stock === 1 ? "disponible" : "disponibles"}
                   </p>
                 </div>
+                <Link href={`/producto/${o.slug}`} className="text-xs font-semibold text-brand-600 underline underline-offset-4">Ver publicación y fotos</Link>
                 <AddButton row={o} base={base} />
               </div>
             </li>

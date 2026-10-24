@@ -21,7 +21,7 @@ interface Suggestion {
   isFoil: boolean;
 }
 
-const TYPE_LABEL: Record<string, string> = { SINGLE: "Single", SEALED: "Sellado", DECK: "Mazo" };
+const TYPE_LABEL: Record<string, string> = { SINGLE: "Single", SEALED: "Sellado", DECK: "Mazo", ACCESSORY: "Accesorios" };
 
 /**
  * Buscador global del sitio. Mientras se escribe muestra, debajo del campo,
@@ -31,7 +31,7 @@ const TYPE_LABEL: Record<string, string> = { SINGLE: "Single", SEALED: "Sellado"
 export function SearchBox({ className = "" }: { className?: string }) {
   const router = useRouter();
   const params = useSearchParams();
-  const type = params.get("type") === "SEALED" ? "SEALED" : params.get("type") === "DECK" ? "DECK" : "SINGLE";
+  const type = params.get("type") === "ACCESSORY" ? "ACCESSORY" : params.get("type") === "SEALED" ? "SEALED" : params.get("type") === "DECK" ? "DECK" : "SINGLE";
   const listId = useId();
   const wrapRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);

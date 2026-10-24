@@ -14,6 +14,7 @@ const NAV = [
   { href: "/cartas", label: "Cartas" },
   { href: "/cartas?type=SEALED", label: "Sellados" },
   { href: "/cartas?type=DECK", label: "Mazos" },
+  { href: "/cartas?type=ACCESSORY", label: "Accesorios" },
   { href: "/explorar", label: "Tiendas por región" },
   { href: "/tiendas", label: "Abre tu tienda" },
   { href: "/noticias", label: "Noticias" },

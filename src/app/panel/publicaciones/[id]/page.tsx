@@ -53,6 +53,8 @@ export default async function EditListingPage({
     game: listing.game as GameId,
     title: listing.title,
     imageUrl: listing.imageUrl,
+    imageUrls: listing.imageUrls,
+    accessoryCategory: listing.accessoryCategory,
     price: listing.price,
     stock: listing.stock,
     condition: listing.condition,

@@ -458,3 +458,13 @@ src/components/cart/      Carrito (contexto, drawer, checkout, animación al agr
 | `npm run setup`   | Crea tablas + carga admin y ejemplos        |
 | `npm run db:seed` | Solo recarga el admin                       |
 | `npm run db:studio` | Explorador visual de la base de datos     |
+
+## Accesorios y fotos de publicaciones
+
+El tipo `ACCESSORY` comparte publicación, edición, stock, ofertas, carrito y compra con los demás productos. Incluye protectores, portamazos, tapetes, carpetas, almacenamiento, toploaders, dados y otros accesorios. Se puede elegir un juego o «Universal / otros TCG» y estado nuevo/usado. Catálogo: `/cartas?type=ACCESSORY`; filtro de categoría: `accessory=SLEEVES`, `DECK_BOX`, `PLAYMAT`, `BINDER`, `STORAGE`, `TOPLOADER`, `DICE` u `OTHER`.
+
+Todas las publicaciones admiten una imagen principal y hasta 10 fotos adicionales (JPG, PNG, WEBP o GIF; 4 MB por foto). Las fotos adicionales se guardan en `Listing.imageUrls` y se muestran en la galería del producto. Elegir una carta desde la API conserva su imagen e identidad mientras se agregan fotos reales. Desde las ofertas de una carta, «Ver publicación y fotos» abre las fotos de ese vendedor.
+
+Antes de ejecutar esta versión contra una base existente, configurar `DATABASE_URL` y `DIRECT_URL` reales y ejecutar `npm run db:push`. Esto agrega `ACCESSORY` al enum y los campos `imageUrls` (vacío para publicaciones anteriores) y `accessoryCategory`. El build habitual del proyecto también ejecuta esta sincronización.
+
+Validación sin base remota: `npm run typecheck` y `npm run test:regression` (incluye persistencia de fotos con adaptadores, permisos, selección de tipo y filtros SQL con PostgreSQL embebido).

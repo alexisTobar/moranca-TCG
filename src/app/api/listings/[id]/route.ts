@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 async function loadOwned(id: string, userId: string, isAdmin: boolean) {
   const listing = await prisma.listing.findUnique({
     where: { id },
-    select: { id: true, sellerId: true, price: true, offerPrice: true },
+    select: { id: true, sellerId: true, price: true, offerPrice: true, type: true, game: true },
   });
   if (!listing) return { error: "Publicación no encontrada", status: 404 as const };
   if (!isAdmin && listing.sellerId !== userId) {
@@ -39,6 +39,10 @@ export async function PATCH(
       );
     }
     const data = parsed.data;
+
+    if ((data.game ?? owned.listing.game) === "generic" && (data.type ?? owned.listing.type) !== "ACCESSORY") {
+      return NextResponse.json({ error: "Selecciona un juego para cartas, mazos y sellados." }, {status:400});
+    }
 
     const nextPrice = data.price ?? owned.listing.price;
     const nextOfferPrice = data.offerPrice !== undefined ? data.offerPrice : owned.listing.offerPrice;
@@ -76,7 +80,9 @@ export async function PATCH(
           status: data.status,
           game: data.game,
           title: data.title,
-          imageUrl: data.imageUrl,
+          imageUrl: data.imageUrl === null ? data.imageUrls?.[0] ?? null : data.imageUrl,
+          imageUrls: data.imageUrls,
+          accessoryCategory: data.type === "ACCESSORY" ? (data.accessoryCategory ?? "OTHER") : data.type ? null : data.accessoryCategory,
           price: data.price,
           offerPrice: data.offerPrice,
           stock: data.stock,

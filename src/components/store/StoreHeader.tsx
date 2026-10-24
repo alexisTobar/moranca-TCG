@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Megaphone, Search } from "lucide-react";
 import { GAMES, type GameId } from "@/lib/games";
 
-const TYPE_LABEL: Record<string, string> = { SINGLE: "Singles", SEALED: "Sellados", DECK: "Mazos" };
+const TYPE_LABEL: Record<string, string> = { SINGLE: "Singles", SEALED: "Sellados", DECK: "Mazos", ACCESSORY: "Accesorios" };
 
 /**
  * Menú propio de una tienda premium. Va debajo del menú de Win Condition (que se mantiene arriba para
