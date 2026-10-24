@@ -59,9 +59,21 @@ model NewsItem {
   sourceName  String
   publishedAt DateTime
   fetchedAt   DateTime     @default(now())
+  originalTitle String?
+  country     String?
+  kind        String       @default("NEWS")
+  eventAt     DateTime?
 
   @@index([category, publishedAt])
   @@index([publishedAt])
+  @@index([country, category, publishedAt])
+}
+
+model NewsSyncState {
+  id          String    @id
+  completedAt DateTime?
+  leaseUntil  DateTime?
+  leaseToken  String?
 }
 
 model User {

@@ -79,7 +79,7 @@ export function CartPageView() {
                   {item.title}
                 </Link>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  <GameChip game={item.game} />
+                  {item.type !== "ACCESSORY" && <GameChip game={item.game} />}
                   <span className="text-[11px] text-ink-400">{item.sellerName}</span>
                 </div>
 

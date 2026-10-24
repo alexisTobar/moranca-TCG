@@ -51,6 +51,7 @@ test('catálogo SQL: agrupa por impresión, elige stock/precio real, filtra y pa
     assert.deepEqual((await catalogMarket({...base,type:'SEALED'})).listings.map(x=>x.id),['box']);
     assert.deepEqual((await catalogMarket({...base,type:'DECK'})).listings.map(x=>x.id),['deck']);
     assert.equal((await catalogMarket({...base,type:'ACCESSORY'})).total,2);
+    assert.equal((await catalogMarket({...base,type:'ACCESSORY',game:'magic',language:'JP'})).total,2);
     assert.deepEqual((await catalogMarket({...base,type:'ACCESSORY',accessoryCategory:'SLEEVES'})).listings.map(x=>x.id),['sleeves']);
     assert.deepEqual((await catalogMarket({...base,min:750,max:850})).listings.map(x=>x.id),['b1']);
     assert.equal((await catalogMarket({...base,q:"'; DROP TABLE"})).total,0);

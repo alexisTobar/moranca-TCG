@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
@@ -38,7 +39,9 @@ export async function PATCH(
         { status: 400 }
       );
     }
-    const data = parsed.data;
+    const effectiveType = parsed.data.type ?? owned.listing.type;
+    if (effectiveType === "ACCESSORY" && (parsed.data.description?.length ?? 0) > 500) return NextResponse.json({error:"La descripción corta admite hasta 500 caracteres."},{status:400});
+    const data = effectiveType === "ACCESSORY" ? {...parsed.data,game:"generic" as const,language:null,externalId:null,isFoil:false,setName:null,cardNumber:null,rarity:null,family:null,illustrator:null} : parsed.data;
 
     if ((data.game ?? owned.listing.game) === "generic" && (data.type ?? owned.listing.type) !== "ACCESSORY") {
       return NextResponse.json({ error: "Selecciona un juego para cartas, mazos y sellados." }, {status:400});
@@ -111,6 +114,10 @@ export async function PATCH(
       });
     });
 
+    revalidatePath("/cartas");
+    revalidatePath("/");
+    revalidatePath("/tienda/[slug]", "page");
+    revalidatePath("/producto/[slug]", "page");
     return NextResponse.json({ ok: true, listing: updated });
   } catch (error) {
     if (error instanceof AuthError) {

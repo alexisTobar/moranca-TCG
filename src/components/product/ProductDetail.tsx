@@ -203,7 +203,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
           <ProductGallery title={listing.title} imageUrl={listing.imageUrl} imageUrls={listing.imageUrls} isFoil={listing.isFoil} />
 
           <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-            <Spec label="Juego" value={gameName(listing.game)} />
+            {listing.type !== "ACCESSORY" && <Spec label="Juego" value={gameName(listing.game)} />}
             <Spec label="Tipo" value={TYPE_LABEL[listing.type] ?? listing.type} />
             {listing.type === "ACCESSORY" && <SpecWide label="Accesorio" value={ACCESSORY_CATEGORIES.find(c => c.value === listing.accessoryCategory)?.label ?? "Otros accesorios"} />}
             {listing.setName && (
@@ -217,7 +217,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
               <SpecWide label="Ilustrador" value={listing.illustrator} />
             )}
             {conditionLabel && <Spec label="Estado" value={conditionLabel} />}
-            {languageLabel && <Spec label="Idioma" value={languageLabel} />}
+            {listing.type !== "ACCESSORY" && languageLabel && <Spec label="Idioma" value={languageLabel} />}
             {listing.type === "DECK" && (
               <Spec label="Cartas" value={`${totalCards} unidades`} />
             )}
@@ -227,7 +227,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
         {/* DETALLE */}
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <GameChip game={listing.game} />
+            {listing.type !== "ACCESSORY" && <GameChip game={listing.game} />}
             <span className="rounded-full border border-ink-700 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-ink-300">
               {TYPE_LABEL[listing.type] ?? listing.type}
             </span>

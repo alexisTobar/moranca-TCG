@@ -39,12 +39,12 @@ export async function SiteHeader() {
 
       {/* Solo esta barra queda fija al hacer scroll; lo demás se desplaza */}
       <header className="market-navigation sticky top-0 z-50 border-b border-white/10 bg-carbon">
-        <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-4 px-4">
+        <div className="mx-auto flex h-[80px] max-w-7xl items-center gap-3 px-4">
           <Link href="/" aria-label="Win Condition TCG - inicio" className="shrink-0">
-            <Logo height={54} tone="dark" />
+            <Logo height={64} tone="dark" />
           </Link>
 
-          <div className="ml-2 hidden flex-1 lg:block">
+          <div className="ml-2 hidden min-w-0 flex-1 lg:block">
             <Suspense fallback={null}>
               <SearchBox />
             </Suspense>

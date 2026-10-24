@@ -235,7 +235,7 @@ export function SearchBox({ className = "" }: { className?: string }) {
                           {r.title}
                         </span>
                         <span className="mt-0.5 block truncate text-[11px] text-ink-400">
-                          {game} · {TYPE_LABEL[r.type] ?? r.type}
+                          {r.type === "ACCESSORY" ? "Accesorios" : `${game} · ${TYPE_LABEL[r.type] ?? r.type}`}
                           {r.setName ? ` · ${r.setName}` : ""}
                           {r.condition ? ` · ${r.condition}` : ""}
                           {r.isFoil ? " · Foil" : ""}

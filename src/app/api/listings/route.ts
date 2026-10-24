@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    const data = parsed.data;
+    const data = parsed.data.type === "ACCESSORY" ? { ...parsed.data, game:"generic" as const, language:null, externalId:null, isFoil:false, setName:null, cardNumber:null, rarity:null, family:null, illustrator:null } : parsed.data;
 
     // Solo el admin puede publicar en nombre de otro vendedor.
     const sellerId =
@@ -81,6 +82,10 @@ export async function POST(req: Request) {
       select: { id: true, slug: true },
     });
 
+    revalidatePath("/cartas");
+    revalidatePath("/");
+    revalidatePath("/tienda/[slug]", "page");
+    revalidatePath("/producto/[slug]", "page");
     return NextResponse.json({ ok: true, listing }, { status: 201 });
   } catch (error) {
     if (error instanceof AuthError) {

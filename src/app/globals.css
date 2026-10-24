@@ -787,14 +787,14 @@ img,svg { max-width:100%; }
 @media(max-width:767px) { .editorial-heading { grid-template-columns:1fr; gap:18px; } .listing-copy h3 { font-size:16px; } .listing-price strong {font-size:17px;} }
 @media(max-width:359px) { .catalog-results { column-gap:12px; } .listing-specs {gap:3px;} }
 /* Light marketplace: open composition, logo carmine, restrained gold. */
-.market-navigation {background:#fff;border-color:#e3e5e9;color:#242732;}
+.market-navigation {background:#e8ecf2;border-color:#cbd2dd;color:#242732;}
 .market-navigation :is(.nav-link,.icon-btn,.btn-glass),.market-games a {color:#434956;}
 .market-navigation .nav-link:hover,.market-games a:hover {color:#a01c36;background:#f9eef1;}
 .market-games {background:#f3f4f6;border-bottom:1px solid #e3e5e9;}
 :is(.market-navigation,.market-games) form[role=search] > svg {color:#626977;}
 :is(.market-navigation,.market-games) input[role=combobox] {background:#f4f5f7;color:#242732;border:1px solid #d8dce3;backdrop-filter:none;}
 :is(.market-navigation,.market-games) input::placeholder {color:#626977;}
-.market-footer {background:#eef0f4;color:#252a34;border-top:1px solid #d8dce3;}
+.market-footer {background:#e1e6ed;color:#252a34;border-top:1px solid #cbd2dd;}
 .market-footer [class*='text-white'] {color:#596171;}
 .market-footer [class*='text-gold'] {color:#8e1931;}
 .market-footer [class*='border-white'] {border-color:#d8dce3;}
@@ -878,3 +878,41 @@ img,svg { max-width:100%; }
 .light-promo .btn-glass {background:#fff;color:#a01c36;border-color:#d8dce3;}
 @media(max-width:767px) {.explorer-results{order:-1}.explorer-toolbar > label:first-child{grid-column:1/-1}.explorer-toolbar{grid-template-columns:1fr 1fr}.explorer-toolbar > label:nth-child(2){grid-column:1/-1}.home-copy h1{font-size:clamp(34px,9vw,44px)}}
 :is(.market-navigation,.market-games) button[aria-label='Borrar búsqueda']{color:#626977;background:#e6e8ed;}
+
+/* More legible brand artwork while preserving the original transparent assets. */
+.brand-logo-readable {filter:brightness(.70) saturate(1.08);object-fit:contain;flex-shrink:0;}
+.market-navigation .nav-link {white-space:nowrap;padding-inline:clamp(6px,.65vw,12px);}
+.market-navigation nav {flex-shrink:0;}
+.market-navigation form[role=search] {min-width:0;}
+.market-navigation input[role=combobox] {min-width:0;}
+.store-opening-hero {isolation:isolate;}
+.store-opening-hero h1 {font-size:clamp(32px,5vw,60px);overflow-wrap:break-word;text-wrap:balance;}
+.store-opening-actions .btn {max-width:100%;white-space:normal;}
+@media(max-width:639px) {
+  .store-opening-hero > .relative {padding-top:40px;padding-bottom:40px;}
+  .store-opening-actions {flex-direction:column;align-items:stretch;}
+  .store-opening-actions .btn {width:100%;font-size:14px;padding-inline:16px;}
+}
+@media(min-width:1280px) and (max-width:1499px) {
+  .market-navigation > div {gap:8px;}
+  .market-navigation .nav-link {font-size:12px;padding-inline:6px;}
+  .market-navigation .btn {padding-inline:10px;}
+}
+
+.chile-agenda {padding:24px;background:#edf1f6;border-radius:12px;}
+.agenda-link {display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px 0;color:#272c36;}
+.agenda-link strong {font-size:14px;color:#8e1931;text-decoration:underline;text-underline-offset:4px;}
+.agenda-link span {font-size:12px;line-height:1.6;color:#505968;}
+.news-image-fallback {display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;width:100%;height:100%;min-height:150px;background:#e4e9f0;color:#3f4a5a;padding:24px;text-align:center;}
+.news-image-fallback span {font-weight:750;font-size:20px;}
+.news-image-fallback small {font-size:12px;}
+.news-image-onepiece {background:#e0eaf1;color:#24516c;}
+.news-image-pokemon {background:#f4e7bb;color:#684e12;}
+.news-feature {background:#fff;border:1px solid #d8dce3;border-radius:12px;overflow:hidden;}
+.news-feature-link {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;}
+.news-feature-art {position:relative;aspect-ratio:16/9;min-width:0;align-self:center;}
+.news-feature-copy {padding:clamp(20px,3vw,40px);min-width:0;overflow-wrap:anywhere;}
+.news-feature-controls {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px;border-top:1px solid #e0e4eb;}
+.news-feature-controls .icon-btn {width:44px;height:44px;color:#434956;background:#f2f4f7;}
+.news-feature-controls .icon-btn:hover {background:#faedf0;color:#8e1931;}
+@media(max-width:767px) {.news-feature-link{grid-template-columns:1fr}.chile-agenda{padding:20px}.news-feature-copy{padding:20px}.news-feature-art{width:100%;}}

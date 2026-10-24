@@ -11,6 +11,7 @@ export interface ListingCardData {
   condition: string | null; language: string | null; isFoil: boolean;
   stock: number; setName: string | null; sellerId: string;
   seller: { name: string; slug: string }; _count?: { deckCards: number };
+  description?: string | null;
   externalId?: string | null;
   market?: {identity: string; sellers: number; stock: number};
 }
@@ -26,10 +27,11 @@ export function ListingCard({ listing, href }: { listing: ListingCardData; href?
       {listing.stock <= 0 && <span className="listing-sold">Vendido</span>}
     </Link>
     <div className="listing-copy">
-      <p className="listing-game">{isGameId(listing.game) ? GAMES[listing.game].short : listing.game} · {TYPE_LABEL[listing.type] || listing.type}{listing.isFoil ? " · Foil" : ""}</p>
+      <p className="listing-game">{listing.type === "ACCESSORY" ? "Accesorios" : isGameId(listing.game) ? GAMES[listing.game].short : listing.game}{listing.type !== "ACCESSORY" && ` · ${TYPE_LABEL[listing.type] || listing.type}`}{listing.isFoil ? " · Foil" : ""}</p>
       <h3><Link href={target}>{listing.title}</Link></h3>
-      <p className="listing-set" title={listing.setName || undefined}>{listing.setName || "Edición no informada"}</p>
-      <dl className="listing-specs"><div><dt>Estado</dt><dd>{listing.condition || "—"}</dd></div><div><dt>Idioma</dt><dd>{listing.language || "—"}</dd></div><div><dt>Stock</dt><dd>{Math.max(0, listing.market?.stock ?? listing.stock)}</dd></div></dl>
+      {listing.type !== "ACCESSORY" && <p className="listing-set" title={listing.setName || undefined}>{listing.setName || "Edición no informada"}</p>}
+      {listing.type === "ACCESSORY" && listing.description && <p className="listing-set line-clamp-2">{listing.description}</p>}
+      <dl className="listing-specs" style={listing.type === "ACCESSORY" ? {gridTemplateColumns:"repeat(2,minmax(0,1fr))"} : undefined}><div><dt>Estado</dt><dd>{listing.condition === "NEW" ? "Nuevo" : listing.condition === "USED" ? "Usado" : listing.condition || "—"}</dd></div>{listing.type !== "ACCESSORY" && <div><dt>Idioma</dt><dd>{listing.language || "—"}</dd></div>}<div><dt>Stock</dt><dd>{Math.max(0, listing.market?.stock ?? listing.stock)}</dd></div></dl>
       <p className="listing-price">{listing.market ? <span>Desde</span> : hasOffer && <del>{clp(listing.price)}</del>}<strong>{clp(price)}</strong></p>
       <p className="listing-seller">{listing.market ? `${listing.market.sellers} vendedores · ${listing.market.stock} disponibles` : listing.seller.name}</p>
     </div>

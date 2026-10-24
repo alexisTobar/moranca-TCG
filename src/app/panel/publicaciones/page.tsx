@@ -191,7 +191,7 @@ export default async function ListingsPage({
                   {l.title}
                 </p>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <GameChip game={l.game} />
+                  {l.type === "ACCESSORY" ? <span className="text-xs font-semibold text-brand-600">Accesorios</span> : <GameChip game={l.game} />}
                   <span
                     className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                       STATUS_STYLE[l.status] ?? ""

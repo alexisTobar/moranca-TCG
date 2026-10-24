@@ -99,7 +99,7 @@ export default async function StorefrontPage({
   const one = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
   const q = one("q").trim();
   const gameParam = one("game");
-  const game = isGameId(gameParam) ? gameParam : "";
+  const game = one("type") !== "ACCESSORY" && isGameId(gameParam) ? gameParam : "";
   const type = TYPES.some((t) => t.value === one("type")) ? one("type") : "";
   const sort = SORTS[one("sort")] ? one("sort") : "recientes";
   const page = Math.max(1, Number(one("page")) || 1);
@@ -374,7 +374,7 @@ export default async function StorefrontPage({
             {TYPES.map((t) => (
               <Link
                 key={t.value}
-                href={href({ type: type === t.value ? undefined : t.value, page: undefined })}
+                href={href({ type: type === t.value ? undefined : t.value, ...(t.value === "ACCESSORY" ? {game:undefined} : {}), page: undefined })}
                 data-active={type === t.value}
                 className="pill shrink-0"
               >

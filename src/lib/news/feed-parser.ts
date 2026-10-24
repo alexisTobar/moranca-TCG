@@ -107,7 +107,8 @@ export function parseFeed(xml: string): FeedItem[] {
     const content = extractTag(block, "content");
 
     if (!title || !link) continue;
-    const publishedAt = dateText ? new Date(dateText) : new Date();
+    if (!dateText || !/^https?:\/\//i.test(link)) continue;
+    const publishedAt = new Date(dateText);
     if (Number.isNaN(publishedAt.getTime())) continue;
 
     items.push({
@@ -117,7 +118,7 @@ export function parseFeed(xml: string): FeedItem[] {
       // El teaser corto (description/summary) suele venir más limpio que el
       // content:encoded completo, que trae widgets/bloques de "relacionados".
       excerptSource: description || summary || content || contentEncoded || "",
-      imageUrl: extractContentImage(contentEncoded, description, summary),
+      imageUrl: extractContentImage(contentEncoded, description, summary) ?? /<(?:media:content|media:thumbnail|enclosure)\b[^>]*url=["\']([^"\']+)["\']/i.exec(block)?.[1] ?? null,
     });
   }
   return items;

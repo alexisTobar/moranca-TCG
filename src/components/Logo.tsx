@@ -34,6 +34,7 @@ export function Logo({
       alt={alt}
       width={Math.round(h * ratio)}
       height={h}
+      className={tone === "dark" ? "brand-logo-readable" : undefined}
       style={{ height: h, width: "auto" }}
       priority
     />

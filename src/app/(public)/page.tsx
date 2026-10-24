@@ -1,3 +1,4 @@
+import { homeNews } from "@/lib/news/query";
 import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -220,13 +221,14 @@ export default async function HomePage() {
         }),
       [] as Array<{ game: string; _count: { _all: number } }>
     ),
-    fetchHomeNews(),
+    safeQuery(() => homeNews(), []),
     getSiteSettings(),
   ]);
 
-  const newsSlides: NewsSlide[] = shuffle(news).map((n) => ({
+  const newsSlides: NewsSlide[] = news.map((n) => ({
     ...n,
     publishedAt: n.publishedAt.toISOString(),
+    eventAt: n.eventAt?.toISOString() ?? null,
   }));
 
   const countByGame = new Map(counts.map((c) => [c.game, c._count._all]));
@@ -417,7 +419,7 @@ export default async function HomePage() {
           <SectionTitle
             eyebrow="Actualidad"
             title="Noticias y torneos"
-            subtitle="Lo último de Magic, Pokémon y One Piece"
+            subtitle="Chile primero: torneos, comunidad y lanzamientos de Pokémon y One Piece, en español"
             href="/noticias"
           />
           <div className="mt-8">
@@ -658,66 +660,4 @@ function GameShowcase({
       </div>
     </section>
   );
-}
-
-type HomeNewsItem = {
-  id: string;
-  category: string;
-  title: string;
-  excerpt: string;
-  imageUrl: string | null;
-  sourceName: string;
-  publishedAt: Date;
-};
-
-const HOME_NEWS_SELECT = {
-  id: true,
-  category: true,
-  title: true,
-  excerpt: true,
-  imageUrl: true,
-  sourceName: true,
-  publishedAt: true,
-} as const;
-
-/**
- * One Piece y Pokémon son las prioridades de la tienda, pero Magic publica
- * mucho más seguido (MTGGoldfish es casi diario) y si se ordenara todo por
- * fecha terminaría copando el slider. Por eso se arma el pool por categoría
- * con cupos fijos en vez de un solo `findMany` ordenado por fecha.
- */
-async function fetchHomeNews(): Promise<HomeNewsItem[]> {
-  const quotas: Array<{ category: NewsCategory; take: number }> = [
-    { category: "ONEPIECE", take: 4 },
-    { category: "POKEMON", take: 4 },
-    { category: "MAGIC", take: 2 },
-    { category: "MYL", take: 2 },
-    { category: "GENERAL", take: 1 },
-  ];
-
-  const groups = await Promise.all(
-    quotas.map(({ category, take }) =>
-      safeQuery(
-        () =>
-          prisma.newsItem.findMany({
-            where: { category },
-            orderBy: { publishedAt: "desc" },
-            take,
-            select: HOME_NEWS_SELECT,
-          }),
-        [] as HomeNewsItem[]
-      )
-    )
-  );
-
-  return groups.flat();
-}
-
-function shuffle<T>(items: T[]): T[] {
-  const arr = [...items];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
 }

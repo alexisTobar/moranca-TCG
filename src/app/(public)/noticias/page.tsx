@@ -1,5 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
+import { NewsImage } from "@/components/news/NewsImage";
+import { newsPage, type NewsRow } from "@/lib/news/query";
+import { CHILE_AGENDA } from "@/lib/news/sources";
+import { catalogPage } from "@/lib/catalog-query";
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import { Newspaper } from "lucide-react";
@@ -10,22 +13,12 @@ import { newsCategoryLabel, NEWS_CATEGORIES } from "@/lib/news/category";
 
 export const metadata: Metadata = {
   title: "Noticias",
-  description: "Noticias, anuncios y torneos de Magic, Pokémon, One Piece y Mitos y Leyendas.",
+  description: "Torneos y Cardfest en Chile, noticias internacionales y lanzamientos de Pokémon y One Piece en español.",
 };
 
 export const revalidate = 300;
 
 const PAGE_SIZE = 18;
-
-type NewsRow = {
-  id: string;
-  category: string;
-  title: string;
-  excerpt: string;
-  imageUrl: string | null;
-  sourceName: string;
-  publishedAt: Date;
-};
 
 export default async function NoticiasPage({
   searchParams,
@@ -33,42 +26,21 @@ export default async function NoticiasPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = await searchParams;
-  const category = typeof sp.category === "string" ? sp.category : undefined;
-  const page = Math.max(1, Number(typeof sp.page === "string" ? sp.page : "1") || 1);
-
-  const where: Prisma.NewsItemWhereInput =
-    category && (NEWS_CATEGORIES as readonly string[]).includes(category)
-      ? { category: category as Prisma.NewsItemWhereInput["category"] }
-      : {};
-
-  const [items, total] = await Promise.all([
-    safeQuery(
-      () =>
-        prisma.newsItem.findMany({
-          where,
-          orderBy: { publishedAt: "desc" },
-          skip: (page - 1) * PAGE_SIZE,
-          take: PAGE_SIZE,
-          select: {
-            id: true,
-            category: true,
-            title: true,
-            excerpt: true,
-            imageUrl: true,
-            sourceName: true,
-            publishedAt: true,
-          },
-        }),
-      [] as NewsRow[]
-    ),
-    safeQuery(() => prisma.newsItem.count({ where }), 0),
-  ]);
-
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rawCategory = typeof sp.category === "string" ? sp.category : undefined;
+  const category = NEWS_CATEGORIES.find(c => c === rawCategory);
+  const scope = sp.scope === "chile" ? "chile" : sp.scope === "international" ? "international" : undefined;
+  const kind = sp.kind === "TOURNAMENT" || sp.kind === "RELEASE" ? sp.kind : undefined;
+  const requestedPage = catalogPage(typeof sp.page === "string" ? sp.page : undefined);
+  let unavailable = false;
+  const result = await newsPage({category, scope, kind, page:requestedPage, take:PAGE_SIZE}).catch(() => {
+    unavailable = true;
+    return {items:[] as NewsRow[],total:0,pages:1,page:1};
+  });
+  const {items,pages,page} = result;
 
   const buildHref = (patch: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
-    const current: Record<string, string | undefined> = { category, ...patch };
+    const current: Record<string, string | undefined> = { category, scope, kind, ...patch };
     for (const [k, v] of Object.entries(current)) if (v) params.set(k, v);
     const s = params.toString();
     return s ? `/noticias?${s}` : "/noticias";
@@ -79,11 +51,22 @@ export default async function NoticiasPage({
       <header>
         <h1 className="font-display text-3xl font-bold text-carbon">Noticias y torneos</h1>
         <p className="mt-1 text-[13px] text-ink-400">
-          Curado de las fuentes más seguidas de cada juego — siempre con link a la nota
-          original.
+          Chile primero. Torneos, comunidad y lanzamientos de Pokémon y One Piece en español. Actualización cada 3 días.
         </p>
       </header>
 
+      <section className="chile-agenda mt-6" aria-labelledby="chile-agenda-title">
+        <h2 id="chile-agenda-title" className="font-display text-lg font-bold">Agenda de Chile y organizadores</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {CHILE_AGENDA.map(source => <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" className="agenda-link"><strong>{source.name}</strong><span>{source.text}</span></a>)}
+        </div>
+        <p className="mt-3 text-xs text-ink-400">Confirma fechas, sedes y cupos con el organizador. Cardfest publica sus novedades en su canal oficial.</p>
+      </section>
+      <nav className="mt-7 flex flex-wrap gap-2" aria-label="Cobertura de noticias">
+        {[{label:"Destacadas",value:undefined},{label:"Chile",value:"chile"},{label:"Internacionales",value:"international"}].map(option => <Link key={option.label} href={buildHref({scope:option.value,page:undefined})} className="pill" data-active={scope === option.value}>{option.label}</Link>)}
+        <Link href={buildHref({kind:kind === "TOURNAMENT" ? undefined : "TOURNAMENT",page:undefined})} className="pill" data-active={kind === "TOURNAMENT"}>Torneos y eventos</Link>
+        <Link href={buildHref({kind:kind === "RELEASE" ? undefined : "RELEASE",page:undefined})} className="pill" data-active={kind === "RELEASE"}>Lanzamientos</Link>
+      </nav>
       <div className="mt-5 flex flex-wrap gap-1.5">
         <Link
           href={buildHref({ category: undefined, page: undefined })}
@@ -110,7 +93,7 @@ export default async function NoticiasPage({
         ))}
       </div>
 
-      {items.length === 0 ? (
+      {unavailable ? <p role="status" className="mt-8 rounded-xl border border-ink-700 p-6 text-sm text-ink-400">No pudimos cargar las noticias. Puedes consultar la agenda de organizadores y volver a intentarlo más tarde.</p> : items.length === 0 ? (
         <div className="mt-10 rounded-2xl border border-dashed border-ink-700 p-16 text-center">
           <Newspaper className="mx-auto h-10 w-10 text-ink-700" strokeWidth={1.5} />
           <p className="mt-3 text-sm text-ink-400">Todavía no hay noticias en esta categoría.</p>
@@ -123,23 +106,10 @@ export default async function NoticiasPage({
               href={`/noticias/${n.id}`}
               className="group overflow-hidden rounded-2xl card-surface transition hover:-translate-y-1 hover:border-carbon"
             >
-              <div className="relative h-40 overflow-hidden bg-ink-900">
-                {n.imageUrl ? (
-                  <Image
-                    src={n.imageUrl}
-                    alt={n.title}
-                    fill
-                    sizes="(max-width:640px) 100vw, 360px"
-                    className="object-cover transition duration-300 group-hover:scale-105"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-ink-700">
-                    <Newspaper className="h-8 w-8" strokeWidth={1.5} />
-                  </div>
-                )}
+              <div className="relative aspect-video overflow-hidden bg-ink-900">
+                <NewsImage src={n.imageUrl} title={n.title} category={n.category} kind={n.kind} />
                 <span className="absolute left-2.5 top-2.5 rounded-full bg-carbon px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-paper">
-                  {newsCategoryLabel(n.category)}
+                  {n.country === "CL" ? "Chile · " : ""}{newsCategoryLabel(n.category)}
                 </span>
               </div>
               <div className="p-4">
@@ -150,7 +120,7 @@ export default async function NoticiasPage({
                   {n.excerpt}
                 </p>
                 <p className="mt-2 text-[11px] text-ink-400">
-                  {n.sourceName} · {timeAgo(n.publishedAt)}
+                  {n.sourceName} · {n.eventAt ? `Evento: ${n.eventAt.toLocaleDateString("es-CL",{timeZone:"America/Santiago"})}` : timeAgo(n.publishedAt)}
                 </p>
               </div>
             </Link>

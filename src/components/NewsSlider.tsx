@@ -1,119 +1,55 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Newspaper } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 import { newsCategoryLabel } from "@/lib/news/category";
+import { NewsImage } from "./news/NewsImage";
 
 export interface NewsSlide {
-  id: string;
-  category: string;
-  title: string;
-  excerpt: string;
-  imageUrl: string | null;
-  sourceName: string;
-  publishedAt: string;
+  id: string; category: string; title: string; excerpt: string; imageUrl: string | null;
+  sourceName: string; publishedAt: string; country?: string | null; kind?: string; eventAt?: string | null;
 }
-
-const AUTOPLAY_MS = 6000;
 
 export function NewsSlider({ items }: { items: NewsSlide[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
+  const [hovered, setHovered] = useState(false);
+  const [reduced, setReduced] = useState(true);
   useEffect(() => {
-    if (paused || items.length <= 1) return;
-    timerRef.current = setInterval(() => {
-      setIndex((i) => (i + 1) % items.length);
-    }, AUTOPLAY_MS);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [paused, items.length]);
-
-  if (items.length === 0) return null;
-  const current = items[index];
-
-  return (
-    <div
-      className="group relative overflow-hidden rounded-2xl border border-ink-700 tcg-card-shadow"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      <Link
-        href={`/noticias/${current.id}`}
-        className="relative block h-[280px] w-full sm:h-[320px]"
-      >
-        {current.imageUrl ? (
-          <Image
-            src={current.imageUrl}
-            alt={current.title}
-            fill
-            sizes="(max-width:768px) 100vw, 1000px"
-            className="object-cover"
-            unoptimized
-            priority
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-ink-900">
-            <Newspaper className="h-12 w-12 text-ink-700" strokeWidth={1.5} />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-
-        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
-          <span className="inline-block rounded-full bg-carbon px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-paper">
-            {newsCategoryLabel(current.category)}
-          </span>
-          <h3 className="mt-2 line-clamp-2 font-display text-lg font-bold text-white sm:text-2xl">
-            {current.title}
-          </h3>
-          <p className="mt-1.5 line-clamp-2 max-w-2xl text-[12px] leading-relaxed text-white/80 sm:text-[13px]">
-            {current.excerpt}
-          </p>
-          <p className="mt-2 text-[11px] text-white/60">
-            {current.sourceName} · {timeAgo(current.publishedAt)}
-          </p>
-        </div>
-      </Link>
-
-      {items.length > 1 && (
-        <>
-          <button
-            type="button"
-            aria-label="Noticia anterior"
-            onClick={() => setIndex((i) => (i - 1 + items.length) % items.length)}
-            className="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition hover:bg-black/60 group-hover:opacity-100"
-          >
-            <ChevronLeft className="h-4 w-4" strokeWidth={2.5} />
-          </button>
-          <button
-            type="button"
-            aria-label="Siguiente noticia"
-            onClick={() => setIndex((i) => (i + 1) % items.length)}
-            className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition hover:bg-black/60 group-hover:opacity-100"
-          >
-            <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
-          </button>
-
-          <div className="absolute bottom-3 right-4 flex gap-1.5 sm:bottom-4">
-            {items.map((it, i) => (
-              <button
-                key={it.id}
-                type="button"
-                aria-label={`Ir a la noticia ${i + 1}`}
-                onClick={() => setIndex(i)}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === index ? "w-5 bg-white" : "w-1.5 bg-white/40"
-                }`}
-              />
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(preference.matches);
+    update(); preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    if (paused || hovered || reduced || items.length <= 1) return;
+    const timer = setInterval(() => setIndex(i => (i + 1) % items.length), 8000);
+    return () => clearInterval(timer);
+  }, [paused, hovered, reduced, items.length]);
+  if (!items.length) return null;
+  const position = index % items.length;
+  const current = items[position];
+  const move = (delta:number) => { setPaused(true); setIndex((position+delta+items.length)%items.length); };
+  return <div className="news-feature" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setPaused(true)}>
+    <Link href={`/noticias/${current.id}`} className="news-feature-link">
+      <div className="news-feature-art"><NewsImage src={current.imageUrl} title={current.title} category={current.category} kind={current.kind} priority /></div>
+      <div className="news-feature-copy">
+        <p className="text-sm font-semibold text-brand-600">{current.country === "CL" ? "Chile · " : ""}{newsCategoryLabel(current.category)}</p>
+        <h3 className="mt-3 font-display text-xl font-bold leading-snug text-carbon sm:text-2xl">{current.title}</h3>
+        <p className="mt-3 text-sm leading-relaxed text-ink-400">{current.excerpt}</p>
+        <p className="mt-4 text-xs text-ink-400">{current.sourceName} · {current.eventAt ? `Evento: ${new Date(current.eventAt).toLocaleDateString("es-CL",{timeZone:"America/Santiago"})}` : timeAgo(current.publishedAt)}</p>
+        <span className="mt-5 inline-block text-sm font-semibold text-brand-600 underline underline-offset-4">Ver noticia y fuente</span>
+      </div>
+    </Link>
+    {items.length > 1 && <div className="news-feature-controls">
+      <p className="text-xs text-ink-400" aria-live={paused ? "polite" : "off"}>Noticia {position+1} de {items.length}</p>
+      <div className="flex items-center gap-2">
+        {!reduced && <button type="button" className="icon-btn" aria-label={paused ? "Reanudar noticias" : "Pausar noticias"} onClick={() => setPaused(v => !v)}>{paused ? <Play size={16} /> : <Pause size={16} />}</button>}
+        <button type="button" className="icon-btn" aria-label="Noticia anterior" onClick={() => move(-1)}><ChevronLeft size={18} /></button>
+        <button type="button" className="icon-btn" aria-label="Siguiente noticia" onClick={() => move(1)}><ChevronRight size={18} /></button>
+      </div>
+    </div>}
+  </div>;
 }

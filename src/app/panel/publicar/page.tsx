@@ -6,7 +6,9 @@ import { ListingForm, type SellerOption } from "@/components/ListingForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function PublishPage() {
+export default async function PublishPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const sp = await searchParams;
+  const accessory = sp.type === "ACCESSORY";
   const user = await getCurrentUser();
   if (!user) return null;
   const isAdmin = user.role === "ADMIN";
@@ -28,11 +30,10 @@ export default async function PublishPage() {
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-bold text-carbon">
-            Nueva publicación
+            {accessory ? "Publicar accesorio" : "Nueva publicación"}
           </h1>
           <p className="mt-1 text-[13px] text-ink-400">
-            Busca la carta por nombre y la imagen se trae sola desde el catálogo oficial.
-            El precio lo pones tú.
+            {accessory ? "Agrega fotos, título, una descripción corta, precio y stock. Los accesorios no necesitan juego ni idioma." : "Busca la carta por nombre o publica un sellado, mazo o accesorio. El precio lo pones tú."}
           </p>
         </div>
         <Link
@@ -43,7 +44,7 @@ export default async function PublishPage() {
         </Link>
       </header>
 
-      <ListingForm sellers={sellers} isAdmin={isAdmin} currentUserId={user.id} />
+      <ListingForm initial={accessory ? {type:"ACCESSORY",game:"generic",language:null,condition:"NEW"} : undefined} sellers={sellers} isAdmin={isAdmin} currentUserId={user.id} />
     </div>
   );
 }

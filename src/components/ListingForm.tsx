@@ -109,6 +109,7 @@ export function ListingForm({
     ...EMPTY,
     ...initial,
     sellerId: initial?.sellerId ?? currentUserId,
+    ...(initial?.type === "ACCESSORY" ? {game:"generic",language:null} : {}),
   });
   const [reference, setReference] = useState<CardResult | null>(null);
   const [saving, setSaving] = useState(false);
@@ -208,6 +209,8 @@ export function ListingForm({
       const payload = {
         ...values,
         imageUrl: values.imageUrl ?? values.imageUrls[0] ?? null,
+        game: values.type === "ACCESSORY" ? "generic" : values.game,
+        language: values.type === "ACCESSORY" ? null : values.language,
         accessoryCategory: values.type === "ACCESSORY" ? values.accessoryCategory ?? "OTHER" : null,
         externalId: values.type === "SINGLE" ? values.externalId : null,
         price: Math.round(values.price),
@@ -230,6 +233,13 @@ export function ListingForm({
 
       if (isEdit) {
         router.push("/panel/publicaciones");
+        router.refresh();
+        return;
+      }
+
+      if (values.type === "ACCESSORY") {
+        toast.success("Accesorio publicado");
+        router.push("/cartas?type=ACCESSORY");
         router.refresh();
         return;
       }
@@ -276,7 +286,7 @@ export function ListingForm({
               }}
               className={`rounded-xl border p-4 text-left transition ${
                 values.type === t.value
-                  ? "border-carbon bg-carbon/5"
+                  ? "border-brand-500 bg-brand-500/10 ring-1 ring-brand-500"
                   : "border-ink-700 hover:border-ink-600"
               }`}
             >
@@ -288,6 +298,7 @@ export function ListingForm({
                 {t.label}
               </span>
               <span className="mt-0.5 block text-[11px] text-ink-400">{t.hint}</span>
+              {values.type === t.value && <span className="mt-2 block text-[11px] font-semibold text-brand-600">Seleccionado</span>}
             </button>
           ))}
         </div>
@@ -312,11 +323,10 @@ export function ListingForm({
         />
       )}
 
-      {(values.type === "SEALED" || values.type === "ACCESSORY") && (
+      {values.type === "SEALED" && (
         <div className="rounded-2xl card-surface p-5">
           <h3 className="text-sm font-semibold text-carbon">Juego del producto</h3>
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {values.type === "ACCESSORY" && <button type="button" onClick={() => set("game", "generic")} aria-pressed={values.game === "generic"} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${values.game === "generic" ? "bg-carbon text-paper" : "border-ink-700 text-carbon"}`}>Universal / otros TCG</button>}
             {(["magic", "pokemon", "onepiece", "myl"] as GameId[]).map((g) => (
               <button
                 key={g}
@@ -661,14 +671,14 @@ export function ListingForm({
 
             <label className="mt-4 block">
               <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink-400">
-                Descripción
+                {values.type === "ACCESSORY" ? "Descripción corta" : "Descripción"}
               </span>
               <textarea
                 value={values.description ?? ""}
                 onChange={(e) => set("description", e.target.value || null)}
                 rows={4}
-                maxLength={4000}
-                placeholder="Detalles del estado, si viene en sleeve, si acepta cambios…"
+                maxLength={values.type === "ACCESSORY" ? 500 : 4000}
+                placeholder={values.type === "ACCESSORY" ? "Marca, tamaño, cantidad, capacidad y estado del accesorio (máximo 500 caracteres)." : "Detalles del estado, si viene en sleeve, si acepta cambios…"}
                 className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3 py-2.5 text-sm text-ink-200 outline-none focus:border-carbon"
               />
             </label>
@@ -781,7 +791,7 @@ export function ListingForm({
               ? "Guardando…"
               : isEdit
                 ? "Guardar cambios"
-                : "Publicar en Win Condition"}
+                : values.type === "ACCESSORY" ? "Publicar accesorio" : "Publicar en Win Condition"}
           </button>
         </div>
       </div>

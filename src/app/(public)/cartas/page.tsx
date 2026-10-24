@@ -22,8 +22,9 @@ export async function generateMetadata({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
   const sp = await searchParams;
-  const game = one(sp.game);
+  const rawGame = one(sp.game);
   const type = one(sp.type) === "ACCESSORY" ? "ACCESSORY" : one(sp.type) === "SEALED" ? "SEALED" : one(sp.type) === "DECK" ? "DECK" : "SINGLE";
+  const game = type === "ACCESSORY" ? undefined : rawGame;
   const gameName = game && isGameId(game) ? GAME_LIST.find((g) => g.id === game)?.name : undefined;
   const typeName = TYPE_SEO[type];
   const page = catalogPage(one(sp.page));
@@ -43,7 +44,7 @@ export async function generateMetadata({
   return {
     title: `${what} en Chile${pagination}`,
     robots: filtered ? { index: false, follow: true } : undefined,
-    description: `${what} de vendedores chilenos: compara precios, elige idioma y estado, y compra con stock reservado y pago por transferencia.`,
+    description: type === "ACCESSORY" ? "Protectores, portamazos, tapetes y otros accesorios: compara precios y compra a vendedores chilenos con stock reservado." : `${what} de vendedores chilenos: compara precios, elige idioma y estado, y compra con stock reservado y pago por transferencia.`,
     alternates: { canonical: canon ? `/cartas?${canon}` : "/cartas" },
   };
 }
@@ -72,11 +73,12 @@ export default async function CatalogPage({
 }) {
   const sp = await searchParams;
   const q = (one(sp.q)?.trim() ?? "").slice(0, 120);
-  const game = one(sp.game);
+  const rawGame = one(sp.game);
   const type = one(sp.type) === "ACCESSORY" ? "ACCESSORY" : one(sp.type) === "SEALED" ? "SEALED" : one(sp.type) === "DECK" ? "DECK" : "SINGLE";
+  const game = type === "ACCESSORY" ? undefined : rawGame;
   const accessoryCategory = type === "ACCESSORY" ? ACCESSORY_CATEGORIES.find(c => c.value === one(sp.accessory))?.value : undefined;
   const condition = one(sp.condition);
-  const language = one(sp.language);
+  const language = type === "ACCESSORY" ? undefined : one(sp.language);
   const sort = one(sp.sort) ?? "recientes";
   const rawMin = catalogPrice(one(sp.min));
   const rawMax = catalogPrice(one(sp.max));
@@ -137,14 +139,14 @@ export default async function CatalogPage({
         </p>
       </header>
 
+      {type === "ACCESSORY" && <Link href="/panel/publicar?type=ACCESSORY" className="btn btn-primary mb-6">Vender un accesorio</Link>}
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         {/* FILTROS */}
         <FilterDrawer activeCount={[game, type, accessoryCategory, condition, language, min, max].filter(Boolean).length}>
-          <FilterGroup label="Juego">
+          {type !== "ACCESSORY" && <FilterGroup label="Juego">
             <FilterPill href={buildHref({ game: undefined, page: undefined })} active={!game}>
               Todos
             </FilterPill>
-            {type === "ACCESSORY" && <FilterPill href={buildHref({ game: "generic", page: undefined })} active={game === "generic"}>Universal / otros TCG</FilterPill>}
             {GAME_LIST.map((g) => (
               <FilterPill
                 key={g.id}
@@ -155,6 +157,8 @@ export default async function CatalogPage({
               </FilterPill>
             ))}
           </FilterGroup>
+
+          }
 
           <FilterGroup label="Categoría">
             {LISTING_TYPES.map((t) => (

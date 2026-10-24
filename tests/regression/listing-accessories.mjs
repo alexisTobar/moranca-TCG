@@ -23,6 +23,8 @@ const base = { type: 'ACCESSORY', game: 'pokemon', title: 'Protectores · 100 un
 
 test('accesorios y fotos: valida categorías, cantidad de fotos y URLs', () => {
   assert.equal(listingSchema.parse(base).accessoryCategory, 'SLEEVES');
+  assert.equal(listingSchema.parse({...base,game:undefined}).game, 'generic');
+  assert.equal(listingSchema.safeParse({...base,description:'a'.repeat(501)}).success,false);
   assert.equal(listingSchema.safeParse({ ...base, accessoryCategory: 'INVALID' }).success, false);
   assert.equal(listingSchema.safeParse({ ...base, imageUrls: Array(11).fill(photo) }).success, false);
   for (const invalid of [null, '', 'javascript:alert(1)', '/private/file']) {
@@ -73,7 +75,7 @@ test('crear, editar y pausar persiste accesorios y fotos sin borrar adjuntos exi
   };
   const prisma = { listing, $transaction: async cb => cb({listing}) };
   const mocks = {
-    '@/lib/db': {prisma}, '@/lib/auth': { requireUser: async () => ({id:'seller', role:'SELLER'}), AuthError: class extends Error {} },
+    'next/cache': {revalidatePath:()=>{}}, '@/lib/db': {prisma}, '@/lib/auth': { requireUser: async () => ({id:'seller', role:'SELLER'}), AuthError: class extends Error {} },
     '@/lib/validators': {listingSchema, listingBaseSchema}, '@/lib/catalog': {uniqueSlug: async () => 'protectores'},
     '@/lib/external-id': {normalizeExternalId: (_game,id) => id},
   };
@@ -81,7 +83,7 @@ test('crear, editar y pausar persiste accesorios y fotos sin borrar adjuntos exi
   const { PATCH } = load('src/app/api/listings/[id]/route.ts', mocks);
   const request = body => new Request('http://localhost/api/listings', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   assert.equal((await POST(request(base))).status,201);
-  assert.equal(stored.type,'ACCESSORY'); assert.equal(stored.imageUrl,photo); assert.deepEqual(stored.imageUrls,[photo]);
+  assert.equal(stored.type,'ACCESSORY'); assert.equal(stored.game,'generic'); assert.equal(stored.language,null); assert.equal(stored.imageUrl,photo); assert.deepEqual(stored.imageUrls,[photo]);
   const params = {params:Promise.resolve({id:stored.id})};
   assert.equal((await PATCH(request({status:'PAUSED'}),params)).status,200);
   assert.deepEqual(stored.imageUrls,[photo]);

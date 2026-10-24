@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { NewsImage } from "@/components/news/NewsImage";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ExternalLink, Newspaper } from "lucide-react";
@@ -7,9 +7,10 @@ import { prisma } from "@/lib/db";
 import { safeQuery } from "@/lib/catalog";
 import { timeAgo } from "@/lib/format";
 import { newsCategoryLabel } from "@/lib/news/category";
+import { eligibleNewsWhere } from "@/lib/news/query";
 
 async function getNewsItem(id: string) {
-  return safeQuery(() => prisma.newsItem.findUnique({ where: { id } }), null);
+  return safeQuery(() => prisma.newsItem.findFirst({ where: { id, ...eligibleNewsWhere() } }), null);
 }
 
 export async function generateMetadata({
@@ -30,7 +31,7 @@ export default async function NoticiaPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
-      <nav className="mb-6 text-[12px] text-ink-400">
+      <nav className="mb-6 break-words text-[12px] text-ink-400">
         <Link href="/noticias" className="hover:text-carbon">
           Noticias
         </Link>
@@ -42,29 +43,15 @@ export default async function NoticiaPage({ params }: { params: Promise<{ id: st
         {newsCategoryLabel(item.category)}
       </span>
 
-      <h1 className="mt-3 font-display text-2xl font-bold leading-tight text-carbon sm:text-3xl">
+      <h1 className="mt-3 break-words font-display text-2xl font-bold leading-tight text-carbon sm:text-3xl">
         {item.title}
       </h1>
       <p className="mt-2 text-[12px] text-ink-400">
-        {item.sourceName} · {timeAgo(item.publishedAt)}
+        {item.sourceName} · {item.country === "CL" ? "Chile · " : ""}{item.eventAt ? `Evento: ${item.eventAt.toLocaleDateString("es-CL",{timeZone:"America/Santiago"})}` : timeAgo(item.publishedAt)}
       </p>
 
       <div className="relative mt-6 aspect-video overflow-hidden rounded-2xl border border-ink-700 bg-ink-900">
-        {item.imageUrl ? (
-          <Image
-            src={item.imageUrl}
-            alt={item.title}
-            fill
-            sizes="720px"
-            className="object-cover"
-            unoptimized
-            priority
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-ink-700">
-            <Newspaper className="h-12 w-12" strokeWidth={1.5} />
-          </div>
-        )}
+        <NewsImage src={item.imageUrl} title={item.title} category={item.category} kind={item.kind} priority />
       </div>
 
       <p className="mt-6 text-[15px] leading-relaxed text-ink-300">{item.excerpt}</p>

@@ -7,6 +7,7 @@ export const LISTING_CARD_SELECT = {
   id: true,
   slug: true,
   title: true,
+  description: true,
   game: true,
   type: true,
   price: true,

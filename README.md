@@ -461,10 +461,20 @@ src/components/cart/      Carrito (contexto, drawer, checkout, animación al agr
 
 ## Accesorios y fotos de publicaciones
 
-El tipo `ACCESSORY` comparte publicación, edición, stock, ofertas, carrito y compra con los demás productos. Incluye protectores, portamazos, tapetes, carpetas, almacenamiento, toploaders, dados y otros accesorios. Se puede elegir un juego o «Universal / otros TCG» y estado nuevo/usado. Catálogo: `/cartas?type=ACCESSORY`; filtro de categoría: `accessory=SLEEVES`, `DECK_BOX`, `PLAYMAT`, `BINDER`, `STORAGE`, `TOPLOADER`, `DICE` u `OTHER`.
+El tipo `ACCESSORY` comparte publicación, edición, stock, ofertas, carrito y compra con los demás productos. Incluye protectores, portamazos, tapetes, carpetas, almacenamiento, toploaders, dados y otros accesorios. Los accesorios no muestran juego ni idioma; usan estado nuevo/usado y una descripción corta de hasta 500 caracteres. Catálogo: `/cartas?type=ACCESSORY`; filtro de categoría: `accessory=SLEEVES`, `DECK_BOX`, `PLAYMAT`, `BINDER`, `STORAGE`, `TOPLOADER`, `DICE` u `OTHER`.
 
 Todas las publicaciones admiten una imagen principal y hasta 10 fotos adicionales (JPG, PNG, WEBP o GIF; 4 MB por foto). Las fotos adicionales se guardan en `Listing.imageUrls` y se muestran en la galería del producto. Elegir una carta desde la API conserva su imagen e identidad mientras se agregan fotos reales. Desde las ofertas de una carta, «Ver publicación y fotos» abre las fotos de ese vendedor.
 
 Antes de ejecutar esta versión contra una base existente, configurar `DATABASE_URL` y `DIRECT_URL` reales y ejecutar `npm run db:push`. Esto agrega `ACCESSORY` al enum y los campos `imageUrls` (vacío para publicaciones anteriores) y `accessoryCategory`. El build habitual del proyecto también ejecuta esta sincronización.
 
 Validación sin base remota: `npm run typecheck` y `npm run test:regression` (incluye persistencia de fotos con adaptadores, permisos, selección de tipo y filtros SQL con PostgreSQL embebido).
+
+## Noticias y agenda de Chile
+
+El inicio y `/noticias` priorizan Chile, seguido de Pokémon y One Piece. Hay filtros de Chile/internacionales, juego, torneos y lanzamientos. La agenda enlaza Cardfest Chile, PlayLatam y los localizadores oficiales; no se inventan fechas desde redes sociales sin feed público. Los importadores consultan PlayLatam (solo TCG en Chile), Play! Pokémon, Bandai, OnePiece.gg y feeds de Google Noticias para Cardfest/eventos chilenos y anuncios oficiales de Pokémon en español.
+
+Vercel comprueba `/api/cron/news` diariamente a las 09:00 UTC. `NewsSyncState` limita la importación a una vez cada tres días de calendario y evita ejecuciones simultáneas. Configurar `CRON_SECRET` en Vercel; el mismo endpoint permite una primera importación autenticada mediante `Authorization: Bearer <CRON_SECRET>`. Después de desplegar, la primera ejecución llena el nuevo catálogo verificado. Una fuente fallida no interrumpe las demás; si no se logra actualizar ninguna, se devuelve un error y no se avanza la fecha.
+
+Los textos ingleses se publican solo si se tradujeron correctamente. La consulta y la ficha excluyen artículos heredados sin verificar, publicaciones de más de 90 días, fechas futuras y eventos vencidos. Se mantienen los enlaces a las fuentes, las imágenes propias de cada nota y una portada por juego cuando falta la imagen; ya no se reutiliza una carta genérica como foto de todas las noticias.
+
+Antes de desplegar esta versión, ejecutar `npm run db:push` con conexiones reales. Se agregan `country`, `kind`, `eventAt` y `originalTitle` a `NewsItem`, además de `NewsSyncState` (protegida con RLS por el script del proyecto). No se modifican publicaciones existentes para adivinar su categoría: si un accesorio se guardó como Sellado, editarlo, seleccionar Accesorios y guardar. El nuevo acceso `/panel/publicar?type=ACCESSORY` abre directamente el formulario correcto y al publicar lleva al catálogo de accesorios, con invalidación de caché.

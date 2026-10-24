@@ -12,6 +12,7 @@ try {
     prisma.$executeRaw`ALTER TABLE "CheckoutRequest" ENABLE ROW LEVEL SECURITY`,
     prisma.$executeRaw`ALTER TABLE "UsageEvent" ENABLE ROW LEVEL SECURITY`,
     prisma.$executeRaw`ALTER TABLE "UsageReport" ENABLE ROW LEVEL SECURITY`,
+    prisma.$executeRaw`ALTER TABLE "NewsSyncState" ENABLE ROW LEVEL SECURITY`,
   ]);
   console.log("Tablas privadas protegidas con Row Level Security.");
 } catch {
