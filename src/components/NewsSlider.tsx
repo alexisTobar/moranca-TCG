@@ -9,7 +9,7 @@ import { NewsImage } from "./news/NewsImage";
 
 export interface NewsSlide {
   id: string; category: string; title: string; excerpt: string; imageUrl: string | null;
-  sourceName: string; publishedAt: string; country?: string | null; kind?: string; eventAt?: string | null;
+  sourceName: string; publishedAt: string; country?: string | null; kind?: string; eventAt?: string | null; sourceUrl?: string;
 }
 
 export function NewsSlider({ items }: { items: NewsSlide[] }) {
@@ -33,7 +33,7 @@ export function NewsSlider({ items }: { items: NewsSlide[] }) {
   const current = items[position];
   const move = (delta:number) => { setPaused(true); setIndex((position+delta+items.length)%items.length); };
   return <div className="news-feature" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setPaused(true)}>
-    <Link href={`/noticias/${current.id}`} className="news-feature-link">
+    <Link href={current.sourceUrl??`/noticias/${current.id}`} className="news-feature-link">
       <div className="news-feature-art"><NewsImage src={current.imageUrl} title={current.title} category={current.category} kind={current.kind} priority /></div>
       <div className="news-feature-copy">
         <p className="text-sm font-semibold text-brand-600">{current.country === "CL" ? "Chile · " : ""}{newsCategoryLabel(current.category)}</p>

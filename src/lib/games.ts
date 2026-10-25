@@ -110,7 +110,7 @@ export const LANGUAGES = [
 export const LISTING_TYPES = [
   { value: "SINGLE", label: "Single", hint: "Una carta individual" },
   { value: "SEALED", label: "Sellado", hint: "Sobres, cajas, bundles" },
-  { value: "DECK", label: "Mazo", hint: "Preconstruido o armado, lista opcional" },
+  { value: "DECK", label: "Mazo", hint: "Construye tu deck y vende el conjunto" },
   { value: "ACCESSORY", label: "Accesorios", hint: "Protectores, portamazos, tapetes y más" },
 ];
 

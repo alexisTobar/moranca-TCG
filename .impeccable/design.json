@@ -1,48 +1,157 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-25T14:41:01Z",
+  "generatedAt": "2026-10-25T16:25:08.088Z",
   "title": "Design System: TCG Cardeck",
   "extensions": {
     "colorMeta": {
-      "primary": { "role": "primary", "displayName": "Rojo arcilla" },
-      "carbon": { "role": "neutral", "displayName": "Marco azul oscuro" },
-      "gold": { "role": "secondary", "displayName": "Dorado de marca" },
-      "store-surface": { "role": "secondary", "displayName": "Verde claro de tiendas" }
+      "primary": {
+        "role": "primary",
+        "displayName": "Rojo arcilla de catálogo, foco y enlaces"
+      },
+      "carbon": {
+        "role": "neutral",
+        "displayName": "Marco azul oscuro"
+      },
+      "gold": {
+        "role": "secondary",
+        "displayName": "Dorado de marca y acciones principales del inicio"
+      },
+      "store-surface": {
+        "role": "secondary",
+        "displayName": "Verde claro de tiendas"
+      },
+      "campaign": {
+        "role": "secondary",
+        "displayName": "Azul de mesa de juego"
+      },
+      "community-surface": {
+        "role": "secondary",
+        "displayName": "Superficie verde de comunidad"
+      },
+      "community-heading": {
+        "role": "secondary",
+        "displayName": "Título verde de comunidad"
+      },
+      "community-text": {
+        "role": "secondary",
+        "displayName": "Texto verde de comunidad"
+      },
+      "community-link": {
+        "role": "secondary",
+        "displayName": "Enlace verde de comunidad"
+      }
     },
     "typographyMeta": {
-      "display": { "displayName": "Título de inicio", "purpose": "Introducción breve a la vitrina." },
-      "headline": { "displayName": "Título de directorio", "purpose": "Encabezado de exploración de tiendas." },
-      "price": { "displayName": "Precio CLP", "purpose": "Cifras tabulares en la vitrina de productos." }
+      "display": {
+        "displayName": "Título de inicio",
+        "purpose": "Único h1 de campaña; 40 px en móvil."
+      },
+      "headline": {
+        "displayName": "Título de directorio",
+        "purpose": "Encabezado de exploración de tiendas."
+      },
+      "price": {
+        "displayName": "Precio CLP",
+        "purpose": "Cifras tabulares CLP: 20 px en vitrina del inicio; token compartido 21 px."
+      }
     },
     "shadows": [
-      { "name": "public-product", "value": "none", "purpose": "Inicio y catálogo: bordes continuos y superficies planas." },
-      { "name": "shared-field-focus", "value": "0 0 0 4px var(--ring)", "purpose": "Campos compartidos; --ring usa mezcla de marca global al 28%." }
+      {
+        "name": "public-product",
+        "value": "none",
+        "purpose": "Inicio y catálogo: bordes continuos y superficies planas."
+      },
+      {
+        "name": "shared-field-focus",
+        "value": "0 0 0 4px var(--ring)",
+        "purpose": "Campos compartidos; --ring usa mezcla de marca global al 28%."
+      }
     ],
     "motion": [
-      { "name": "manual-rail", "value": "scroll-snap-type: x mandatory; scroll-behavior: smooth", "purpose": "Desplazamiento solicitado por el usuario; instantáneo con prefers-reduced-motion. Sin autoplay." },
-      { "name": "field-state", "value": "border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease", "purpose": "Transición compartida de campos." }
+      {
+        "name": "manual-rail",
+        "value": "scroll-snap-type: x mandatory; scroll-behavior: smooth",
+        "purpose": "Desplazamiento solicitado por el usuario; instantáneo con prefers-reduced-motion. Sin autoplay."
+      },
+      {
+        "name": "field-state",
+        "value": "border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease",
+        "purpose": "Transición compartida de campos."
+      },
+      {
+        "name": "campaign-unfold",
+        "value": "cardeck-unfold .8s cubic-bezier(.16,1,.3,1) both",
+        "purpose": "Clip-path inset(0 0 15% 0) y translateY(10px) a reposo; sin animación con movimiento reducido, contenido visible sin JavaScript."
+      }
     ],
     "breakpoints": [
-      { "name": "catalog-three-columns", "value": "640px" },
-      { "name": "directory-mobile", "value": "767px" },
-      { "name": "rail-tablet-maximum", "value": "1023px" },
-      { "name": "catalog-four-columns", "value": "1280px" }
+      {
+        "name": "home-mobile-maximum",
+        "value": "639px"
+      },
+      {
+        "name": "catalog-three-columns",
+        "value": "640px"
+      },
+      {
+        "name": "directory-mobile",
+        "value": "767px"
+      },
+      {
+        "name": "home-tablet-maximum",
+        "value": "900px"
+      },
+      {
+        "name": "shared-rail-tablet-maximum",
+        "value": "1023px"
+      },
+      {
+        "name": "home-four-items-maximum",
+        "value": "1279px"
+      },
+      {
+        "name": "catalog-four-columns-and-home-five-items",
+        "value": "1280px"
+      },
+      {
+        "name": "campaign-large-screen",
+        "value": "1800px"
+      }
     ],
     "verification": {
-      "visualReview": "Passed: home 390/1440/2560 px and directory 390/1440 px.",
-      "horizontalOverflow": "None observed at 390, 768, 1290, 1440, 1920 and 2560 px.",
-      "directoryFixture": "120 synthetic profiles; 18-result pagination, next page and search verified. This is not a concurrent-user capacity test.",
-      "regressionTests": 40,
-      "typecheck": "Passed",
-      "finishReview": "Ship",
-      "searchScope": "All five category labels verified in browser; deck search submitted /cartas?type=DECK&q=Mazo+Guerrero.",
-      "productionBuild": "Passed",
-      "databaseBoundary": "Local database configuration uses a placeholder. Actual schema application and live database operations were not validated.",
-      "evidenceDirectory": "C:/Users/Seba/.codex/visualizations/2026/10/24/01a16ec8-723a-7a81-8b63-a66d1e310c62",
-      "evidenceFiles": ["cardeck-home-1440.png", "cardeck-home-390.png", "cardeck-home-2560.png", "cardeck-directory-1440.png", "cardeck-directory-390.png"]
+      "visualReview": "Ship once documentation and build are complete. Both conditions completed. Scope: revised homepage captures and resolution of the three code/capture findings; not whole-site certification.",
+      "resolvedReviewFindings": [
+        "Game-logo failure before hydration has a readable fallback.",
+        "SINGLE home products show canonical grouping, minimum in-stock effective price, aggregate stock and distinct seller count.",
+        "Final desktop/mobile/2560 captures refreshed; four cards per game."
+      ],
+      "captureDataBoundary": "Actual public offer snapshot populated with market summaries and two clearly named synthetic test seller profiles. Local database uses placeholder configuration; live database operations and concurrent capacity are not validated.",
+      "realRoute": "Separately checked Spanish live fallback news, one h1, canonical, Organization/WebSite/CollectionPage/FAQPage JSON-LD.",
+      "regressionTests": 42,
+      "typecheck": "Passed; final production build also passed type validation.",
+      "productionBuild": "Passed, exit 0. Original QA route restored; temporary fixture excluded.",
+      "homeMarket": "Two queries: SQL aggregation chooses the cheapest active in-stock SINGLE per game/canonical identity and computes distinct sellers/total stock, then a batched listing select hydrates representatives.",
+      "newsBoundary": "Spanish live fallback cached three days. News older than 90 days excluded. Official One Piece feed entries observed in March 2026 were stale; official agenda link remains visible.",
+      "evidenceDirectory": ".impeccable/review",
+      "externalEvidenceDirectory": "C:/Users/Seba/.codex/visualizations/2026/10/24/01a16ec8-723a-7a81-8b63-a66d1e310c62",
+      "evidenceFiles": [
+        "home-v2-desktop.png",
+        "home-v2-mobile.png",
+        "home-v2-user-2560.png"
+      ],
+      "previousDirectoryEvidence": "Historical directory review: 390/1440 px, 120 synthetic profiles and 18-result pagination. Not homepage approval or a concurrency test."
     },
     "assetProvenance": [
-      { "path": "public/tcg-cardeck-logo.png", "origin": "User-supplied TCG Cardeck goblin artwork", "implementation": "Logo.tsx clips transparent margins without altering the original artwork; proportions are retained." }
+      {
+        "path": "public/tcg-cardeck-logo.png",
+        "origin": "User-supplied TCG Cardeck goblin artwork",
+        "implementation": "Original pixels and proportions preserved. Logo.tsx clips transparent margins. Embedded provenance retained. Header height 88 px; footer 116 px."
+      },
+      {
+        "path": "public/cardeck-tabletop.png",
+        "origin": "Built-in imagegen tabletop campaign photograph",
+        "implementation": "Prompt sidecar and embedded provenance accompany the raster. Atmospheric campaign art; no available-stock claim."
+      }
     ]
   },
   "components": [
@@ -53,14 +162,6 @@
       "description": "Acción roja de compra o navegación en el contenido público.",
       "html": "<button class=\"ds-primary\">Ver catálogo</button>",
       "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#b13a25;color:#fff;border:0;border-radius:8px;padding:.7rem 1.35rem;font:600 .875rem/1.25 Roboto,Arial,sans-serif;cursor:pointer;transition:transform .18s ease,background-color .2s ease}.ds-primary:hover{transform:translateY(-1px)}.ds-primary:active{transform:scale(.97)}.ds-primary:focus-visible{outline:2px solid #a76b36;outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}}"
-    },
-    {
-      "name": "Búsqueda de la vitrina",
-      "kind": "input",
-      "refersTo": "search-button",
-      "description": "Campo y acción explícita; el alcance textual cambia según la categoría.",
-      "html": "<form class=\"ds-search\" role=\"search\"><input aria-label=\"Buscar cartas\" placeholder=\"Buscar cartas…\" type=\"search\"><button type=\"button\">Buscar</button></form>",
-      "css": ".ds-search{display:flex;max-width:600px;border:1px solid #c9ced8;border-radius:8px;background:white;padding:5px;font-family:Roboto,Arial,sans-serif}.ds-search:focus-within{outline:2px solid #b13a25;outline-offset:2px}.ds-search input{flex:1;min-width:0;padding:10px 12px;font-size:15px;color:#171c26;border:0;outline:none;background:transparent}.ds-search input::placeholder{color:#626b7c}.ds-search button{flex-shrink:0;min-height:44px;padding:10px 25px;background:#b13a25;border:0;border-radius:5px;color:#fff;font:600 14px Roboto,Arial,sans-serif;cursor:pointer}.ds-search button:hover{background:#8c2d20}.ds-search button:focus-visible{outline:2px solid #b13a25;outline-offset:4px}"
     },
     {
       "name": "Navegación oscura",
@@ -81,9 +182,9 @@
       "name": "Producto de la vitrina",
       "kind": "card",
       "refersTo": "product",
-      "description": "Borde continuo, foto contenida y datos legibles. Ejemplo de estructura sin simular una publicación.",
-      "html": "<article class=\"ds-product\"><div class=\"ds-photo\" aria-label=\"Área de fotografía\"></div><div class=\"ds-copy\"><p>Juego</p><h2><a href=\"/cartas\">Título de la publicación</a></h2><strong>Precio CLP</strong><span>Vendedor</span></div></article>",
-      "css": ".ds-product{max-width:280px;border:1px solid #d8dee7;border-radius:12px;background:#fff;padding:12px;min-width:0;font-family:Roboto,Arial,sans-serif}.ds-photo{aspect-ratio:1;background:#f4f5f7;border-radius:8px;overflow:hidden}.ds-copy{padding-top:12px}.ds-copy p{font-size:12px;color:#657083;line-height:1.5;margin:0}.ds-copy h2{font-size:15px;line-height:1.45;font-weight:600;min-height:44px;margin:5px 0 0}.ds-copy h2 a{color:#171c26;text-decoration:none}.ds-copy h2 a:hover{text-decoration:underline;text-underline-offset:3px}.ds-copy a:focus-visible{outline:2px solid #b13a25;outline-offset:4px}.ds-copy strong{display:block;margin-top:9px;font-size:21px;font-weight:700;color:#171c26;font-variant-numeric:tabular-nums}.ds-copy span{display:block;margin-top:6px;color:#657083;font-size:12px}"
+      "description": "Arte contenido y datos legibles. SINGLE agrupa identidad, precio Desde, stock y vendedores; ejemplo estructural sin publicación ficticia.",
+      "html": "<article class=\"ds-product\"><div class=\"ds-photo\" aria-label=\"Área de fotografía\"></div><div class=\"ds-copy\"><p>Juego</p><h2><a href=\"/cartas\">Título de la carta</a></h2><strong>Desde · Precio CLP</strong><span>Vendedores · Stock agregado</span></div></article>",
+      "css": ".ds-product{max-width:280px;border:1px solid #d8dee7;border-radius:12px;background:#fff;padding:10px;min-width:0;font-family:Roboto,Arial,sans-serif}.ds-photo{aspect-ratio:1/1.15;background:#f4f5f7;border-radius:8px;overflow:hidden}.ds-copy{padding-top:12px}.ds-copy p{font-size:12px;color:#657083;line-height:1.5;margin:0}.ds-copy h2{font-size:15px;line-height:1.45;font-weight:600;min-height:44px;margin:5px 0 0}.ds-copy h2 a{color:#171c26;text-decoration:none}.ds-copy h2 a:hover{text-decoration:underline;text-underline-offset:3px}.ds-copy a:focus-visible{outline:2px solid #b13a25;outline-offset:4px}.ds-copy strong{display:block;margin-top:9px;font-size:20px;font-weight:700;color:#171c26;font-variant-numeric:tabular-nums}.ds-copy span{display:block;margin-top:6px;color:#657083;font-size:12px}"
     },
     {
       "name": "Área de tiendas",
@@ -92,22 +193,34 @@
       "description": "Separación verde de la exploración geográfica de tiendas.",
       "html": "<section class=\"ds-stores\"><div><h2>Encuentra una tienda cerca de ti</h2><p>Explora tiendas por región y comuna.</p></div><a href=\"/explorar\">Explorar tiendas</a></section>",
       "css": ".ds-stores{display:flex;align-items:center;justify-content:space-between;gap:28px;background:#f0f4eb;border:1px solid #d6dfca;border-radius:12px;padding:28px;font-family:Roboto,Arial,sans-serif}.ds-stores h2{font-size:24px;font-weight:700;color:#26361f;margin:0}.ds-stores p{margin:8px 0 0;max-width:65ch;font-size:14px;line-height:1.65;color:#4d5a47}.ds-stores a{display:flex;align-items:center;min-height:44px;flex-shrink:0;font-size:14px;font-weight:650;color:#355622;text-decoration:underline;text-underline-offset:4px}.ds-stores a:hover{text-decoration-thickness:2px}.ds-stores a:focus-visible{outline:2px solid var(--color-brand-500,#c94a2e);outline-offset:2px}@media(max-width:639px){.ds-stores{flex-direction:column;align-items:flex-start;padding:22px}}"
+    },
+    {
+      "name": "Acción principal del inicio",
+      "kind": "button",
+      "refersTo": "home-primary",
+      "description": "Dorado para explorar cartas o construir un mazo desde las secciones azul oscuro.",
+      "html": "<a class=\"ds-home-action\" href=\"/cartas\">Explorar cartas</a>",
+      "css": ".ds-home-action{display:inline-flex;align-items:center;min-height:44px;padding:12px 22px;border:0;border-radius:8px;background:#e6b94a;color:#171c26;font:600 14px/1.4 Roboto,Arial,sans-serif;text-decoration:none;transition:transform .18s ease,background .2s ease}.ds-home-action:hover{background:#f1d27a;transform:translateY(-1px)}.ds-home-action:active{transform:scale(.97)}.ds-home-action:focus-visible{outline:3px solid #b13a25;outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-home-action{transition:none}}"
     }
   ],
   "narrative": {
-    "overview": "La marca TCG Cardeck usa el duende entregado por el usuario y una interfaz comercial moderna, familiar y comprensible. El contenido claro está enmarcado por navegación y footer azul oscuro. Las fotos, los precios y los vendedores llevan la atención; los bordes separan productos y las áreas verdes identifican tiendas.",
+    "overview": "TCG Cardeck usa el duende entregado por el usuario y una interfaz comercial moderna, familiar y comprensible. Navegación y footer azul oscuro enmarcan contenido blanco. El inicio abre con campaña fotográfica de mesa de juego y conecta categorías, juegos, publicaciones, noticias, comunidad, constructor y guías. La fotografía ambienta; no representa stock. Esta revisión sustituye la portada centrada en una vitrina aislada y preserva las decisiones válidas del catálogo y directorio.",
     "keyCharacteristics": [
-      "Roboto y títulos en caja normal.",
-      "Rojo arcilla para acciones, dorado sobre el marco oscuro y verde para tiendas.",
-      "Contenedores centrados, productos delimitados y superficies mayormente planas.",
-      "Contenido y precios reales, con estados de error explícitos."
+      "Roboto con jerarquía clara y un solo h1.",
+      "Dorado para acciones principales del inicio; enlaces arcilla y verde para comunidad.",
+      "Un único buscador visible en cabecera; vitrina manual sin autoplay.",
+      "Cinco productos desde 1280 px, cuatro hasta 1279 px, tres hasta 900 px y 72% de ancho hasta 639 px.",
+      "SINGLE agrupado por identidad y menor precio disponible; SEALED conserva preconstruidos de fábrica.",
+      "Actualidad y agenda visibles con fuente, fecha y fallback explícito."
     ],
     "rules": [],
     "dos": [
       "Do conservar el logo del duende TCG Cardeck y sus proporciones.",
       "Do mantener bordes visibles por producto y una zona de tiendas diferenciada.",
       "Do conservar márgenes en pantallas grandes, foco visible y navegación manual accesible.",
-      "Do mantener categorías y alcance de búsqueda comprensibles, con publicaciones y precios reales."
+      "Do mantener un único buscador visible en cabecera.",
+      "Do exigir lista de cartas y cantidades al publicar DECK; no reclasificar SEALED por palabras del nombre.",
+      "Do mostrar precio mínimo, stock y vendedores agregados por identidad de carta."
     ],
     "donts": [
       "Don't reintroducir la escena de cartas flotantes o la composición de texto junto a cartas en el inicio.",

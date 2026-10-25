@@ -89,13 +89,19 @@ test('crear, editar y pausar persiste accesorios y fotos sin borrar adjuntos exi
   assert.deepEqual(stored.imageUrls,[photo]);
   assert.equal((await PATCH(request({imageUrls:[]}),params)).status,200);
   assert.deepEqual(stored.imageUrls,[]);
+  assert.equal((await POST(request({type:'DECK',game:'myl',title:'Deck construido',price:13000,deckCards:[]}))).status,400);
   for (const type of ['DECK','SEALED']) {
-    const response=await POST(request({type,game:'myl',title:'Mazo Guerrero formato Imperio',price:13000,stock:2,imageUrls:[photo],deckCards:[]}));
+    const deckCards=type==='DECK'?[{name:'Carta de mi mazo',quantity:3}]:[];
+    const response=await POST(request({type,game:'myl',title:'Mazo Guerrero formato Imperio',price:13000,stock:2,imageUrls:[photo],deckCards}));
     assert.equal(response.status,201);
-    assert.equal(stored.type,'DECK');
+    assert.equal(stored.type,type);
     assert.equal(stored.stock,2);
     assert.equal(stored.status,'ACTIVE');
-    assert.deepEqual(stored.deckCards.create,[]);
+    assert.equal(stored.deckCards?.create.length??0,deckCards.length);
+    if(type==='DECK') {
+      stored._count={deckCards:deckCards.length};
+      assert.equal((await PATCH(request({deckCards:[]}),params)).status,400);
+    }
   }
   stored.sellerId = 'other';
   assert.equal((await PATCH(request({imageUrls:[photo]}),params)).status,403);

@@ -5,6 +5,7 @@ import { safeQuery } from "@/lib/catalog";
 import { activeStoreWhere } from "@/lib/store";
 import { cardHref } from "@/lib/card-url";
 import { siteUrl } from "@/lib/seo";
+import { eligibleNewsWhere } from "@/lib/news/query";
 
 // Se regenera cada hora: las publicaciones cambian seguido, pero no hace falta al segundo.
 export const revalidate = 3600;
@@ -22,7 +23,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     u("/", 1, "daily"),
     u("/cartas", 0.9, "hourly"),
-    u("/cartas?type=SINGLE", 0.8, "daily"),
     u("/cartas?type=SEALED", 0.8, "daily"),
     u("/cartas?type=DECK", 0.8, "daily"),
     u("/cartas?type=ACCESSORY", 0.8, "daily"),
@@ -78,7 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       [] as Array<{ updatedAt: Date; seller: { slug: string } }>
     ),
     safeQuery(
-      () => prisma.newsItem.findMany({ select: { id: true, publishedAt: true }, orderBy: { publishedAt: "desc" }, take: 100 }),
+      () => prisma.newsItem.findMany({ where:eligibleNewsWhere(), select: { id: true, publishedAt: true }, orderBy: { publishedAt: "desc" }, take: 100 }),
       [] as Array<{ id: string; publishedAt: Date }>
     ),
   ]);

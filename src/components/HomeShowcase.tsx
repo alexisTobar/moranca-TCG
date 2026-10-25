@@ -24,8 +24,6 @@ export function HomeShowcase({items,unavailable=false}:{items:ListingCardData[];
   const groups=CATEGORIES.slice(1).map(c=>products.filter(item=>item.type===c.value));
   const mixed=Array.from({length:Math.max(0,...groups.map(group=>group.length))},(_,index)=>groups.flatMap(group=>group[index]?[group[index]]:[])).flat();
   const visible=category==="all"?mixed:products.filter(item=>item.type===category);
-  const searchType=category==="all"?"SINGLE":category;
-  const searchLabel=CATEGORIES.find(option=>option.value===searchType)!.label.toLowerCase();
 
   useEffect(()=>{
     const element=track.current;
@@ -45,14 +43,9 @@ export function HomeShowcase({items,unavailable=false}:{items:ListingCardData[];
 
   return <section className="home-market max-w-7xl" aria-labelledby="home-market-title">
     <header className="home-market-intro">
-      <h1 id="home-market-title">Encuentra lo que vas a jugar.</h1>
-      <p>Cartas, mazos, sellados y accesorios de vendedores de Chile.</p>
-      <form action="/cartas" role="search" className="home-market-search">
-        <input type="hidden" name="type" value={searchType}/>
-        <label htmlFor="home-product-query" className="sr-only">Buscar {searchLabel}</label>
-        <input id="home-product-query" name="q" type="search" placeholder={`Buscar ${searchLabel}…`} maxLength={120} autoComplete="off"/>
-        <button type="submit">Buscar</button>
-      </form>
+      <div><h2 id="home-market-title">Recién publicados</h2>
+      <p>Descubre las últimas publicaciones y entra a comparar.</p></div>
+      <Link href="/cartas">Explorar cartas</Link>
     </header>
     <div className="home-market-toolbar">
       <div className="home-market-categories" aria-label="Productos de la vitrina">
@@ -63,7 +56,7 @@ export function HomeShowcase({items,unavailable=false}:{items:ListingCardData[];
         <button type="button" onClick={()=>move(1)} disabled={!next||!visible.length} aria-label="Ver más productos"><ChevronRight size={19} aria-hidden="true"/></button>
       </div>
     </div>
-    {visible.length ? <ul ref={track} className="home-market-track" aria-label="Productos disponibles" tabIndex={0}>
+    {visible.length ? <ul key={category} ref={track} className="home-market-track" aria-label="Productos disponibles" tabIndex={0}>
       {visible.map((item,index)=>{
         const href=item.market?cardHref(item.game,item.market.identity):item.type === "SINGLE" && item.externalId?cardHref(item.game,item.externalId):`/producto/${item.slug}`;
         const offer=item.offerPrice!=null&&item.offerPrice<item.price;
@@ -71,13 +64,13 @@ export function HomeShowcase({items,unavailable=false}:{items:ListingCardData[];
           <Link href={href} className="home-market-image" aria-label={`Ver ${item.title}`}><CardArtwork src={item.imageUrl} alt={item.title} sizes="(max-width:639px) 62vw, (max-width:1023px) 32vw, 240px" className="object-contain" priority={index<3}/></Link>
           <div className="home-market-product-copy">
             <p>{item.type==="ACCESSORY"?"Accesorios":gameName(item.game)}</p>
-            <h2><Link href={href}>{item.title}</Link></h2>
-            <div className="home-market-price">{offer&&<del>{clp(item.price)}</del>}<strong>{clp(offer?item.offerPrice!:item.price)}</strong></div>
-            <span>{item.seller.name}</span>
+            <h3><Link href={href}>{item.title}</Link></h3>
+            <div className="home-market-price">{item.market?<small>Desde</small>:offer&&<del>{clp(item.price)}</del>}<strong>{clp(offer?item.offerPrice!:item.price)}</strong></div>
+            <span>{item.market?`${item.market.sellers} ${item.market.sellers===1?"vendedor":"vendedores"} · ${item.market.stock} disponibles`:item.seller.name}</span>
           </div>
         </li>;
       })}
-    </ul>:<div className="home-market-empty" role="status"><h2>{unavailable?"No pudimos cargar la vitrina":"Todavía no hay productos en esta selección"}</h2><p>{unavailable?"Vuelve a intentarlo en unos momentos. También puedes explorar el catálogo.":"Explora las otras categorías o publica tu primer producto."}</p></div>}
+    </ul>:<div className="home-market-empty" role="status"><h3>{unavailable?"No pudimos cargar las publicaciones":"Todavía no hay productos en esta selección"}</h3><p>{unavailable?"Vuelve a intentarlo en unos momentos. Los accesos a juegos y categorías siguen disponibles.":category==="DECK"?"Arma tu deck con el buscador de cartas y publica el conjunto para venderlo.":"Explora las otras categorías o publica tu primer producto."}</p>{category==="DECK"&&<Link href="/panel/publicar?type=DECK">Construir y vender mi mazo</Link>}</div>}
     <div className="home-market-footer">
       <Link href={category==="all"||category==="SINGLE"?"/cartas":`/cartas?type=${category}`}>Ver {category==="all"?"el catálogo":CATEGORIES.find(c=>c.value===category)?.label.toLowerCase()}</Link>
       <Link href="/explorar">Encuentra una tienda cerca de ti</Link>

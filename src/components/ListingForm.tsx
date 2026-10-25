@@ -196,6 +196,7 @@ export function ListingForm({
     setError(null);
 
     if (!values.title.trim()) return setError("Ponle un título a la publicación.");
+    if (values.type === "DECK" && values.status === "ACTIVE" && !values.deckCards.length) return setError("Agrega las cartas que componen el mazo antes de publicarlo.");
     if (values.price < 1) return setError("El precio debe ser mayor a 0.");
     if (values.offerPrice != null && values.offerPrice >= values.price) {
       return setError("El precio de oferta debe ser menor al precio normal.");
@@ -314,7 +315,7 @@ export function ListingForm({
           }
           hint={
             values.type === "DECK"
-              ? "Puedes vender un mazo preconstruido con fotos y descripción. Si quieres detallar sus cartas, agrégalas aquí."
+              ? "Construye tu deck: busca cada carta, agrégala al mazo y ajusta sus copias. Después publica el conjunto para venderlo."
               : "Escribe el nombre y elige la impresión correcta. La imagen se toma automáticamente."
           }
         />
@@ -397,7 +398,7 @@ export function ListingForm({
 
           {values.deckCards.length === 0 ? (
             <p className="mt-4 rounded-xl border border-dashed border-ink-700 p-8 text-center text-[13px] text-ink-400">
-              No necesitas una lista para publicar un mazo preconstruido. Puedes agregar cartas con el buscador si quieres detallar su contenido.
+              Busca las cartas arriba y agrégalas para construir tu deck. Los mazos de fábrica sin abrir se publican en Sellados.
             </p>
           ) : (
             <div className="mt-4 grid grid-cols-3 gap-2.5 sm:grid-cols-5 lg:grid-cols-7">

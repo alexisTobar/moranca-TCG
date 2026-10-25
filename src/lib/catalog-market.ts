@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 import { CARD_IDENTITY_SQL } from "./card-identity";
 import { LISTING_CARD_SELECT } from "./catalog";
-import { publicListingType, PRECONSTRUCTED_DECK_PATTERN, DECK_BOX_PATTERN } from "./listing-kind";
+import { publicListingType } from "./listing-kind";
 
 export interface MarketFilters {
   type: "SINGLE" | "SEALED" | "DECK" | "ACCESSORY"; game?: string; q?: string;
@@ -11,11 +11,31 @@ export interface MarketFilters {
 }
 const PRICE = Prisma.sql`LEAST(l.price, COALESCE(l."offerPrice", l.price))`;
 
+/** One market aggregation for the home, then one batched hydration query. */
+export async function homeCardMarket(takePerGame=6) {
+  const groups=await prisma.$queryRaw<{id:string;game:string;identity:string;sellers:number;totalStock:number}[]>(Prisma.sql`
+    WITH offers AS (
+      SELECT l.id,l.game,l."sellerId",l.stock,l."createdAt",${PRICE} AS price,${CARD_IDENTITY_SQL} AS identity
+      FROM "Listing" l JOIN "User" u ON u.id=l."sellerId"
+      WHERE l.type='SINGLE' AND l.status='ACTIVE' AND l.stock>0 AND u.active=true AND u.role IN ('SELLER','ADMIN')
+    ), ranked AS (
+      SELECT *,row_number() OVER(PARTITION BY game,identity ORDER BY price ASC,id ASC) AS rank FROM offers
+    ), summary AS (
+      SELECT game,identity,count(DISTINCT "sellerId")::int AS sellers,sum(stock)::int AS "totalStock",max("createdAt") AS newest
+      FROM offers GROUP BY game,identity
+    ), cards AS (
+      SELECT r.id,r.game,r.identity,s.sellers,s."totalStock",s.newest,
+        row_number() OVER(PARTITION BY r.game ORDER BY s.newest DESC,r.id ASC) AS position
+      FROM ranked r JOIN summary s ON r.game=s.game AND r.identity=s.identity WHERE r.rank=1
+    ) SELECT * FROM cards WHERE position<=${Math.min(12,Math.max(1,takePerGame))} ORDER BY newest DESC,id ASC`);
+  const rows=await prisma.listing.findMany({where:{id:{in:groups.map(group=>group.id)}},select:LISTING_CARD_SELECT});
+  const byId=new Map(rows.map(row=>[row.id,row]));
+  return groups.flatMap(group=>{const row=byId.get(group.id);return row?[{...row,market:{identity:group.identity,sellers:group.sellers,stock:group.totalStock}}]:[];});
+}
+
 /** Filtering, cheapest-offer selection, deduplication and pagination happen in PostgreSQL. */
 export async function catalogMarket(filters: MarketFilters) {
-  const effectiveType = Prisma.sql`CASE WHEN l.type = 'SEALED' AND l.title ~* ${PRECONSTRUCTED_DECK_PATTERN} AND l.title !~* ${DECK_BOX_PATTERN} THEN 'DECK' ELSE l.type::text END`;
-  const storedType = filters.type === "DECK" ? Prisma.sql`l.type IN ('DECK','SEALED')` : Prisma.sql`l.type = ${filters.type}::"ListingType"`;
-  const clauses = [Prisma.sql`l.status = 'ACTIVE' AND ${storedType} AND ${effectiveType} = ${filters.type} AND u.active = true AND u.role IN ('SELLER','ADMIN')`];
+  const clauses = [Prisma.sql`l.status = 'ACTIVE' AND l.type = ${filters.type}::"ListingType" AND u.active = true AND u.role IN ('SELLER','ADMIN')`];
   if (filters.accessoryCategory && filters.type === "ACCESSORY") clauses.push(Prisma.sql`l."accessoryCategory" = ${filters.accessoryCategory}`);
   if (filters.game && filters.type !== "ACCESSORY") clauses.push(Prisma.sql`l.game = ${filters.game}`);
   if (filters.condition) clauses.push(Prisma.sql`l.condition = ${filters.condition}`);

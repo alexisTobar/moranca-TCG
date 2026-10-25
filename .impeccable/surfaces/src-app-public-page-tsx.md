@@ -2,16 +2,16 @@
 version: 1
 slug: "src-app-public-page-tsx"
 primary_target: "src/app/(public)/page.tsx"
-related_targets: ["src/app/(public)/cartas/page.tsx","src/components/HeroCards.tsx","src/components/ListingCard.tsx"]
+related_targets: ["src/components/HomeShowcase.tsx","src/components/SiteHeader.tsx","src/lib/news/query.ts"]
 ---
+# Inicio TCG Cardeck
+Modo: Persuade. Rediseño solicitado por el usuario el 25-10-2026 después de rechazar la vitrina aislada.
 
-# Inicio y vitrina de productos
-Modo: Operate. Sustitución de la composición del inicio confirmada por el usuario el 25-10-2026.
-
-THESIS: Una vitrina de comercio centrada en productos reales, sin cartas flotantes ni una columna de texto junto a las cartas.
-OWN-WORLD: Contenido blanco #ffffff, fotos sobre gris #f4f5f7, texto #171c26, rojo arcilla #b13a25 y navbar/footer #080b16. Roboto, pesos 400–700, títulos en caja normal y precios tabulares. Se usa el logo del duende TCG Cardeck entregado por el usuario, y se mantienen los juegos y márgenes hasta 1440 px.
-STORY: Buscar, cambiar entre Cartas/Mazos/Sellados/Accesorios, recorrer fotos y precios, y abrir el producto. Los mazos preconstruidos publicados antes como sellados aparecen en Mazos.
-FIRST VIEWPORT: Título breve y buscador arriba; categorías sobre una fila horizontal de productos con foto, título, precio y vendedor. Cuatro productos en escritorio, tres en tablet, y uno más un avance del siguiente en móvil. Controles de recorrido visibles; sin autoplay.
-FORM: Vitrina horizontal elegida explícitamente por el usuario en la pregunta de dirección. La marca anterior se sustituye por TCG Cardeck. Se añaden bordes por producto y una zona diferenciada para tiendas, tal como pidió el usuario; no se añaden mosaicos de iconos. seed: none (unavailable).
-SIGNATURE: Desplazamiento manual con scroll snap, flechas, teclado y gesto táctil. Movimiento reducido respetado. No se inventan publicaciones cuando falla la base.
+## Direction contract
+THESIS: Una portada de marketplace completa: entrar al catálogo, entender las categorías y conocer la comunidad antes de comprar. Sin segundo buscador.
+OWN-WORLD: Marco navy #080b16, mesa de juego azul #152a3b, blanco, dorado #e6b94a y rojo arcilla #b13a25. Logo del duende más visible. Roboto con jerarquía clara; producto y vendedor tienen regiones distintas.
+STORY: Qué puedo comprar, qué juegos hay, qué acaba de publicarse, quién vende, cómo armo mi deck y cómo pago. Sellados conserva los preconstruidos; Mazos son decks construidos por el vendedor con lista.
+FIRST VIEWPORT: Logo de 88px, campaña fotográfica horizontal de mesa de juego con título breve y dos acciones reales, seguida de cuatro entradas descriptivas a categorías. La vitrina y los juegos continúan la portada, no sustituyen toda la página.
+FORM: Campaña de tienda, índice de categorías, catálogo real, noticias/agenda, comunidad, constructor de mazos y guía de compra. La fotografía ambienta; no representa stock. seed: none (unavailable).
+SIGNATURE: Apertura breve de la composición de portada con clip-path; rail manual con snap, flechas y teclado. Sin cartas flotantes; movimiento reducido respetado y contenido visible sin JavaScript.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

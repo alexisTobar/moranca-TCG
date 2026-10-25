@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { NewsImage } from "@/components/news/NewsImage";
-import { newsPage, type NewsRow } from "@/lib/news/query";
+import { publicNewsPage } from "@/lib/news/query";
 import { CHILE_AGENDA } from "@/lib/news/sources";
 import { catalogPage } from "@/lib/catalog-query";
 import type { Metadata } from "next";
@@ -31,12 +31,7 @@ export default async function NoticiasPage({
   const scope = sp.scope === "chile" ? "chile" : sp.scope === "international" ? "international" : undefined;
   const kind = sp.kind === "TOURNAMENT" || sp.kind === "RELEASE" ? sp.kind : undefined;
   const requestedPage = catalogPage(typeof sp.page === "string" ? sp.page : undefined);
-  let unavailable = false;
-  const result = await newsPage({category, scope, kind, page:requestedPage, take:PAGE_SIZE}).catch(() => {
-    unavailable = true;
-    return {items:[] as NewsRow[],total:0,pages:1,page:1};
-  });
-  const {items,pages,page} = result;
+  const {items,pages,page,unavailable} = await publicNewsPage({category, scope, kind, page:requestedPage, take:PAGE_SIZE});
 
   const buildHref = (patch: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
@@ -103,7 +98,7 @@ export default async function NoticiasPage({
           {items.map((n) => (
             <Link
               key={n.id}
-              href={`/noticias/${n.id}`}
+              href={n.sourceUrl??`/noticias/${n.id}`}
               className="group overflow-hidden rounded-2xl card-surface transition hover:-translate-y-1 hover:border-carbon"
             >
               <div className="relative aspect-video overflow-hidden bg-ink-900">

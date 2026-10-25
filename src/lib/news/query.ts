@@ -5,7 +5,7 @@ import { NEWS_MAX_AGE_DAYS } from "./policy";
 
 export interface NewsRow {
   id: string; category: string; title: string; excerpt: string; imageUrl: string | null;
-  sourceName: string; publishedAt: Date; country: string | null; kind: string; eventAt: Date | null;
+  sourceName: string; publishedAt: Date; country: string | null; kind: string; eventAt: Date | null; sourceUrl?: string;
 }
 
 export function eligibleNewsWhere(now = new Date()) {
@@ -37,10 +37,33 @@ export async function newsPage({ category, scope, kind, page = 1, take = 18 }: {
 }
 
 export async function homeNews(): Promise<NewsRow[]> {
-  const [local, onepiece, pokemon] = await Promise.all([
+  const results = await Promise.allSettled([
     newsPage({scope:"chile",take:4}),
     newsPage({category:"ONEPIECE",scope:"international",take:3}),
     newsPage({category:"POKEMON",scope:"international",take:3}),
   ]);
-  return [...local.items,...onepiece.items,...pokemon.items];
+  const items=results.flatMap(result=>result.status==="fulfilled"?result.value.items:[]);
+  if(items.length)return balanceHomeNews(items);
+  const {liveSpanishNews}=await import("./live");
+  return balanceHomeNews(await liveSpanishNews());
+}
+
+/** Show Chile and international coverage together instead of filling the home with one source. */
+export function balanceHomeNews(items:NewsRow[]):NewsRow[] {
+  const local=items.filter(item=>item.country==="CL");
+  const global=items.filter(item=>item.country!=="CL");
+  const featured=[...local.slice(0,2),global.find(item=>item.category==="ONEPIECE")??global.find(item=>item.category==="POKEMON"),...global,...local.slice(2)];
+  return [...new Map(featured.filter((item):item is NewsRow=>!!item).map(item=>[item.id,item])).values()].slice(0,10);
+}
+
+export async function publicNewsPage(filters:Parameters<typeof newsPage>[0]={}) {
+  try {
+    const result=await newsPage(filters);
+    if(result.total)return {...result,unavailable:false};
+  } catch { /* A missing first sync or an unavailable database must not hide source links. */ }
+  const {liveSpanishNews}=await import("./live");
+  const rows=await liveSpanishNews();
+  const items=rows.filter(item=>(!filters.category||item.category===filters.category)&&(!filters.scope||(filters.scope==="chile"?item.country==="CL":item.country!=="CL"))&&(!filters.kind||item.kind===filters.kind));
+  const take=filters.take??18,pages=Math.max(1,Math.ceil(items.length/take)),page=Math.min(Math.max(1,filters.page??1),pages);
+  return {items:items.slice((page-1)*take,page*take),total:items.length,pages,page,unavailable:!rows.length};
 }

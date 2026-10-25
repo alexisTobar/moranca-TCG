@@ -34,7 +34,7 @@ export default async function PublishPage({ searchParams }: { searchParams: Prom
             {accessory ? "Publicar accesorio" : deck ? "Publicar mazo" : "Nueva publicación"}
           </h1>
           <p className="mt-1 text-[13px] text-ink-400">
-            {accessory ? "Agrega fotos, título, una descripción corta, precio y stock. Los accesorios no necesitan juego ni idioma." : deck ? "Vende un mazo preconstruido o armado. Agrega fotos y descripción; la lista de cartas es opcional." : "Busca la carta por nombre o publica un sellado, mazo o accesorio. El precio lo pones tú."}
+            {accessory ? "Agrega fotos, título, una descripción corta, precio y stock. Los accesorios no necesitan juego ni idioma." : deck ? "Construye tu deck con el buscador de cartas, ajusta las copias y publica el mazo completo para venderlo." : "Busca la carta por nombre o publica un sellado, mazo o accesorio. El precio lo pones tú."}
           </p>
         </div>
         <Link

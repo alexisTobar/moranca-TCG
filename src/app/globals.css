@@ -986,3 +986,125 @@ img,svg { max-width:100%; }
 .catalog-heading {border-bottom:1px solid #d8dee7;padding-bottom:20px;}
 @media(max-width:1023px){.home-market-track{grid-auto-columns:calc((100% - 48px)/3)}}
 @media(max-width:639px){.home-market-track{grid-auto-columns:76%;gap:14px}.home-stores-guide{flex-direction:column;align-items:flex-start;padding:22px}.listing-sheet{padding:9px}.listing-copy h3{font-size:14px}.catalog-results{gap:20px 12px}}
+
+/* TCG Cardeck storefront: campaign, shopping and community have distinct hierarchy. */
+.cardeck-home {background:#fff;color:#171c26;padding-bottom:80px;}
+.cardeck-home h2 {font-size:clamp(25px,2.2vw,34px);font-weight:700;line-height:1.2;letter-spacing:-.025em;text-wrap:balance;}
+.cardeck-home a {text-underline-offset:4px;}
+.cardeck-home :is(a,button,[tabindex]):focus-visible {outline:3px solid #b13a25;outline-offset:4px;}
+.cardeck-campaign {padding-top:24px;}
+.cardeck-campaign-stage {position:relative;isolation:isolate;min-height:400px;display:grid;place-items:center;overflow:hidden;border-radius:16px 16px 0 0;background:#132a3d;}
+.cardeck-campaign-art {object-fit:cover;object-position:center;}
+.cardeck-campaign-shade {position:absolute;inset:0;background:linear-gradient(90deg,#08162420,#08162455 25%,#08162455 75%,#08162420);}
+.cardeck-campaign-copy {position:relative;text-align:center;color:#fff;padding:46px 28px;max-width:800px;animation:cardeck-unfold .8s cubic-bezier(.16,1,.3,1) both;}
+.cardeck-campaign-copy h1 {font-size:clamp(38px,4.5vw,66px);font-weight:750;letter-spacing:-.035em;line-height:1.03;text-wrap:balance;}
+.cardeck-campaign-copy p {color:#e1e8ef;font-size:17px;line-height:1.6;margin-top:22px;}
+.cardeck-campaign-copy > div {display:flex;justify-content:center;align-items:center;gap:25px;margin-top:26px;flex-wrap:wrap;}
+.cardeck-campaign .btn-gold {box-shadow:none;border-radius:8px;background:#e6b94a;color:#171c26;}
+.campaign-stores-link {font-size:14px;color:#fff;font-weight:600;min-height:44px;display:flex;align-items:center;border-bottom:1px solid #ffffff80;}
+.cardeck-category-index {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#f5f6f8;border:1px solid #d8dee7;border-top:0;border-radius:0 0 16px 16px;overflow:hidden;}
+.cardeck-category-index > a {padding:24px 26px;min-width:0;transition:background .2s ease;}
+.cardeck-category-index > a+a {border-left:1px solid #d8dee7;}
+.cardeck-category-index a:hover {background:#edeff3;}
+.cardeck-category-index strong {display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:17px;font-weight:700;}
+.cardeck-category-index span {display:block;max-width:32ch;margin-top:9px;color:#586174;font-size:13px;line-height:1.6;}
+.cardeck-games {display:flex;gap:36px;align-items:center;padding-block:38px;border-bottom:1px solid #d8dee7;}
+.cardeck-games > div {flex:0 0 270px;}
+.cardeck-games h2 {font-size:24px;max-width:16ch;}
+.cardeck-games p {font-size:13px;color:#586174;margin-top:8px;}
+.cardeck-games nav {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;flex:1;}
+.cardeck-games nav a {display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;min-height:85px;}
+.cardeck-games img {height:46px;width:125px;object-fit:contain;}
+.cardeck-games span {font-size:12px;font-weight:600;color:#586174;}
+.cardeck-home .home-market {padding-block:48px 24px;}
+.cardeck-home .home-market-intro {display:flex;justify-content:space-between;gap:24px;text-align:left;align-items:center;max-width:none;margin-bottom:24px;}
+.cardeck-home .home-market-intro p {margin-top:9px;color:#586174;font-size:14px;}
+.cardeck-home .home-market-intro > a {color:#8c2d20;font-size:14px;font-weight:600;text-decoration:underline;flex-shrink:0;}
+.cardeck-home .home-market-track {grid-auto-columns:calc((100% - 96px)/5);}
+.cardeck-home .home-market-product {padding:10px;}
+.cardeck-home .home-market-product-copy h3 {font-size:14px;font-weight:600;line-height:1.5;min-height:42px;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.cardeck-home .home-market-image {aspect-ratio:1/1.15;}
+.cardeck-home .home-market-price strong {font-size:20px;}
+.cardeck-home .home-market-empty {border-radius:12px;min-height:160px;}
+.cardeck-home .home-market-empty h3 {font-size:19px;font-weight:650;}
+.cardeck-home .home-market-empty a {margin-top:14px;align-self:flex-start;color:#8c2d20;text-decoration:underline;font-weight:600;min-height:44px;display:flex;align-items:center;}
+.cardeck-buying-strip {display:flex;justify-content:space-between;gap:20px;border-top:1px solid #d8dee7;border-bottom:1px solid #d8dee7;padding:22px 0;}
+.cardeck-buying-strip span {display:flex;align-items:center;gap:10px;font-size:13px;color:#586174;}
+.cardeck-buying-strip svg {color:#8c2d20;flex-shrink:0;}
+.cardeck-section-heading {display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:26px;}
+.cardeck-section-heading p {margin-top:10px;max-width:65ch;font-size:14px;color:#586174;line-height:1.6;}
+.cardeck-section-heading > a {display:flex;align-items:center;gap:10px;flex-shrink:0;color:#8c2d20;min-height:44px;font-size:14px;font-weight:600;}
+.cardeck-game-collections,.cardeck-news,.cardeck-how,.cardeck-about,.cardeck-faq {padding-top:64px;}
+.cardeck-collection-grid {display:grid;gap:32px;}
+.cardeck-collection {background:#f7f8fa;border:1px solid #d8dee7;border-radius:16px;padding:24px;}
+.cardeck-collection > header {display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px;}
+.cardeck-collection h3 {font-size:21px;font-weight:650;}
+.cardeck-collection > header a {display:flex;align-items:center;gap:8px;font-size:13px;min-height:44px;color:#8c2d20;font-weight:600;}
+.cardeck-collection > div {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;}
+.cardeck-home .listing-copy h3 {font-size:15px;}
+.cardeck-news-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;}
+.cardeck-news-grid article {border:1px solid #d8dee7;border-radius:12px;overflow:hidden;}
+.cardeck-news-grid article a {display:block;height:100%;}
+.cardeck-news-art {position:relative;aspect-ratio:16/8.5;background:#edf0f5;overflow:hidden;}
+.cardeck-news-copy {padding:22px;}
+.cardeck-news-copy > span {font-size:12px;font-weight:600;color:#8c2d20;}
+.cardeck-news-copy h3 {font-size:19px;line-height:1.35;font-weight:650;margin-top:9px;}
+.cardeck-news-copy p {margin-top:10px;font-size:13px;line-height:1.6;color:#586174;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.cardeck-news-copy small {display:block;font-size:11px;color:#586174;margin-top:18px;}
+.cardeck-news-status {background:#f5f6f8;border-radius:12px;padding:28px;color:#586174;line-height:1.6;}
+.cardeck-agenda {padding:28px 0 0;}
+.cardeck-agenda h3 {font-size:17px;font-weight:650;}
+.cardeck-agenda > div {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:12px;border-top:1px solid #d8dee7;border-bottom:1px solid #d8dee7;}
+.cardeck-agenda a {position:relative;padding:20px 28px 20px 0;}
+.cardeck-agenda a+a {padding-left:20px;border-left:1px solid #d8dee7;}
+.cardeck-agenda strong {font-size:14px;display:block;}
+.cardeck-agenda span {display:block;margin-top:7px;font-size:12px;line-height:1.6;color:#586174;}
+.cardeck-agenda svg {position:absolute;right:8px;top:20px;color:#8c2d20;}
+.cardeck-agenda > p {font-size:12px;color:#586174;margin-top:14px;}
+.cardeck-community {margin-top:64px;background:#edf3ee;border-block:1px solid #d1ded4;padding-block:48px;}
+.cardeck-community .cardeck-section-heading h2 {max-width:22ch;color:#1c392b;}
+.cardeck-community .cardeck-section-heading p,.cardeck-community-note {color:#496251;font-size:14px;line-height:1.6;}
+.cardeck-community a {color:#26563c;}
+.cardeck-seller-list {display:grid;grid-template-columns:1fr 1fr;gap:16px 32px;}
+.cardeck-seller-list > a {display:flex;align-items:center;gap:16px;padding:20px 0;border-top:1px solid #c5d6ca;}
+.cardeck-seller-list h3 {font-size:17px;font-weight:650;}
+.cardeck-seller-list p {font-size:12px;margin-top:6px;color:#496251;}
+.cardeck-seller-list > a > svg {margin-left:auto;flex-shrink:0;}
+.cardeck-seller-initial {width:48px;height:48px;display:grid;place-items:center;border:1px solid #a5c2af;border-radius:50%;font-size:22px;font-weight:600;flex-shrink:0;}
+.cardeck-community-links {display:flex;gap:28px;flex-wrap:wrap;margin-top:22px;}
+.cardeck-community-links a {font-size:14px;font-weight:650;text-decoration:underline;min-height:44px;display:flex;align-items:center;}
+.cardeck-deck-builder {display:grid;grid-template-columns:1.1fr 1fr;gap:60px;background:#152a3b;color:#fff;border-radius:16px;padding:44px;margin-top:64px;}
+.cardeck-deck-builder h2 {font-size:clamp(30px,3.1vw,44px);line-height:1.12;}
+.cardeck-deck-builder p {color:#d3dee7;font-size:14px;line-height:1.7;max-width:56ch;margin-top:18px;}
+.cardeck-deck-builder .btn {margin-top:25px;box-shadow:none;}
+.cardeck-deck-builder ol {align-self:center;counter-reset:deck;}
+.cardeck-deck-builder li {position:relative;padding:18px 0 18px 44px;border-top:1px solid #405464;counter-increment:deck;}
+.cardeck-deck-builder li:before {content:counter(deck);position:absolute;left:0;top:17px;color:#e6b94a;font-size:20px;}
+.cardeck-deck-builder strong {display:block;font-weight:600;font-size:16px;}
+.cardeck-deck-builder li span {display:block;font-size:13px;color:#d3dee7;line-height:1.6;margin-top:5px;}
+.cardeck-how > ol {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;}
+.cardeck-how li {border-top:1px solid #d8dee7;padding-top:22px;}
+.cardeck-how li > span {color:#8c2d20;font-weight:600;font-size:14px;}
+.cardeck-how h3 {font-size:19px;font-weight:650;margin-top:14px;}
+.cardeck-how li p {font-size:14px;line-height:1.7;color:#586174;margin-top:10px;}
+.cardeck-about {display:grid;grid-template-columns:1fr 1.4fr;gap:64px;}
+.cardeck-about h2 {max-width:20ch;}
+.cardeck-about p {font-size:14px;line-height:1.8;color:#586174;max-width:75ch;}
+.cardeck-about p+p {margin-top:18px;}
+.cardeck-about a {color:#8c2d20;text-decoration:underline;}
+.cardeck-faq > h2 {margin-bottom:26px;}
+.cardeck-faq > div {max-width:none;box-shadow:none;}
+@keyframes cardeck-unfold {from{clip-path:inset(0 0 15% 0);transform:translateY(10px)}to{clip-path:inset(0);transform:none}}
+@media(min-width:1800px){.cardeck-campaign-stage{min-height:440px}}
+@media(max-width:1279px){.cardeck-home .home-market-track{grid-auto-columns:calc((100% - 72px)/4)}.cardeck-games{gap:20px}.cardeck-games > div{flex-basis:220px}.cardeck-games nav{gap:14px}.cardeck-games img{width:100px}.cardeck-collection > div{gap:12px}}
+@media(max-width:900px){.cardeck-games{display:block}.cardeck-games > div{margin-bottom:25px}.cardeck-games h2{max-width:none}.cardeck-category-index{grid-template-columns:1fr 1fr}.cardeck-category-index > a:nth-child(3){border-left:0;border-top:1px solid #d8dee7}.cardeck-category-index > a:nth-child(4){border-top:1px solid #d8dee7}.cardeck-home .home-market-track{grid-auto-columns:calc((100% - 48px)/3)}.cardeck-news-grid{gap:14px}.cardeck-news-copy{padding:16px}.cardeck-news-copy h3{font-size:17px}.cardeck-agenda > div{grid-template-columns:1fr 1fr}.cardeck-agenda a:nth-child(3){border-left:0;padding-left:0;border-top:1px solid #d8dee7}.cardeck-agenda a:nth-child(4){border-top:1px solid #d8dee7}.cardeck-buying-strip{flex-wrap:wrap}.cardeck-deck-builder{gap:32px;padding:32px}.cardeck-about{gap:32px}.cardeck-collection > div{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:639px){.cardeck-campaign{padding-top:12px}.cardeck-campaign-stage{min-height:390px}.cardeck-campaign-art{object-position:35% center}.cardeck-campaign-shade{background:#08162480}.cardeck-campaign-copy{padding:36px 20px}.cardeck-campaign-copy h1{font-size:40px}.cardeck-campaign-copy p{font-size:14px;line-height:1.7;margin-top:18px}.cardeck-campaign-copy > div{gap:10px;flex-direction:column;margin-top:22px}.cardeck-category-index > a{padding:17px 14px}.cardeck-category-index strong{font-size:14px}.cardeck-category-index span{font-size:12px;line-height:1.5}.cardeck-category-index svg{width:14px}.cardeck-games{padding-block:28px}.cardeck-games nav{gap:14px 8px;grid-template-columns:repeat(2,minmax(0,1fr))}.cardeck-games nav a{min-height:74px}.cardeck-games img{height:40px;width:110px}.cardeck-home .home-market{padding-top:36px}.cardeck-home .home-market-intro{align-items:flex-start;gap:12px}.cardeck-home .home-market-intro > a{max-width:72px;line-height:1.5;text-align:right;font-size:12px}.cardeck-home .home-market-intro p{font-size:13px}.cardeck-home .home-market-track{grid-auto-columns:72%;gap:14px}.cardeck-buying-strip{display:grid;gap:14px;padding-block:20px}.cardeck-section-heading{align-items:flex-start;flex-direction:column;gap:12px;margin-bottom:20px}.cardeck-section-heading p{font-size:13px}.cardeck-section-heading > a{font-size:13px}.cardeck-game-collections,.cardeck-news,.cardeck-how,.cardeck-about,.cardeck-faq{padding-top:42px}.cardeck-collection{padding:14px}.cardeck-collection h3{font-size:18px}.cardeck-collection > header a{font-size:12px;gap:4px}.cardeck-collection > div{gap:10px}.cardeck-home .listing-copy h3{font-size:13px}.cardeck-news-grid{grid-template-columns:1fr;gap:20px}.cardeck-news-copy{padding:20px}.cardeck-news-copy h3{font-size:20px}.cardeck-agenda > div{grid-template-columns:1fr}.cardeck-agenda a+a{padding-left:0;border-left:0;border-top:1px solid #d8dee7}.cardeck-community{margin-top:42px;padding-block:32px}.cardeck-seller-list{grid-template-columns:1fr;gap:0}.cardeck-deck-builder{grid-template-columns:1fr;margin-top:42px;padding:28px 22px;gap:26px}.cardeck-deck-builder h2{font-size:33px}.cardeck-deck-builder .btn{font-size:13px;gap:8px;padding-inline:14px}.cardeck-how > ol{grid-template-columns:1fr;gap:26px}.cardeck-about{grid-template-columns:1fr;gap:20px}.cardeck-home{padding-bottom:48px}}
+@media(prefers-reduced-motion:reduce){.cardeck-campaign-copy{animation:none}.cardeck-home *{scroll-behavior:auto!important;transition:none!important}}
+.game-brand-fallback {display:inline-flex;align-items:center;justify-content:center;min-height:46px;text-align:center;font-size:17px;font-weight:750;line-height:1.2;color:#2b4636;}
+.cardeck-games .game-brand-fallback {height:46px;width:125px;max-width:100%;}
+.cardeck-event-art {display:flex;align-items:center;justify-content:center;gap:28px;height:100%;background:#152a3b;color:#fff;}
+.cardeck-event-art time {display:flex;align-items:center;flex-direction:column;padding-right:28px;border-right:1px solid #506273;}
+.cardeck-event-art strong {font-size:66px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;}
+.cardeck-event-art time span {font-size:16px;color:#e6b94a;margin-top:6px;}
+.cardeck-event-art > span {font-size:17px;max-width:9ch;line-height:1.4;font-weight:600;}
+@media(max-width:900px){.cardeck-event-art{gap:15px}.cardeck-event-art time{padding-right:15px}.cardeck-event-art strong{font-size:52px}.cardeck-event-art > span{font-size:15px}}

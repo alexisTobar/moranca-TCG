@@ -60,7 +60,7 @@ export function SiteFooter() {
 
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
         <div>
-          <Logo height={96} tone="light" />
+          <Logo height={116} tone="light" />
           <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-white/55">
             Marketplace chileno de cartas coleccionables. Singles, sellados y mazos armados de
             vendedores de todo Chile.

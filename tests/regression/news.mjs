@@ -119,3 +119,24 @@ test('cron autorizado respeta tres días y no duplica artículos al reintentar',
     assert.equal((await POST(request())).status,200);assert.equal(items.size,1);assert.equal(fetches,2);
   } finally {global.fetch=original;if(previous===undefined)delete process.env.CRON_SECRET;else process.env.CRON_SECRET=previous;}
 });
+
+test('noticias del inicio conservan fuentes disponibles y equilibran Chile e internacionales', async()=>{
+  const row=(id,country,category)=>({id,country,category,title:id});
+  const mocks={'@prisma/client':{Prisma},'@/lib/db':{prisma:{}}};
+  const {balanceHomeNews}=load('src/lib/news/query.ts',mocks);
+  const items=[row('cl1','CL','POKEMON'),row('cl2','CL','POKEMON'),row('cl3','CL','POKEMON'),row('pokemon',null,'POKEMON'),row('op',null,'ONEPIECE')];
+  assert.deepEqual(balanceHomeNews(items).slice(0,3).map(item=>item.id),['cl1','cl2','op']);
+  assert.equal(new Set(balanceHomeNews(items).map(item=>item.id)).size,5);
+});
+
+test('base vacía o caída permite noticias de fuente en español con enlaces directos y filtros', async()=>{
+  const live=[{id:'source-cl',country:'CL',category:'POKEMON',kind:'TOURNAMENT',sourceUrl:'https://www.playlatam.net/tournaments/test'},{id:'source-global',country:null,category:'POKEMON',kind:'RELEASE',sourceUrl:'https://www.pokemon.com/es/noticias/test'}];
+  for(const broken of [false,true]){
+    const {publicNewsPage,homeNews}=load('src/lib/news/query.ts',{'@prisma/client':{Prisma},'@/lib/db':{prisma:{$queryRaw:async query=>{if(broken)throw Error('Database unavailable');return /count\(\*\)/i.test(query.text)?[{total:0}]:[]}}},'./live':{liveSpanishNews:async()=>live}});
+    const result=await publicNewsPage({scope:'chile'});
+    assert.equal(result.unavailable,false);assert.deepEqual(result.items.map(item=>item.id),['source-cl']);
+    assert.equal(result.items[0].sourceUrl,live[0].sourceUrl);
+    assert.deepEqual((await homeNews()).map(item=>item.id),['source-cl','source-global']);
+    assert.equal((await publicNewsPage({category:'ONEPIECE'})).total,0);
+  }
+});

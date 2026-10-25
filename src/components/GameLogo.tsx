@@ -1,4 +1,5 @@
 import { GAMES, type GameId } from "@/lib/games";
+import { GameBrand } from "./GameBrand";
 
 /** Ancho de la placa en cada tamaño. Todas comparten la misma proporción. */
 const PLATE = {
@@ -38,14 +39,8 @@ export function GameLogo({
       className={`relative inline-flex shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/[0.06] ${PLATE[size]} ${className}`}
       style={{ aspectRatio: `${PLATE_W} / ${PLATE_H}` }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={meta.logo}
-        alt={meta.name}
-        loading="lazy"
-        decoding="async"
-        referrerPolicy="no-referrer"
-        className="object-contain"
+      <GameBrand
+        game={game}
         style={{
           width: `${(width / PLATE_W) * 100}%`,
           height: `${(h / PLATE_H) * 100}%`,

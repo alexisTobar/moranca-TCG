@@ -41,7 +41,7 @@ test('catálogo SQL: agrupa por impresión, elige stock/precio real, filtra y pa
       $queryRaw:async q=>(await db.query(q.text,q.values)).rows,
       listing:{findMany:async({where})=> (await db.query('SELECT * FROM "Listing" WHERE id=ANY($1::text[])',[where.id.in])).rows}
     };
-    const {catalogMarket}=load('src/lib/catalog-market.ts',{'server-only':{},'@prisma/client':{Prisma},'./db':{prisma},'./listing-kind':kinds,'./card-identity':identity,'./catalog':{LISTING_CARD_SELECT:{}}});
+    const {catalogMarket,homeCardMarket}=load('src/lib/catalog-market.ts',{'server-only':{},'@prisma/client':{Prisma},'./db':{prisma},'./listing-kind':kinds,'./card-identity':identity,'./catalog':{LISTING_CARD_SELECT:{}}});
     const base={type:'SINGLE',sort:'precio-asc',page:1};
     const result=await catalogMarket(base);
     assert.equal(result.total,4);
@@ -49,14 +49,20 @@ test('catálogo SQL: agrupa por impresión, elige stock/precio real, filtra y pa
     const group=result.listings.find(x=>x.id==='b1');
     assert.equal(group.market.stock,5);assert.equal(group.market.sellers,2);
     assert.equal(result.listings.find(x=>x.id==='manual-b').market.stock,3);
+    const home=await homeCardMarket(12);
+    assert.equal(home.filter(card=>card.market.identity===group.market.identity).length,1);
+    assert.equal(home.find(card=>card.market.identity===group.market.identity).id,'b1');
+    assert.equal(home.find(card=>card.id==='b1').market.sellers,2);
+    assert.equal(home.find(card=>card.id==='b1').market.stock,5);
+    assert.ok(home.every(card=>card.stock>0&&!['blocked','buyer'].includes(card.sellerId)));
     assert.deepEqual((await catalogMarket({...base,type:'SEALED'})).listings.map(x=>x.id),['box']);
     assert.deepEqual((await catalogMarket({...base,type:'DECK'})).listings.map(x=>x.id),['deck']);
     await insert('legacy-warrior',null,10000,1,'a','SEALED',null,'Imperio','Mazo Guerrero formato Imperio');
     await insert('legacy-dragon',null,7000,1,'a','SEALED',null,'Imperio','Mazo Dragón formato Imperio');
     await insert('deck-box',null,9000,1,'a','SEALED',null,null,'Deck box rígido');
-    assert.deepEqual((await catalogMarket({...base,type:'DECK'})).listings.map(x=>x.id),['deck','legacy-dragon','legacy-warrior']);
-    assert.equal((await catalogMarket({...base,type:'DECK'})).listings.find(x=>x.id==='legacy-dragon').type,'DECK');
-    assert.deepEqual((await catalogMarket({...base,type:'SEALED'})).listings.map(x=>x.id),['box','deck-box']);
+    assert.deepEqual((await catalogMarket({...base,type:'DECK'})).listings.map(x=>x.id),['deck']);
+    assert.deepEqual((await catalogMarket({...base,type:'SEALED'})).listings.map(x=>x.id),['box','legacy-dragon','deck-box','legacy-warrior']);
+    assert.equal(kinds.publicListingType('SEALED','Mazo Guerrero formato Imperio'),'SEALED');
 
     assert.equal((await catalogMarket({...base,type:'ACCESSORY'})).total,2);
     assert.equal((await catalogMarket({...base,type:'ACCESSORY',game:'magic',language:'JP'})).total,2);

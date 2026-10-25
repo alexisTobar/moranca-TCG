@@ -63,6 +63,7 @@ export const listingBaseSchema = z.object({
 });
 
 export const listingSchema = listingBaseSchema
+  .refine(data => data.type !== "DECK" || data.status !== "ACTIVE" || data.deckCards.length > 0, {message:"Agrega las cartas que componen el mazo antes de publicarlo.",path:["deckCards"]})
   .refine(data => data.type !== "ACCESSORY" || (data.description?.length ?? 0) <= 500, {message:"La descripción corta admite hasta 500 caracteres.",path:["description"]})
   .refine(data => data.game !== "generic" || data.type === "ACCESSORY", { message: "Selecciona un juego para cartas, mazos y sellados.", path: ["game"] })
   .refine((data) => data.offerPrice == null || data.offerPrice < data.price, {
