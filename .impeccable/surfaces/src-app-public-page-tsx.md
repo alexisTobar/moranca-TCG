@@ -13,5 +13,8 @@ OWN-WORLD: Marco navy #080b16, mesa de juego azul #152a3b, blanco, dorado #e6b94
 STORY: Qué puedo comprar, qué juegos hay, qué acaba de publicarse, quién vende, cómo armo mi deck y cómo pago. Sellados conserva los preconstruidos; Mazos son decks construidos por el vendedor con lista.
 FIRST VIEWPORT: Logo de 88px, campaña fotográfica horizontal de mesa de juego con título breve y dos acciones reales, seguida de cuatro entradas descriptivas a categorías. La vitrina y los juegos continúan la portada, no sustituyen toda la página.
 FORM: Campaña de tienda, índice de categorías, catálogo real, noticias/agenda, comunidad, constructor de mazos y guía de compra. La fotografía ambienta; no representa stock. seed: none (unavailable).
-SIGNATURE: Apertura breve de la composición de portada con clip-path; rail manual con snap, flechas y teclado. Sin cartas flotantes; movimiento reducido respetado y contenido visible sin JavaScript.
+SIGNATURE: Cámara lenta sobre la mesa durante 12 s, con pausa/reanudación, detención fuera de pantalla y pestaña oculta. Entrada de portada y cambio de categoría de 320 ms con clip-path. Rail manual con snap, flechas y teclado. Roboto explícito en el body; movimiento reducido sin desplazamientos ni bucles.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+
+## Extensión del 25-10-2026
+El usuario pide movimiento perceptible y Roboto. Un único movimiento ambiental queda acotado a la fotografía; títulos y acciones permanecen fijos. Transiciones de categoría explican el cambio de inventario. La lista de mazo usa una etiqueta de cantidad de alto contraste y contador central con controles de 44 px. Comparación de funcionalidades del HTML de TCGmatch documentada en docs/comparacion-tcgmatch.md, sin prometer módulos pendientes.

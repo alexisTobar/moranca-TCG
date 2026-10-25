@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-25T16:25:08.088Z",
+  "generatedAt": "2026-10-25T16:45:58.607Z",
   "title": "Design System: TCG Cardeck",
   "extensions": {
     "colorMeta": {
@@ -53,6 +53,10 @@
       "price": {
         "displayName": "Precio CLP",
         "purpose": "Cifras tabulares CLP: 20 px en vitrina del inicio; token compartido 21 px."
+      },
+      "body": {
+        "displayName": "Roboto aplicado",
+        "purpose": "next/font/google expone bodyFont.variable en html y bodyFont.className en body; verificado en estilos calculados del cuerpo y controles."
       }
     },
     "shadows": [
@@ -79,9 +83,24 @@
         "purpose": "Transición compartida de campos."
       },
       {
-        "name": "campaign-unfold",
-        "value": "cardeck-unfold .8s cubic-bezier(.16,1,.3,1) both",
-        "purpose": "Clip-path inset(0 0 15% 0) y translateY(10px) a reposo; sin animación con movimiento reducido, contenido visible sin JavaScript."
+        "name": "tabletop-camera",
+        "value": "cardeck-tabletop-camera 12s ease-in-out infinite alternate",
+        "purpose": "Fotografía: scale(1.025) translate3d(-.5%,0,0) a scale(1.12) translate3d(1%,0,0). Títulos fijos. Pausa CSS inicial; corre solo visible, documento activo, sin movimiento reducido y sin pausa manual. Botón Pausar/Reanudar."
+      },
+      {
+        "name": "showcase-category",
+        "value": "320ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "WAAPI al cambiar categoría: opacity .4 a 1 y clip-path inset(0 12% 0 0) a inset(0); sin animación inicial ni autoplay; desactivado con movimiento reducido."
+      },
+      {
+        "name": "home-link-arrow",
+        "value": "transform .2s cubic-bezier(.16,1,.3,1)",
+        "purpose": "Desplazamiento 5 px en hover/focus de enlaces de categoría/sección; ninguno con movimiento reducido."
+      },
+      {
+        "name": "faq-height",
+        "value": "height .28s cubic-bezier(.16,1,.3,1), content-visibility .28s allow-discrete",
+        "purpose": "Apertura de details solo bajo @supports(interpolate-size:allow-keywords); apertura nativa como fallback, sin transición con movimiento reducido."
       }
     ],
     "breakpoints": [
@@ -116,6 +135,14 @@
       {
         "name": "campaign-large-screen",
         "value": "1800px"
+      },
+      {
+        "name": "deck-four-columns",
+        "value": "640px"
+      },
+      {
+        "name": "deck-six-columns",
+        "value": "1024px"
       }
     ],
     "verification": {
@@ -139,7 +166,35 @@
         "home-v2-mobile.png",
         "home-v2-user-2560.png"
       ],
-      "previousDirectoryEvidence": "Historical directory review: 390/1440 px, 120 synthetic profiles and 18-result pagination. Not homepage approval or a concurrency test."
+      "previousDirectoryEvidence": "Historical directory review: 390/1440 px, 120 synthetic profiles and 18-result pagination. Not homepage approval or a concurrency test.",
+      "motionAndQuantityPass": {
+        "scope": "Campaign motion, explicit Roboto application, showcase category feedback and deck quantity readability/interactions. No whole-site certification.",
+        "visualReview": "Ship conditional on documentation and final production build; both completed. No additional UI changes requested.",
+        "browserChecks": [
+          "Computed camera movement; pause freezes and resume restarts.",
+          "Offscreen camera stops; reduced-motion camera animation is none.",
+          "Actual computed Roboto on body and quantity controls.",
+          "Category transition animates normally and is absent with reduced motion.",
+          "Quantity 2 to 3 to 2; total 5; subtract from 1 removes card.",
+          "44 px quantity controls; plus disabled at 99.",
+          "No overflow at 390 px; no browser errors."
+        ],
+        "regressionTests": 42,
+        "typecheck": "Passed in this scoped pass.",
+        "productionBuild": "Passed, exit 0; QA route exactly restored.",
+        "evidenceFiles": [
+          "motion-home-desktop.png",
+          "motion-home-mobile.png",
+          "deck-quantities-desktop.png",
+          "deck-quantities-mobile.png"
+        ],
+        "recording": "cardeck-motion-preview.webm",
+        "productionBuildLog": "motion-quantities-build.log",
+        "dataBoundary": "Temporary QA route restored exactly. No database writes; existing local database placeholder. No deployment claimed.",
+        "comparison": "docs/comparacion-tcgmatch.md records available, partial and missing functions with source-HTML evidence; no pending modules claimed implemented.",
+        "assetBoundary": "No public raster created or changed in this pass. Existing logo/tabletop provenance retained.",
+        "advisory": "Existing 11 px form card-name typography remains outside this scoped pass."
+      }
     },
     "assetProvenance": [
       {
@@ -201,6 +256,13 @@
       "description": "Dorado para explorar cartas o construir un mazo desde las secciones azul oscuro.",
       "html": "<a class=\"ds-home-action\" href=\"/cartas\">Explorar cartas</a>",
       "css": ".ds-home-action{display:inline-flex;align-items:center;min-height:44px;padding:12px 22px;border:0;border-radius:8px;background:#e6b94a;color:#171c26;font:600 14px/1.4 Roboto,Arial,sans-serif;text-decoration:none;transition:transform .18s ease,background .2s ease}.ds-home-action:hover{background:#f1d27a;transform:translateY(-1px)}.ds-home-action:active{transform:scale(.97)}.ds-home-action:focus-visible{outline:3px solid #b13a25;outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-home-action{transition:none}}"
+    },
+    {
+      "name": "Cantidades de mazo",
+      "kind": "custom",
+      "description": "Insignia compacta con solo el número, centrada sobre la carta; controles accesibles con salida central. En la aplicación, restar desde 1 elimina y sumar se limita a 99.",
+      "html": "<div class=\"ds-deck-quantity\"><span class=\"ds-copy-badge\">2</span><div class=\"ds-quantity-controls\" role=\"group\" aria-label=\"Copias de la carta\"><button type=\"button\" aria-label=\"Quitar copia\">−</button><output aria-label=\"Cantidad\" aria-live=\"polite\">2</output><button type=\"button\" aria-label=\"Agregar copia\">+</button></div></div>",
+      "css": ".ds-deck-quantity{position:relative;min-width:140px;padding-top:52px;font-family:Roboto,Arial,sans-serif}.ds-copy-badge{position:absolute;left:50%;top:4px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:2px 5px;border:1px solid #ffffffcc;border-radius:5px;background:#080b16;color:#fff;font:700 12px/1.3 Roboto,Arial,sans-serif;font-variant-numeric:tabular-nums}.ds-quantity-controls{display:grid;grid-template-columns:44px minmax(24px,1fr) 44px;align-items:stretch;border-top:1px solid #d8dee7;background:#f4f5f7}.ds-quantity-controls button{display:grid;place-items:center;min-width:44px;min-height:44px;border:0;background:#fff;color:#171c26;font-size:22px;font-weight:600;cursor:pointer}.ds-quantity-controls button:hover{background:#eceff4}.ds-quantity-controls button:active{background:#d8dee7}.ds-quantity-controls button:focus-visible{position:relative;outline:2px solid #b13a25;outline-offset:-3px}.ds-quantity-controls button:disabled{opacity:.35;cursor:default}.ds-quantity-controls output{display:grid;place-items:center;min-width:0;color:#080b16;font-size:18px;font-weight:750;font-variant-numeric:tabular-nums;border-inline:1px solid #d8dee7}"
     }
   ],
   "narrative": {
@@ -211,7 +273,9 @@
       "Un único buscador visible en cabecera; vitrina manual sin autoplay.",
       "Cinco productos desde 1280 px, cuatro hasta 1279 px, tres hasta 900 px y 72% de ancho hasta 639 px.",
       "SINGLE agrupado por identidad y menor precio disponible; SEALED conserva preconstruidos de fábrica.",
-      "Actualidad y agenda visibles con fuente, fecha y fallback explícito."
+      "Actualidad y agenda visibles con fuente, fecha y fallback explícito.",
+      "Cámara de campaña visible y pausable; títulos fijos y movimiento reducido respetado.",
+      "Cantidades sobre insignia oscura y controles de 44 px; límite 99."
     ],
     "rules": [],
     "dos": [
@@ -220,7 +284,9 @@
       "Do conservar márgenes en pantallas grandes, foco visible y navegación manual accesible.",
       "Do mantener un único buscador visible en cabecera.",
       "Do exigir lista de cartas y cantidades al publicar DECK; no reclasificar SEALED por palabras del nombre.",
-      "Do mostrar precio mínimo, stock y vendedores agregados por identidad de carta."
+      "Do mostrar precio mínimo, stock y vendedores agregados por identidad de carta.",
+      "Do conservar títulos fijos y controles de pausa en el bucle de campaña.",
+      "Do mostrar cantidades con contraste oscuro/blanco y controles de al menos 44 px."
     ],
     "donts": [
       "Don't reintroducir la escena de cartas flotantes o la composición de texto junto a cartas en el inicio.",

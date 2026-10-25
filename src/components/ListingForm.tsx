@@ -139,7 +139,7 @@ export function ListingForm({
         const idx = v.deckCards.findIndex((c) => c.externalId === card.externalId);
         if (idx >= 0) {
           const next = [...v.deckCards];
-          next[idx] = { ...next[idx], quantity: next[idx].quantity + 1 };
+          next[idx] = { ...next[idx], quantity: Math.min(99,next[idx].quantity + 1) };
           return { ...v, deckCards: next };
         }
         return {
@@ -185,7 +185,7 @@ export function ListingForm({
       const next = [...v.deckCards];
       const q = next[index].quantity + delta;
       if (q <= 0) next.splice(index, 1);
-      else next[index] = { ...next[index], quantity: q };
+      else next[index] = { ...next[index], quantity: Math.min(99,q) };
       return { ...v, deckCards: next };
     });
   }
@@ -401,7 +401,7 @@ export function ListingForm({
               Busca las cartas arriba y agrégalas para construir tu deck. Los mazos de fábrica sin abrir se publican en Sellados.
             </p>
           ) : (
-            <div className="mt-4 grid grid-cols-3 gap-2.5 sm:grid-cols-5 lg:grid-cols-7">
+            <div className="deck-builder-cards mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
               {values.deckCards.map((card, i) => (
                 <div
                   key={`${card.externalId}-${i}`}
@@ -418,26 +418,26 @@ export function ListingForm({
                         unoptimized
                       />
                     )}
-                    <span className="absolute right-1 top-1 rounded bg-ink-950/90 px-1.5 py-0.5 text-[10px] font-bold text-paper">
-                      ×{card.quantity}
+                    <span className="deck-copy-badge" aria-hidden="true">
+                      {card.quantity}
                     </span>
                   </div>
-                  <p className="line-clamp-2 px-1 py-1 text-[9px] leading-tight text-ink-300">
+                  <p className="line-clamp-2 min-h-10 px-2 py-1.5 text-[11px] leading-tight text-ink-300">
                     {card.name}
                   </p>
-                  <div className="flex border-t border-ink-800">
+                  <div className="deck-quantity-controls" role="group" aria-label={`Copias de ${card.name}`}>
                     <button
                       type="button"
                       onClick={() => changeQty(i, -1)}
-                      className="flex-1 py-1 text-[12px] text-ink-400 transition hover:bg-rose-500/20 hover:text-rose-600"
-                      aria-label={`Quitar copia de ${card.name}`}
+                      aria-label={card.quantity===1?`Quitar ${card.name} del mazo`:`Quitar copia de ${card.name}`}
                     >
                       −
                     </button>
+                    <output aria-label={`Cantidad de ${card.name}`} aria-live="polite">{card.quantity}</output>
                     <button
                       type="button"
                       onClick={() => changeQty(i, 1)}
-                      className="flex-1 border-l border-ink-800 py-1 text-[12px] text-ink-400 transition hover:bg-ink-850 hover:text-carbon"
+                      disabled={card.quantity>=99}
                       aria-label={`Agregar copia de ${card.name}`}
                     >
                       +

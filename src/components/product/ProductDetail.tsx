@@ -433,11 +433,9 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
                           <ImageOff className="h-6 w-6" strokeWidth={1.5} />
                         </div>
                       )}
-                      {card.quantity > 1 && (
-                        <span className="absolute right-1 top-1 rounded-md bg-ink-950/90 px-1.5 py-0.5 text-[10px] font-bold text-paper">
-                          ×{card.quantity}
-                        </span>
-                      )}
+                      <span className="deck-copy-badge">
+                        {card.quantity}<span className="sr-only"> {card.quantity===1?"copia":"copias"}</span>
+                      </span>
                     </div>
                     <p className="line-clamp-2 px-1.5 py-1 text-[10px] leading-tight text-ink-300">
                       {card.name}

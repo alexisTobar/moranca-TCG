@@ -1108,3 +1108,24 @@ img,svg { max-width:100%; }
 .cardeck-event-art time span {font-size:16px;color:#e6b94a;margin-top:6px;}
 .cardeck-event-art > span {font-size:17px;max-width:9ch;line-height:1.4;font-weight:600;}
 @media(max-width:900px){.cardeck-event-art{gap:15px}.cardeck-event-art time{padding-right:15px}.cardeck-event-art strong{font-size:52px}.cardeck-event-art > span{font-size:15px}}
+
+/* Tabletop camera motion: one focal loop, entirely user controllable. */
+.cardeck-campaign-stage .cardeck-campaign-art {animation:cardeck-tabletop-camera 12s ease-in-out infinite alternate;animation-play-state:paused;transform-origin:50% 50%;}
+.cardeck-campaign-stage[data-motion=running] .cardeck-campaign-art {animation-play-state:running;will-change:transform;}
+.campaign-motion-control {position:absolute;z-index:2;right:16px;bottom:16px;display:flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:9px 12px;border:1px solid #ffffff66;border-radius:8px;background:#152a3be6;color:#fff;font:500 12px/1.4 var(--font-body),Roboto,sans-serif;}
+.campaign-motion-control:hover {background:#152a3b;}
+.cardeck-category-index strong svg,.cardeck-section-heading > a svg {transition:transform .2s cubic-bezier(.16,1,.3,1);flex-shrink:0;}
+.cardeck-category-index a:is(:hover,:focus-visible) svg,.cardeck-section-heading > a:is(:hover,:focus-visible) svg {transform:translateX(5px);}
+@keyframes cardeck-tabletop-camera {from{transform:scale(1.025) translate3d(-.5%,0,0)}to{transform:scale(1.12) translate3d(1%,0,0)}}
+@supports(interpolate-size:allow-keywords){.cardeck-faq{interpolate-size:allow-keywords}.cardeck-faq details::details-content{height:0;overflow:clip;transition:height .28s cubic-bezier(.16,1,.3,1),content-visibility .28s allow-discrete}.cardeck-faq details[open]::details-content{height:auto}}
+@media(prefers-reduced-motion:reduce){.cardeck-campaign-stage .cardeck-campaign-art{animation:none;transform:none}.campaign-motion-control{display:none}.cardeck-category-index svg,.cardeck-section-heading svg{transform:none!important}}
+
+/* Deck quantities stay legible on artwork and on a light interface. */
+.deck-copy-badge {position:absolute;left:50%;top:4px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:2px 5px;border:1px solid #ffffffcc;border-radius:5px;background:#080b16;color:#fff;font:700 12px/1.2 var(--font-body),Roboto,sans-serif;font-variant-numeric:tabular-nums;}
+.deck-quantity-controls {display:grid;grid-template-columns:44px minmax(24px,1fr) 44px;align-items:stretch;border-top:1px solid #d8dee7;background:#f4f5f7;}
+.deck-quantity-controls button {display:grid;place-items:center;min-width:44px;min-height:44px;background:#fff;color:#171c26;font-size:22px;font-weight:600;}
+.deck-quantity-controls button:hover {background:#eceff4;}
+.deck-quantity-controls button:focus-visible {position:relative;outline:2px solid #b13a25;outline-offset:-3px;}
+.deck-quantity-controls button:disabled {opacity:.35;cursor:default;}
+.deck-quantity-controls output {display:grid;place-items:center;min-width:0;color:#080b16;font-size:18px;font-weight:750;font-variant-numeric:tabular-nums;border-inline:1px solid #d8dee7;}
+@media(prefers-reduced-motion:reduce){.cardeck-faq details::details-content{transition:none}}

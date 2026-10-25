@@ -20,6 +20,7 @@ export function HomeShowcase({items,unavailable=false}:{items:ListingCardData[];
   const [previous,setPrevious]=useState(false);
   const [next,setNext]=useState(false);
   const track=useRef<HTMLUListElement>(null);
+  const lastCategory=useRef(category);
   const products=[...new Map(items.filter(item=>item.stock>0).map(item=>[item.id,{...item,type:publicListingType(item.type,item.title)}])).values()];
   const groups=CATEGORIES.slice(1).map(c=>products.filter(item=>item.type===c.value));
   const mixed=Array.from({length:Math.max(0,...groups.map(group=>group.length))},(_,index)=>groups.flatMap(group=>group[index]?[group[index]]:[])).flat();
@@ -27,7 +28,12 @@ export function HomeShowcase({items,unavailable=false}:{items:ListingCardData[];
 
   useEffect(()=>{
     const element=track.current;
+    const changed=lastCategory.current!==category;
+    lastCategory.current=category;
     if(!element)return;
+    if(changed&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      element.animate([{opacity:.4,clipPath:"inset(0 12% 0 0)"},{opacity:1,clipPath:"inset(0)"}],{duration:320,easing:"cubic-bezier(.16,1,.3,1)"});
+    }
     element.scrollLeft=0;
     const update=()=>{setPrevious(element.scrollLeft>2);setNext(element.scrollLeft+element.clientWidth<element.scrollWidth-2);};
     const observer=new ResizeObserver(update);

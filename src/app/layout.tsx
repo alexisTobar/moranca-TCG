@@ -52,7 +52,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es-CL" className={bodyFont.variable}>
-      <body className="min-h-dvh antialiased">
+      <body className={`${bodyFont.className} min-h-dvh antialiased`}>
         {children}
         <UsageConsent />
         <Toaster richColors position="top-right" />
