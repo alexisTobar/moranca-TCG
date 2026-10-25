@@ -4,6 +4,7 @@ import { clp } from "@/lib/format";
 import { GAMES, isGameId } from "@/lib/games";
 import { AddToCartMini } from "./cart/AddToCart";
 import { CardArtwork } from "./CardArtwork";
+import { CardTilt } from "./CardTilt";
 import { cardMarketHref } from "@/lib/card-identity";
 
 export interface ListingCardData {
@@ -24,10 +25,10 @@ export function ListingCard({ listing: original, href }: { listing: ListingCardD
   const price = hasOffer ? listing.offerPrice! : listing.price;
   const target = href ?? (listing.market ? cardMarketHref(listing.game, listing.market.identity) : `/producto/${listing.slug}`);
   return <article className="listing-sheet">
-    <Link href={target} className="listing-art" style={listing.type === "ACCESSORY" ? {aspectRatio:"1 / 1"} : undefined} aria-label={`Ver ${listing.title}`}>
+    <CardTilt><Link href={target} className="listing-art" style={listing.type === "ACCESSORY" ? {aspectRatio:"1 / 1"} : undefined} aria-label={`Ver ${listing.title}`}>
       <CardArtwork src={listing.imageUrl} alt={listing.title} sizes="(max-width:639px) 45vw, (max-width:1023px) 30vw, 230px" className="object-contain" />
       {listing.stock <= 0 && <span className="listing-sold">Vendido</span>}
-    </Link>
+    </Link></CardTilt>
     <div className="listing-copy">
       <p className="listing-game">{listing.type === "ACCESSORY" ? "Accesorios" : isGameId(listing.game) ? GAMES[listing.game].short : listing.game}{listing.type !== "ACCESSORY" && ` · ${TYPE_LABEL[listing.type] || listing.type}`}{listing.isFoil ? " · Foil" : ""}</p>
       <h3><Link href={target}>{listing.title}</Link></h3>

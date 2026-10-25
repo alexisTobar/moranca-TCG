@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CardArtwork } from "./CardArtwork";
+import { CardTilt } from "./CardTilt";
 import type { ListingCardData } from "./ListingCard";
 import { publicListingType } from "@/lib/listing-kind";
 import { clp } from "@/lib/format";
@@ -66,8 +67,8 @@ export function HomeShowcase({items,unavailable=false}:{items:ListingCardData[];
       {visible.map((item,index)=>{
         const href=item.market?cardHref(item.game,item.market.identity):item.type === "SINGLE" && item.externalId?cardHref(item.game,item.externalId):`/producto/${item.slug}`;
         const offer=item.offerPrice!=null&&item.offerPrice<item.price;
-        return <li key={item.id} className="home-market-product">
-          <Link href={href} className="home-market-image" aria-label={`Ver ${item.title}`}><CardArtwork src={item.imageUrl} alt={item.title} sizes="(max-width:639px) 62vw, (max-width:1023px) 32vw, 240px" className="object-contain" priority={index<3}/></Link>
+        return <li key={item.id} className="home-market-product" style={{"--i":Math.min(index,8)} as React.CSSProperties}>
+          <CardTilt><Link href={href} className="home-market-image" aria-label={`Ver ${item.title}`}><CardArtwork src={item.imageUrl} alt={item.title} sizes="(max-width:639px) 62vw, (max-width:1023px) 32vw, 240px" className="object-contain" priority={index<3}/></Link></CardTilt>
           <div className="home-market-product-copy">
             <p>{item.type==="ACCESSORY"?"Accesorios":gameName(item.game)}</p>
             <h3><Link href={href}>{item.title}</Link></h3>

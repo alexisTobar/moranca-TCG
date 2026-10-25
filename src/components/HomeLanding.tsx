@@ -44,13 +44,14 @@ export function HomeLanding({latest,byGame,sellers,news,paymentWindowHours,unava
   return <div className="cardeck-home">
     <JsonLd data={[
       {"@context":"https://schema.org","@type":"Organization","@id":`${base}/#organization`,name:SITE_NAME,url:base,logo:`${base}/tcg-cardeck-logo.png`,description:"Marketplace chileno de cartas coleccionables, mazos y accesorios TCG.",areaServed:{"@type":"Country",name:"Chile"}},
-      {"@context":"https://schema.org","@type":"WebSite","@id":`${base}/#website`,name:SITE_NAME,url:base,inLanguage:"es-CL",publisher:{"@id":`${base}/#organization`}},
+      {"@context":"https://schema.org","@type":"WebSite","@id":`${base}/#website`,name:SITE_NAME,url:base,inLanguage:"es-CL",publisher:{"@id":`${base}/#organization`},potentialAction:{"@type":"SearchAction",target:{"@type":"EntryPoint",urlTemplate:`${base}/cartas?q={search_term_string}`},"query-input":"required name=search_term_string"}},
+      ...(latest.some(item=>item.stock>0)?[{"@context":"https://schema.org","@type":"ItemList",name:"Recién publicados en TCG Cardeck",itemListElement:latest.filter(item=>item.stock>0).slice(0,10).map((item,index)=>({"@type":"ListItem",position:index+1,item:{"@type":"Product",name:item.title,...(item.imageUrl?.startsWith("https://")?{image:item.imageUrl}:{}),url:`${base}/producto/${item.slug}`,offers:{"@type":"Offer",priceCurrency:"CLP",price:item.offerPrice!=null&&item.offerPrice<item.price?item.offerPrice:item.price,availability:"https://schema.org/InStock",itemCondition:item.condition==="NEW"?"https://schema.org/NewCondition":"https://schema.org/UsedCondition"}}}))}]:[]),
       {"@context":"https://schema.org","@type":"CollectionPage",name:"Cartas y productos TCG en Chile",url:base,inLanguage:"es-CL",isPartOf:{"@id":`${base}/#website`},about:GAME_LIST.map(game=>({"@type":"Thing",name:game.name})),mainEntity:{"@type":"ItemList",itemListElement:CATEGORIES.map((category,index)=>({"@type":"ListItem",position:index+1,name:category.title,url:`${base}${category.href}`}))}},
       faqJsonLd(faqs),
     ]}/>
     <section className="cardeck-campaign max-w-7xl" aria-labelledby="home-title">
       <CampaignMotion>
-        <Image src="/cardeck-tabletop.png" alt="" fill priority sizes="(max-width:1440px) 100vw, 1440px" className="cardeck-campaign-art"/>
+        <Image src="/cardeck-tabletop.webp" alt="" fill priority sizes="(max-width:1440px) 100vw, 1440px" className="cardeck-campaign-art"/>
         <div className="cardeck-campaign-shade"/>
         <div className="cardeck-campaign-copy">
           <h1 id="home-title">Tu próxima jugada<br/>empieza aquí.</h1>
