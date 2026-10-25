@@ -12,3 +12,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 ## Extensión del 25-10-2026
 El usuario pide movimiento perceptible y Roboto. Un único movimiento ambiental queda acotado a la fotografía; títulos y acciones permanecen fijos. Transiciones de categoría explican el cambio de inventario. La lista de mazo usa una etiqueta de cantidad de alto contraste y contador central con controles de 44 px. Comparación de funcionalidades del HTML de TCGmatch documentada en docs/comparacion-tcgmatch.md, sin prometer módulos pendientes.
+
+## Corrección del 25-10-2026 (tarde)
+El usuario pide un front moderno que no parezca generado y que luzca las cartas en venta. Se reemplaza la foto centrada por "la mesa": titular grande alineado a la izquierda y una mano de hasta 5 cartas reales con imagen, repartidas una sola vez al cargar (CSS, sin JS). Hover/foco levanta la carta y muestra el precio. Si hay menos de 3 cartas con imagen, vuelve la campaña fotográfica. Se retiran las entradas fade-up por sección.

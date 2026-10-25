@@ -5,7 +5,8 @@ const SESSION_COOKIE = "dreamdeck_session";
 
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  // unsafe-eval solo lo necesita el modo desarrollo de Next (recarga en caliente).
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://cards.scryfall.io https://images.pokemontcg.io https://images.scrydex.com https://static.dotgg.gg https://api.myl.cl https://assets.tcgdex.net https://*.supabase.co https://upload.wikimedia.org https://static.wikia.nocookie.net https://en.onepiece-cardgame.com https://play.pokemon.com https://assets.pokemon.com https://img.pokemondb.net https://i0.wp.com https://i1.wp.com https://i2.wp.com https://bleedingcool.com",
   "font-src 'self' data:",

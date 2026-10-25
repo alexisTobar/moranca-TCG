@@ -5,3 +5,7 @@ out
 .env*.local
 *.tsbuildinfo
 next-env.d.ts.bak
+
+# Salidas locales de QA
+qa-*.log
+qa-*.png

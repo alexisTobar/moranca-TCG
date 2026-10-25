@@ -17,6 +17,7 @@ import {
   Flag,
   ClipboardList,
   BarChart3,
+  TrendingUp,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { CountBadge, usePanelCounts, type Counts } from "@/components/panel/PanelCounts";
@@ -43,6 +44,7 @@ const ITEMS: Array<{
   { href: "/panel/reportes", label: "Reportes", icon: Flag, adminOnly: true, badge: "reports" },
   { href: "/panel/auditoria", label: "Auditoría", icon: ClipboardList, adminOnly: true },
   { href: "/panel/consentimientos", label: "Consentimientos", icon: ShieldCheck, adminOnly: true },
+  { href: "/panel/mercado", label: "Análisis de mercado", icon: TrendingUp, adminOnly: true },
   { href: "/panel/analitica", label: "Analítica y respaldos", icon: BarChart3, adminOnly: true },
   { href: "/panel/configuracion", label: "Pagos y descuentos", icon: ShieldCheck, adminOnly: true },
 ];

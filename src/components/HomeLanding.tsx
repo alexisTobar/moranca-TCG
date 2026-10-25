@@ -5,6 +5,8 @@ import { GAME_LIST } from "@/lib/games";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { HomeShowcase } from "@/components/HomeShowcase";
 import { CampaignMotion } from "@/components/CampaignMotion";
+import { HeroHand } from "@/components/HeroHand";
+import { publicListingType } from "@/lib/listing-kind";
 import { GameBrand } from "@/components/GameBrand";
 import { StoreShowcase } from "@/components/store/StoreShowcase";
 import { FaqList, faqJsonLd, type FaqItem } from "@/components/FaqList";
@@ -41,6 +43,7 @@ export function HomeLanding({latest,byGame,sellers,news,paymentWindowHours,unava
     {q:"¿Cómo publico mis cartas o un mazo?",a:"Crea una cuenta y solicita acceso de vendedor. Desde tu panel puedes buscar cartas en el catálogo, agregar fotos propias, fijar precio y stock o construir un mazo con sus cartas y cantidades para venderlo completo."},
   ];
   const base=siteUrl();
+  const hand=latest.filter(item=>item.imageUrl&&item.stock>0&&publicListingType(item.type,item.title)==="SINGLE").slice(0,5);
   return <div className="cardeck-home">
     <JsonLd data={[
       {"@context":"https://schema.org","@type":"Organization","@id":`${base}/#organization`,name:SITE_NAME,url:base,logo:`${base}/tcg-cardeck-logo.png`,description:"Marketplace chileno de cartas coleccionables, mazos y accesorios TCG.",areaServed:{"@type":"Country",name:"Chile"}},
@@ -50,7 +53,14 @@ export function HomeLanding({latest,byGame,sellers,news,paymentWindowHours,unava
       faqJsonLd(faqs),
     ]}/>
     <section className="cardeck-campaign max-w-7xl" aria-labelledby="home-title">
-      <CampaignMotion>
+      {hand.length>=3?<div className="hero-table">
+        <div className="hero-table-copy">
+          <h1 id="home-title">Tu próxima jugada empieza aquí.</h1>
+          <p>Cartas, sellados y mazos de vendedores de todo Chile. Compara precios, elige a quién comprarle y paga directo al vendedor.</p>
+          <div><Link href="/cartas" className="btn btn-gold btn-lg">Explorar cartas</Link><Link href="/explorar" className="campaign-stores-link">Ver tiendas por región</Link></div>
+        </div>
+        <HeroHand cards={hand}/>
+      </div>:      <CampaignMotion>
         <Image src="/cardeck-tabletop.webp" alt="" fill priority sizes="(max-width:1440px) 100vw, 1440px" className="cardeck-campaign-art"/>
         <div className="cardeck-campaign-shade"/>
         <div className="cardeck-campaign-copy">
@@ -58,7 +68,7 @@ export function HomeLanding({latest,byGame,sellers,news,paymentWindowHours,unava
           <p>Compra, vende y colecciona cartas TCG en Chile.<br className="hidden sm:block"/> Encuentra tu juego, tu vendedor y las cartas que te faltan.</p>
           <div><Link href="/cartas" className="btn btn-gold btn-lg">Explorar cartas <ArrowRight size={18}/></Link><Link href="/explorar" className="campaign-stores-link">Conocer las tiendas</Link></div>
         </div>
-      </CampaignMotion>
+      </CampaignMotion>}
       <nav className="cardeck-category-index" aria-label="Qué puedes comprar en TCG Cardeck">
         {CATEGORIES.map(category=><Link key={category.href} href={category.href}><strong>{category.title}<ArrowRight size={17} aria-hidden="true"/></strong><span>{category.description}</span></Link>)}
       </nav>
