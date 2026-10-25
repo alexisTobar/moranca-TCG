@@ -1,3 +1,4 @@
+import { catalogPage } from "@/lib/catalog-query";
 import Link from "next/link";
 import Image from "next/image";
 import { cookies } from "next/headers";
@@ -12,13 +13,18 @@ import { isStoreActive } from "@/lib/store";
 
 export const metadata: Metadata = {
   title: "Vendedores",
-  description: "Tiendas y coleccionistas que publican en Win Condition TCG.",
+  description: "Tiendas y coleccionistas que publican en TCG Cardeck.",
 };
 
 // Depende de la ubicación del visitante (cookie), así que no se puede cachear.
 export const dynamic = "force-dynamic";
 
-export default async function SellersPage() {
+const PAGE_SIZE=24;
+export default async function SellersPage({searchParams}:{searchParams:Promise<{page?:string}>}) {
+  const requested=catalogPage((await searchParams).page);
+  const total=await safeQuery(()=>prisma.user.count({where:{active:true,role:{in:["SELLER","ADMIN"]}}}),0);
+  const pages=Math.max(1,Math.ceil(total/PAGE_SIZE));
+  const page=Math.min(requested,pages);
   const sellers = await safeQuery(
     () =>
       prisma.user.findMany({
@@ -37,7 +43,9 @@ export default async function SellersPage() {
           store: { select: { status: true, planId: true, activeUntil: true } },
           _count: { select: { listings: { where: { status: "ACTIVE" } } } },
         },
-        orderBy: { createdAt: "asc" },
+        orderBy: [{name:"asc"},{id:"asc"}],
+        take:PAGE_SIZE,
+        skip:(page-1)*PAGE_SIZE,
       }),
     [] as Array<{
       id: string;
@@ -65,7 +73,7 @@ export default async function SellersPage() {
       const region = sellerRegion(s);
       return { ...s, st, region, hasStore: Boolean(s.store && isStoreActive(s.store)), near: Boolean(buyerRegion && region === buyerRegion) };
     })
-    // Primero los de tu región, después los que más venden.
+    // Dentro de la página, destacar los perfiles cercanos y con actividad.
     .sort((a, b) => Number(b.near) - Number(a.near) || b.st.sales - a.st.sales || b.st.reviews - a.st.reviews);
 
   return (
@@ -74,7 +82,7 @@ export default async function SellersPage() {
         <div>
           <h1 className="font-display text-3xl font-bold text-carbon">Vendedores</h1>
           <p className="mt-1 text-[13px] text-ink-400">
-            Perfiles habilitados para publicar en Win Condition TCG.
+            Perfiles habilitados para publicar en TCG Cardeck.
           </p>
         </div>
         <LocationPicker region={buyerRegion} />
@@ -163,6 +171,7 @@ export default async function SellersPage() {
           })}
         </div>
       )}
+      {pages>1&&<nav className="mt-8 flex items-center justify-center gap-4" aria-label="Páginas de vendedores">{page>1&&<Link href={`/vendedores?page=${page-1}`} className="btn btn-secondary">Anteriores</Link>}<span className="text-sm text-ink-400">Página {page} de {pages} · {total} perfiles</span>{page<pages&&<Link href={`/vendedores?page=${page+1}`} className="btn btn-secondary">Siguientes</Link>}</nav>}
     </div>
   );
 }

@@ -50,7 +50,7 @@ export async function sendVerificationEmail(user: { id: string; email: string; n
     const origin = await siteOrigin();
     await sendEmail({
       to: user.email,
-      subject: "Confirma tu email en Win Condition TCG",
+      subject: "Confirma tu email en TCG Cardeck",
       html: renderEmail(
         {
           heading: "Confirma tu email",

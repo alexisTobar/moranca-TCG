@@ -1,8 +1,8 @@
+import { listingTypeWhere } from "@/lib/listing-kind";
 import { homeNews } from "@/lib/news/query";
 import Link from "next/link";
 import type { Metadata } from "next";
-import Image from "next/image";
-import type { NewsCategory } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import {
   ArrowRight,
   Boxes,
@@ -24,7 +24,7 @@ import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
 import { discountPctFor, getSiteSettings } from "@/lib/site-settings";
 import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { Reveal } from "@/components/Reveal";
-import { HeroCards } from "@/components/HeroCards";
+import { HomeShowcase } from "@/components/HomeShowcase";
 import { NewsSlider, type NewsSlide } from "@/components/NewsSlider";
 import { GameLogo } from "@/components/GameLogo";
 import { StoreShowcase } from "@/components/store/StoreShowcase";
@@ -37,83 +37,18 @@ import { SITE_NAME, siteUrl } from "@/lib/seo";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: { absolute: "Win Condition TCG | Compra y vende cartas TCG en Chile" },
+  title: { absolute: "TCG Cardeck | Compra y vende cartas TCG en Chile" },
   description:
     "Marketplace chileno de cartas TCG: singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas. Stock reservado, pago por transferencia y envíos a todo Chile.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Win Condition TCG | Compra y vende cartas TCG en Chile",
+    title: "TCG Cardeck | Compra y vende cartas TCG en Chile",
     description: "Singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas. Stock reservado y envíos a todo Chile.",
     url: "/",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Win Condition TCG — cartas TCG en Chile" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "TCG Cardeck — cartas TCG en Chile" }],
   },
   twitter: { card: "summary_large_image" },
 };
-
-/** Una carta destacada por juego (todas caras o raras y de ediciones actuales). */
-const HERO_CARDS: Array<{
-  game: "magic" | "pokemon" | "onepiece" | "myl";
-  src: string;
-  alt: string;
-  name: string;
-  detail: string;
-}> = [
-  {
-    game: "magic",
-    src: "https://cards.scryfall.io/large/front/e/f/ef371352-ec8f-4da4-9085-67195068fb79.jpg",
-    alt: "Emeritus of Ideation // Ancestral Recall, carta de Magic",
-    name: "Ancestral Recall",
-    detail: "Secrets of Strixhaven",
-  },
-  {
-    game: "pokemon",
-    src: "https://assets.tcgdex.net/en/me/me02.5/276/high.webp",
-    alt: "Pikachu ex, carta de Pokémon",
-    name: "Pikachu ex",
-    detail: "Ascended Heroes",
-  },
-  {
-    game: "onepiece",
-    src: "https://static.dotgg.gg/onepiece/card/OP05-119.webp",
-    alt: "Monkey D. Luffy Gear 5, carta de One Piece",
-    name: "Monkey D. Luffy",
-    detail: "Gear 5 · OP-05",
-  },
-  {
-    game: "myl",
-    src: "https://api.myl.cl/static/cards/166/018.png",
-    alt: "Guerra Celestial, carta legendaria de Mitos y Leyendas",
-    name: "Guerra Celestial",
-    detail: "AyD Vigilantes",
-  },
-];
-
-const TYPE_TILES: Array<{
-  href: string;
-  title: string;
-  text: string;
-  icon: LucideIcon;
-}> = [
-  {
-    href: "/cartas?type=SINGLE",
-    title: "Singles",
-    text: "La carta exacta que buscas, con foto real del catálogo oficial.",
-    icon: Layers,
-  },
-  {
-    href: "/cartas?type=SEALED",
-    title: "Sellados",
-    text: "Sobres, displays y cajas sin abrir.",
-    icon: Boxes,
-  },
-  {
-    href: "/cartas?type=DECK",
-    title: "Mazos armados",
-    text: "Listos para jugar, con su lista carta por carta.",
-    icon: Swords,
-  },
-  { href: "/cartas?type=ACCESSORY", title: "Accesorios", text: "Protectores, portamazos, tapetes y todo para tu colección.", icon: Boxes },
-];
 
 const STEPS: Array<{ title: string; body: string; icon: LucideIcon }> = [
   {
@@ -139,6 +74,14 @@ const STEPS: Array<{ title: string; body: string; icon: LucideIcon }> = [
 ];
 
 export default async function HomePage() {
+  let catalogUnavailable=false;
+  const eligibleSeller:Prisma.UserWhereInput={active:true,role:{in:["SELLER","ADMIN"]}};
+  async function latestProducts():Promise<ListingCardData[]> {
+    try {
+      return await prisma.listing.findMany({where:{status:"ACTIVE",stock:{gt:0},seller:{active:true,role:{in:["SELLER","ADMIN"]}}},select:LISTING_CARD_SELECT,orderBy:[{featured:"desc"},{createdAt:"desc"}],take:16});
+    } catch {catalogUnavailable=true;return [];}
+  }
+
   const [byGame, latest, decks, sealed, accessories, sellers, counts, news, settings] = await Promise.all([
     // Se pide el top de cada juego por separado — si se pidiera un único top
     // global, un juego con muchas publicaciones (ej. Magic) desplazaría por
@@ -148,7 +91,7 @@ export default async function HomePage() {
         safeQuery(
           () =>
             prisma.listing.findMany({
-              where: { status: "ACTIVE", stock: { gt: 0 }, game: g.id },
+              where: { status: "ACTIVE", stock: { gt: 0 }, seller:eligibleSeller, game: g.id },
               select: LISTING_CARD_SELECT,
               orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
               take: 6,
@@ -157,20 +100,11 @@ export default async function HomePage() {
         )
       )
     ),
+    latestProducts(),
     safeQuery(
       () =>
         prisma.listing.findMany({
-          where: { status: "ACTIVE", stock: { gt: 0 } },
-          select: LISTING_CARD_SELECT,
-          orderBy: { createdAt: "desc" },
-          take: 12,
-        }),
-      [] as ListingCardData[]
-    ),
-    safeQuery(
-      () =>
-        prisma.listing.findMany({
-          where: { status: "ACTIVE", type: "DECK", stock: { gt: 0 } },
+          where: { status: "ACTIVE", AND:[listingTypeWhere("DECK")], seller:eligibleSeller, stock: { gt: 0 } },
           select: LISTING_CARD_SELECT,
           orderBy: { createdAt: "desc" },
           take: 6,
@@ -180,7 +114,7 @@ export default async function HomePage() {
     safeQuery(
       () =>
         prisma.listing.findMany({
-          where: { status: "ACTIVE", type: "SEALED", stock: { gt: 0 } },
+          where: { status: "ACTIVE", AND:[listingTypeWhere("SEALED")], seller:eligibleSeller, stock: { gt: 0 } },
           select: LISTING_CARD_SELECT,
           orderBy: { createdAt: "desc" },
           take: 6,
@@ -188,7 +122,7 @@ export default async function HomePage() {
       [] as ListingCardData[]
     ),
     safeQuery(() => prisma.listing.findMany({
-      where: { status: "ACTIVE", type: "ACCESSORY", stock: { gt: 0 } },
+      where: { status: "ACTIVE", type: "ACCESSORY", seller:eligibleSeller, stock: { gt: 0 } },
       select: LISTING_CARD_SELECT, orderBy: { createdAt: "desc" }, take: 6,
     }), [] as ListingCardData[]),
     safeQuery(
@@ -237,7 +171,7 @@ export default async function HomePage() {
 
   const faqs: FaqItem[] = [
     {
-      q: "¿Cómo compro cartas en Win Condition TCG?",
+      q: "¿Cómo compro cartas en TCG Cardeck?",
       a: "Buscas la carta, la agregas al carrito y confirmas la compra. Reservamos el stock a tu nombre, transfieres al vendedor con tu código único y subes el comprobante. El vendedor confirma el pago y despacha tu pedido.",
     },
     {
@@ -258,7 +192,7 @@ export default async function HomePage() {
     },
     {
       q: "¿Qué es una tienda premium?",
-      a: "Es tu propia vitrina dentro de Win Condition: con tu logo, banner y colores, solo tus productos, link corto y QR con tu logo, estadísticas y soporte directo. Conoce los planes en la página de tiendas.",
+      a: "Es tu propia vitrina dentro de TCG Cardeck: con tu logo, banner y colores, solo tus productos, link corto y QR con tu logo, estadísticas y soporte directo. Conoce los planes en la página de tiendas.",
     },
   ];
 
@@ -271,7 +205,7 @@ export default async function HomePage() {
             "@type": "Organization",
             name: SITE_NAME,
             url: siteUrl(),
-            logo: `${siteUrl()}/logo-full.png`,
+            logo: `${siteUrl()}/tcg-cardeck-logo.png`,
             description: "Marketplace chileno de cartas coleccionables TCG.",
             areaServed: "CL",
           },
@@ -290,85 +224,12 @@ export default async function HomePage() {
           faqJsonLd(faqs),
         ]}
       />
-      <section className="editorial-hero">
-        <div className="home-stage max-w-7xl">
-          <div className="home-copy">
-            <h1>La carta que falta.<br/><em>La jugada que viene.</em></h1>
-            <p>Tu próximo mazo empieza aquí. Compara cartas de tiendas y coleccionistas de todo Chile y encuentra tu mejor jugada.</p>
-            <form action="/cartas" className="editorial-search">
-              <Search size={20} aria-hidden="true"/><label htmlFor="hero-query" className="sr-only">Buscar cartas</label>
-              <input id="hero-query" name="q" type="search" placeholder="¿Qué carta estás buscando?" maxLength={120}/>
-              <button type="submit">Buscar <ArrowRight size={17}/></button>
-            </form>
-            <nav className="home-categories" aria-label="Tipo de producto"><Link href="/cartas">Cartas <ArrowRight size={16}/></Link><Link href="/cartas?type=SEALED">Sellados <ArrowRight size={16}/></Link><Link href="/cartas?type=DECK">Mazos <ArrowRight size={16}/></Link><Link href="/cartas?type=ACCESSORY">Accesorios <ArrowRight size={16}/></Link></nav>
-            <Link className="home-local-link" href="/explorar"><Store size={18}/> Encuentra tiendas cerca de ti <ArrowRight size={17}/></Link>
-          </div>
-          <div className="home-card-stage"><HeroCards cards={HERO_CARDS}/></div>
-        </div>
-      </section>
-      <section className="home-discovery max-w-7xl" aria-labelledby="nearby-title"><div><h2 id="nearby-title">Tu comunidad también juega cerca.</h2><p>Explora Chile por región y comuna. Descubre vendedores, sus juegos y el stock disponible.</p></div><Link href="/explorar">Buscar tiendas en el mapa <ArrowRight size={20}/></Link></section>
-      {/* JUEGOS */}
-      <section className="mx-auto max-w-7xl px-4 py-16">
-        <SectionTitle
-          eyebrow="Explora"
-          title="Elige tu TCG favorito"
-          subtitle="Cada juego con su catálogo, imágenes y filtros propios"
-        />
-        <Reveal className="stagger mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {GAME_LIST.map((g) => (
-            <GameTile key={g.id} game={g} count={countByGame.get(g.id) ?? 0} />
-          ))}
-        </Reveal>
+      <HomeShowcase items={[...latest,...decks,...sealed,...accessories]} unavailable={catalogUnavailable}/>
+      <nav className="home-game-links max-w-7xl" aria-label="Explorar por juego">
+        {GAME_LIST.map(game=><Link key={game.id} href={`/cartas?game=${game.id}`}>{game.name}</Link>)}
+      </nav>
 
-        <Reveal className="stagger mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {TYPE_TILES.map((t) => {
-            const Icon = t.icon;
-            return (
-              <Link
-                key={t.href}
-                href={t.href}
-                className="group flex items-start gap-4 border-b border-ink-700 py-5"
-              >
-                <span className="flex h-10 w-8 shrink-0 items-center justify-center text-ink-300">
-                  <Icon className="h-6 w-6" strokeWidth={1.6} />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center justify-between gap-2 font-display text-[16px] font-bold text-carbon">
-                    {t.title}
-                    <ArrowRight
-                      className="h-4 w-4 text-ink-500 transition group-hover:translate-x-1 group-hover:text-brand-600"
-                      strokeWidth={2}
-                    />
-                  </span>
-                  <span className="mt-1 block text-[13px] leading-relaxed text-ink-400">
-                    {t.text}
-                  </span>
-                </span>
-              </Link>
-            );
-          })}
-        </Reveal>
-      </section>
-
-      {/* RECIÉN LLEGADOS */}
-      {latest.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-6">
-          <SectionTitle
-            eyebrow="Novedades"
-            title="Recién llegados"
-            subtitle="Lo último que publicaron nuestros vendedores"
-            href="/cartas"
-          />
-          <div className="no-scrollbar -mx-4 mt-8 flex snap-x snap-mandatory gap-3.5 overflow-x-auto px-4 pb-4">
-            {latest.map((l) => (
-              <div key={l.id} className="w-[46vw] shrink-0 snap-start sm:w-[220px]">
-                <ListingCard listing={l} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
+      <section className="home-stores-guide max-w-7xl" aria-labelledby="home-stores-title"><div><h2 id="home-stores-title">Tiendas y vendedores</h2><p>Las cartas y productos se compran a un vendedor. Entra a su tienda para ver todo su catálogo, ubicación y opciones de entrega.</p></div><Link href="/explorar">Explorar tiendas y vendedores</Link></section>
       {/* POR JUEGO */}
       {GAME_LIST.map((g, i) => {
         const items = byGame[i];
@@ -387,8 +248,8 @@ export default async function HomePage() {
       {decks.length > 0 && (
         <Showcase
           eyebrow="Listos para jugar"
-          title="Mazos armados"
-          subtitle="Decks completos con su lista de cartas carta por carta"
+          title="Mazos"
+          subtitle="Preconstruidos y mazos armados listos para jugar"
           href="/cartas?type=DECK"
           listings={decks}
         />
@@ -408,7 +269,7 @@ export default async function HomePage() {
       {accessories.length > 0 && <Showcase eyebrow="" title="Accesorios" subtitle="Protectores, portamazos, tapetes y más" href="/cartas?type=ACCESSORY" listings={accessories} />}
 
       <section className="editorial-process mx-auto max-w-7xl px-4 py-16">
-        <h2 className="font-display text-3xl">Así funciona cada compra en Win Condition</h2>
+        <h2 className="font-display text-3xl">Así funciona cada compra en TCG Cardeck</h2>
         <p className="mt-4 max-w-2xl text-sm text-ink-400">Tus cartas apartadas, un pago identificable y un vendedor que confirma antes de despachar.</p>
         <ol>{STEPS.map((step, i) => <li key={step.title}><span aria-hidden="true">{i + 1}</span><div><h3>{step.title}</h3><p>{step.body}</p></div></li>)}</ol>
         <p className="mt-5 text-sm text-ink-400">Comprobante solo visible para las partes · Envíos a todo Chile{transferPct > 0 ? ` · ${transferPct}% de descuento pagando por transferencia` : ""}</p>
@@ -435,7 +296,7 @@ export default async function HomePage() {
         <section className="mx-auto max-w-7xl px-4 pt-16">
           <SectionTitle
             eyebrow="Comunidad"
-            title="Vendedores de Win Condition"
+            title="Vendedores de TCG Cardeck"
             subtitle="Tiendas y coleccionistas de todo Chile"
             href="/vendedores"
           />
@@ -539,50 +400,6 @@ function SectionTitle({
         </Link>
       )}
     </div>
-  );
-}
-
-function GameTile({ game, count }: { game: GameMeta; count: number }) {
-  return (
-    <Link
-      href={`/cartas?game=${game.id}`}
-      className="group relative isolate flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-3xl bg-carbon p-3 sm:aspect-[4/5] sm:p-5"
-    >
-      <Image
-        src={game.artImage ?? game.cardImage}
-        alt=""
-        fill
-        sizes="(max-width:640px) 100vw, 320px"
-        className={`-z-10 object-cover opacity-90 transition duration-700 group-hover:scale-110 group-hover:opacity-100 ${
-          game.artImage ? "" : "object-[center_10%]"
-        }`}
-        unoptimized
-      />
-      <span className="absolute inset-0 -z-10 bg-gradient-to-t from-carbon via-carbon/40 to-carbon/10" />
-      <span
-        className="absolute inset-x-0 top-0 -z-10 h-1 opacity-0 transition group-hover:opacity-100"
-        style={{ background: game.accent }}
-      />
-
-      <GameLogo game={game.id} size="tile" />
-
-      <span className="block">
-        <span className="block font-display text-[13px] font-bold leading-snug text-white sm:text-xl">
-          {game.tagline}
-        </span>
-        <span className="mt-3 flex items-center justify-between gap-2">
-          <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur sm:px-3 sm:text-[11px]">
-            {count} {count === 1 ? "publicación" : "publicaciones"}
-          </span>
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-carbon transition group-hover:bg-gold-300">
-            <ArrowRight
-              className="h-4 w-4 transition group-hover:translate-x-0.5"
-              strokeWidth={2.25}
-            />
-          </span>
-        </span>
-      </span>
-    </Link>
   );
 }
 

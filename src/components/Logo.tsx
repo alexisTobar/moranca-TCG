@@ -1,42 +1,11 @@
 import Image from "next/image";
 
-const MARK_RATIO = 590 / 240;
-const FULL_RATIO = 738 / 600;
-
-/**
- * "full" (default): el logo completo con "WIN CONDITION TCG" — se usa en
- * todos lados, el "mark" (solo el ícono) queda disponible por si algún
- * espacio muy chico lo necesita más adelante.
- */
-export function Logo({
-  variant = "full",
-  height,
-  tone = "dark",
-}: {
-  variant?: "mark" | "full";
-  height?: number;
-  /** "dark" = logo con texto oscuro/dorado (fondos claros); "light" = variante blanca (fondos oscuros, ej. navbar) */
-  tone?: "dark" | "light";
-}) {
-  const h = height ?? (variant === "full" ? 120 : 44);
-  const ratio = variant === "full" ? FULL_RATIO : MARK_RATIO;
-  const src =
-    variant === "full"
-      ? tone === "light"
-        ? "/logo-full-white.png"
-        : "/logo-full.png"
-      : "/logo-mark.png";
-  const alt = "Win Condition TCG";
-
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      width={Math.round(h * ratio)}
-      height={h}
-      className={tone === "dark" ? "brand-logo-readable" : undefined}
-      style={{ height: h, width: "auto" }}
-      priority
-    />
-  );
+/** User-supplied TCG Cardeck artwork, with transparent margins excluded by the viewport. */
+export function Logo({variant="full",height,tone="dark"}:{variant?:"mark"|"full";height?:number;tone?:"dark"|"light"}) {
+  const h=height??(variant==="full"?96:44);
+  const width=h*1752/1226;
+  const imageSize=h*2000/1226;
+  return <span className="cardeck-logo" style={{display:"inline-block",position:"relative",overflow:"hidden",height:h,width,verticalAlign:"middle",flexShrink:0}}>
+    <Image src="/tcg-cardeck-logo.png" alt="TCG Cardeck" width={2000} height={2000} sizes={`${Math.ceil(imageSize)}px`} priority style={{position:"absolute",height:imageSize,width:imageSize,maxWidth:"none",top:-h*390/1226,left:-h*147/1226}}/>
+  </span>;
 }

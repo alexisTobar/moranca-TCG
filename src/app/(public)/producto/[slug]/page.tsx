@@ -18,7 +18,7 @@ export async function generateMetadata({
     title: listing.title,
     description:
       listing.description ??
-      `${listing.title} — ${gameName(listing.game)} en Win Condition TCG por ${clp(listing.price)}.`,
+      `${listing.title} — ${gameName(listing.game)} en TCG Cardeck por ${clp(listing.price)}.`,
     alternates: { canonical: `/producto/${slug}` },
     openGraph: {
       images: listing.imageUrl ? [listing.imageUrl] : undefined,

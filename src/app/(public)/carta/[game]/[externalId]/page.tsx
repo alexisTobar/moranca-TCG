@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!data) return { title: "Carta no encontrada" };
   return {
     title: `${data.sample.title} · vendedores y precios`,
-    description: `Compara precios y vendedores de ${data.sample.title} (${gameName(data.game)}) en Win Condition TCG.`,
+    description: `Compara precios y vendedores de ${data.sample.title} (${gameName(data.game)}) en TCG Cardeck.`,
     alternates: { canonical: cardMarketHref(data.game, data.externalId) },
     openGraph: { images: data.sample.imageUrl ? [data.sample.imageUrl] : undefined },
   };
@@ -286,7 +286,7 @@ export default async function CardPage({ params }: { params: Params }) {
               </ul>
             ) : (
               <p className="mt-3 text-[13px] text-ink-400">
-                Todavía no se registran ventas de esta carta en Win Condition.
+                Todavía no se registran ventas de esta carta en TCG Cardeck.
               </p>
             )}
           </section>

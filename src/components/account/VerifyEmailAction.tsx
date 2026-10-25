@@ -33,7 +33,7 @@ export function VerifyEmailAction({ token }: { token: string }) {
           <CheckCircle2 className="h-8 w-8" strokeWidth={1.75} />
         </span>
         <h1 className="mt-5 font-display text-2xl font-bold text-carbon">¡Email confirmado!</h1>
-        <p className="mt-2 text-[14px] text-ink-400">Ya puedes comprar y vender en Win Condition TCG.</p>
+        <p className="mt-2 text-[14px] text-ink-400">Ya puedes comprar y vender en TCG Cardeck.</p>
         <Link href="/cuenta" className="btn btn-primary btn-lg mt-6">
           Ir a mi cuenta
         </Link>

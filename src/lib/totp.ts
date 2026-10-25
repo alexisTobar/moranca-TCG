@@ -78,7 +78,7 @@ export function verifyTotp(secretBase32: string, code: string, lastStep?: number
 }
 
 export function otpauthUrl(email: string, secret: string): string {
-  const issuer = "Win Condition TCG";
+  const issuer = "TCG Cardeck";
   const label = encodeURIComponent(`${issuer}:${email}`);
   return `otpauth://totp/${label}?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=${DIGITS}&period=${STEP_SECONDS}`;
 }

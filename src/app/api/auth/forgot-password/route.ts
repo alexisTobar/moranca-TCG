@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 
     await sendEmail({
       to: email,
-      subject: "Recupera tu contraseña — Win Condition TCG",
+      subject: "Recupera tu contraseña — TCG Cardeck",
       html: `<p>Hola ${user.name},</p><p>Haz clic en el link para elegir una contraseña nueva. Vence en 1 hora.</p><p><a href="${link}">${link}</a></p><p>Si no pediste esto, ignora este correo.</p>`,
     });
   }

@@ -34,10 +34,10 @@ export const metadata: Metadata = {
     "Tu propia tienda dentro del marketplace TCG de Chile: banner, logo, colores, link corto y QR con tu logo. Vende Magic, Pokémon, One Piece y Mitos y Leyendas con stock reservado.",
   alternates: { canonical: "/tiendas" },
   openGraph: {
-    title: "Abre tu tienda de cartas TCG en Win Condition",
+    title: "Abre tu tienda de cartas TCG en TCG Cardeck",
     description: "Link corto, QR con tu logo, tu marca al frente y solo tus productos. Planes desde una mensualidad simple.",
     url: "/tiendas",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Win Condition TCG — cartas TCG en Chile" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "TCG Cardeck — cartas TCG en Chile" }],
   },
   twitter: { card: "summary_large_image" },
 };
@@ -71,7 +71,7 @@ const BENEFITS: Array<{ icon: LucideIcon; title: string; text: string }> = [
   {
     icon: LifeBuoy,
     title: "Soporte directo",
-    text: "Un canal exclusivo con el equipo de Win Condition para resolver dudas de tu tienda, tus pagos o tus órdenes.",
+    text: "Un canal exclusivo con el equipo de TCG Cardeck para resolver dudas de tu tienda, tus pagos o tus órdenes.",
   },
 ];
 
@@ -103,7 +103,7 @@ export default async function StoresLandingPage() {
   const faqs: FaqItem[] = [
     {
       q: "¿Necesito un dominio propio para tener mi tienda?",
-      a: "No. Tu tienda vive dentro de Win Condition TCG con un link corto y un QR propios, listos para compartir. No tienes que comprar ni configurar ningún dominio.",
+      a: "No. Tu tienda vive dentro de TCG Cardeck con un link corto y un QR propios, listos para compartir. No tienes que comprar ni configurar ningún dominio.",
     },
     {
       q: "¿Cómo pago la membresía?",
@@ -119,7 +119,7 @@ export default async function StoresLandingPage() {
     },
     {
       q: "¿Cobran comisión por mis ventas?",
-      a: "No. Win Condition TCG no maneja el dinero de tus ventas: tus clientes te transfieren directo a tu cuenta. Lo único que pagas es la membresía si contratas una tienda.",
+      a: "No. TCG Cardeck no maneja el dinero de tus ventas: tus clientes te transfieren directo a tu cuenta. Lo único que pagas es la membresía si contratas una tienda.",
     },
     {
       q: "¿Con qué courier despacho?",
@@ -130,7 +130,7 @@ export default async function StoresLandingPage() {
       a: "Sí. Publicar y vender es gratis con tu perfil de vendedor, que también tiene link y QR para compartir. La tienda propia agrega tu marca, tu vitrina y las herramientas para crecer.",
     },
     {
-      q: "¿Mis clientes compran en mi tienda o en Win Condition?",
+      q: "¿Mis clientes compran en mi tienda o en TCG Cardeck?",
       a: "Compran dentro de tu tienda, con tu marca al frente, y el pago sigue el mismo proceso seguro de siempre: stock reservado, código de pago y comprobante.",
     },
   ];

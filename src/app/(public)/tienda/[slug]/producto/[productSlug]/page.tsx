@@ -1,3 +1,4 @@
+import { publicListingTypeCounts } from "@/lib/listing-kind";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
@@ -47,7 +48,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-/** Ficha de producto dentro de una tienda premium: mismo encabezado de la tienda, sin el menú de Win Condition. */
+/** Ficha de producto dentro de una tienda premium: mismo encabezado de la tienda, sin el menú de TCG Cardeck. */
 export default async function StoreProductPage({ params }: { params: Params }) {
   const { slug, productSlug } = await params;
   let seller = await loadStore(slug);
@@ -72,7 +73,7 @@ export default async function StoreProductPage({ params }: { params: Params }) {
       [] as Array<{ game: string; _count: { _all: number } }>
     ),
     safeQuery(
-      () => prisma.listing.groupBy({ by: ["type"], where: { sellerId: seller.id, status: "ACTIVE" }, _count: { _all: true } }),
+      async () => publicListingTypeCounts(await prisma.listing.findMany({where:{sellerId:seller.id,status:"ACTIVE"},select:{type:true,title:true}})),
       [] as Array<{ type: string; _count: { _all: number } }>
     ),
   ]);
@@ -96,7 +97,7 @@ export default async function StoreProductPage({ params }: { params: Params }) {
       />
       <ProductDetail listing={listing} store={{ slug: seller.slug, name, logoUrl }} />
       <p className="mx-auto max-w-7xl px-4 pb-2 pt-10 text-center text-[12px] text-ink-400">
-        {name} vende con la garantía de Win Condition TCG: stock reservado, código de pago y comprobante en cada compra.
+        {name} vende con la garantía de TCG Cardeck: stock reservado, código de pago y comprobante en cada compra.
       </p>
     </div>
   );

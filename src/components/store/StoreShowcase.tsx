@@ -38,11 +38,10 @@ export async function StoreShowcase() {
   return (
     <section className="mx-auto max-w-7xl px-4 pt-16">
       <div>
-        <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-brand-600">Tiendas oficiales</p>
         <h2 className="mt-1.5 font-display text-2xl font-bold tracking-tight text-carbon sm:text-[2rem]">
           Tiendas destacadas
         </h2>
-        <p className="mt-1.5 text-[14px] text-ink-400">Vendedores con su propia tienda en Win Condition</p>
+        <p className="mt-1.5 text-[14px] text-ink-400">Cada tienda reúne su catálogo, ubicación y formas de entrega.</p>
       </div>
       <Reveal className="stagger mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stores.map((s) => {
@@ -80,7 +79,7 @@ export async function StoreShowcase() {
                   {s.tagline || `${s.seller._count.listings} publicaciones activas`}
                 </p>
                 <span className="mt-2 inline-flex items-center gap-1 text-[12px] font-bold text-brand-600">
-                  Visitar tienda
+                  Entrar a la tienda
                   <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" strokeWidth={2.25} />
                 </span>
               </div>

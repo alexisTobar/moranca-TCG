@@ -39,7 +39,7 @@ export const listingBaseSchema = z.object({
     type: z.enum(["SINGLE", "SEALED", "DECK", "ACCESSORY"]),
     status: z.enum(["DRAFT", "ACTIVE", "PAUSED", "SOLD"]).default("ACTIVE"),
     game: z.enum(["magic", "pokemon", "onepiece", "myl", "generic"]).default("generic"),
-    title: z.string().min(2).max(180),
+    title: z.string().trim().min(2).max(180),
     imageUrl: imagenUrl,
     imageUrls: z.array(imagenUrl.unwrap().unwrap()).max(10, "Puedes adjuntar hasta 10 fotos").default([]),
     accessoryCategory: z.enum(["SLEEVES", "DECK_BOX", "PLAYMAT", "BINDER", "STORAGE", "TOPLOADER", "DICE", "OTHER"]).optional().nullable(),
@@ -65,10 +65,6 @@ export const listingBaseSchema = z.object({
 export const listingSchema = listingBaseSchema
   .refine(data => data.type !== "ACCESSORY" || (data.description?.length ?? 0) <= 500, {message:"La descripción corta admite hasta 500 caracteres.",path:["description"]})
   .refine(data => data.game !== "generic" || data.type === "ACCESSORY", { message: "Selecciona un juego para cartas, mazos y sellados.", path: ["game"] })
-  .refine((data) => data.type !== "DECK" || data.deckCards.length > 0, {
-    message: "Un mazo debe incluir al menos una carta en su lista.",
-    path: ["deckCards"],
-  })
   .refine((data) => data.offerPrice == null || data.offerPrice < data.price, {
     message: "El precio de oferta debe ser menor al precio normal.",
     path: ["offerPrice"],

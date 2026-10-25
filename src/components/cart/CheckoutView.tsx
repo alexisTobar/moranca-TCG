@@ -606,7 +606,7 @@ export function CheckoutView({
               <Link href="/terminos-y-condiciones" target="_blank" className="font-semibold text-brand-600 hover:text-brand-700">
                 Términos
               </Link>
-              . La compra es entre tú y el vendedor: Win Condition no maneja el pago ni realiza devoluciones (
+              . La compra es entre tú y el vendedor: TCG Cardeck no maneja el pago ni realiza devoluciones (
               <Link href="/devoluciones" target="_blank" className="font-semibold text-brand-600 hover:text-brand-700">
                 ver cómo resolver un problema
               </Link>

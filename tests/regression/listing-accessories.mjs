@@ -75,7 +75,7 @@ test('crear, editar y pausar persiste accesorios y fotos sin borrar adjuntos exi
   };
   const prisma = { listing, $transaction: async cb => cb({listing}) };
   const mocks = {
-    'next/cache': {revalidatePath:()=>{}}, '@/lib/db': {prisma}, '@/lib/auth': { requireUser: async () => ({id:'seller', role:'SELLER'}), AuthError: class extends Error {} },
+    '@/lib/listing-kind':load('src/lib/listing-kind.ts'), 'next/cache': {revalidatePath:()=>{},revalidateTag:()=>{}}, '@/lib/db': {prisma}, '@/lib/auth': { requireUser: async () => ({id:'seller', role:'SELLER'}), AuthError: class extends Error {} },
     '@/lib/validators': {listingSchema, listingBaseSchema}, '@/lib/catalog': {uniqueSlug: async () => 'protectores'},
     '@/lib/external-id': {normalizeExternalId: (_game,id) => id},
   };
@@ -89,6 +89,14 @@ test('crear, editar y pausar persiste accesorios y fotos sin borrar adjuntos exi
   assert.deepEqual(stored.imageUrls,[photo]);
   assert.equal((await PATCH(request({imageUrls:[]}),params)).status,200);
   assert.deepEqual(stored.imageUrls,[]);
+  for (const type of ['DECK','SEALED']) {
+    const response=await POST(request({type,game:'myl',title:'Mazo Guerrero formato Imperio',price:13000,stock:2,imageUrls:[photo],deckCards:[]}));
+    assert.equal(response.status,201);
+    assert.equal(stored.type,'DECK');
+    assert.equal(stored.stock,2);
+    assert.equal(stored.status,'ACTIVE');
+    assert.deepEqual(stored.deckCards.create,[]);
+  }
   stored.sellerId = 'other';
   assert.equal((await PATCH(request({imageUrls:[photo]}),params)).status,403);
 });

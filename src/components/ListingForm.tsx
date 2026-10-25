@@ -200,9 +200,6 @@ export function ListingForm({
     if (values.offerPrice != null && values.offerPrice >= values.price) {
       return setError("El precio de oferta debe ser menor al precio normal.");
     }
-    if (values.type === "DECK" && values.deckCards.length === 0) {
-      return setError("Agrega al menos una carta al mazo.");
-    }
 
     setSaving(true);
     try {
@@ -237,9 +234,9 @@ export function ListingForm({
         return;
       }
 
-      if (values.type === "ACCESSORY") {
-        toast.success("Accesorio publicado");
-        router.push("/cartas?type=ACCESSORY");
+      if (values.type === "ACCESSORY" || values.type === "DECK") {
+        toast.success(values.type === "DECK" ? "Mazo publicado" : "Accesorio publicado");
+        router.push(`/cartas?type=${values.type}`);
         router.refresh();
         return;
       }
@@ -312,12 +309,12 @@ export function ListingForm({
           onPick={pickCard}
           label={
             values.type === "DECK"
-              ? "Arma tu mazo carta por carta"
+              ? "Lista del mazo (opcional)"
               : "Buscar la carta en el catálogo oficial"
           }
           hint={
             values.type === "DECK"
-              ? "Cada carta que elijas se agrega a la lista del mazo. Vuelve a hacer clic para sumar copias."
+              ? "Puedes vender un mazo preconstruido con fotos y descripción. Si quieres detallar sus cartas, agrégalas aquí."
               : "Escribe el nombre y elige la impresión correcta. La imagen se toma automáticamente."
           }
         />
@@ -400,7 +397,7 @@ export function ListingForm({
 
           {values.deckCards.length === 0 ? (
             <p className="mt-4 rounded-xl border border-dashed border-ink-700 p-8 text-center text-[13px] text-ink-400">
-              Usa el buscador de arriba para ir agregando cartas al mazo.
+              No necesitas una lista para publicar un mazo preconstruido. Puedes agregar cartas con el buscador si quieres detallar su contenido.
             </p>
           ) : (
             <div className="mt-4 grid grid-cols-3 gap-2.5 sm:grid-cols-5 lg:grid-cols-7">
@@ -792,7 +789,7 @@ export function ListingForm({
               ? "Guardando…"
               : isEdit
                 ? "Guardar cambios"
-                : values.type === "ACCESSORY" ? "Publicar accesorio" : "Publicar en Win Condition"}
+                : values.type === "ACCESSORY" ? "Publicar accesorio" : values.type === "DECK" ? "Publicar mazo" : "Publicar en TCG Cardeck"}
           </button>
         </div>
       </div>

@@ -32,7 +32,7 @@ let [st] = (await db.query(`SELECT s.*, p.code FROM "Store" s JOIN "StorePlan" p
 check("plan PRO, ACTIVE, sin vencimiento (2099)", st?.code === "PRO" && st.status === "ACTIVE" && new Date(st.activeUntil).getFullYear() === 2099, JSON.stringify(st));
 
 await db.query(`DELETE FROM "Store" WHERE "sellerId"=$1`, [adminId]);
-r = await admin.req("/api/store", { method: "PUT", json: { tagline: "Tienda oficial de Win Condition" } });
+r = await admin.req("/api/store", { method: "PUT", json: { tagline: "Tienda oficial de TCG Cardeck" } });
 check("admin personaliza su tienda sin haber comprado nada (200)", r.status === 200, JSON.stringify(r.data)?.slice(0, 160));
 
 r = await admin.req("/api/store/subscribe", { method: "POST", json: { planCode: "TIENDA", months: 1 } });
@@ -79,8 +79,8 @@ const h = r.data ?? "";
 check("ficha en tienda (200)", r.status === 200, r.status);
 check("muestra el producto", h.includes(own.title.replace(/&/g, "&amp;")) || h.includes(own.title));
 check("usa el encabezado de la tienda (buscador propio)", h.includes('action="/tienda/sipo-tcg#catalogo"'));
-check("mantiene el menu de Win Condition arriba", h.includes('href="/cartas"') && h.includes('href="/vendedores"'));
-check("logo de Win Condition lleva a la home y hay menu propio de la tienda", h.includes('aria-label="Win Condition TCG - inicio"') && h.includes('aria-label="Categorías de la tienda"'));
+check("mantiene el menu de TCG Cardeck arriba", h.includes('href="/cartas"') && h.includes('href="/vendedores"'));
+check("logo de TCG Cardeck lleva a la home y hay menu propio de la tienda", h.includes('aria-label="TCG Cardeck - inicio"') && h.includes('aria-label="Categorías de la tienda"'));
 check("NO ofrece otros vendedores con la misma carta", !h.includes("Otros vendedores con esta carta") && !h.includes("vendedores tienen esta carta") && !h.includes("vendedor tiene esta carta"));
 check("tarjeta 'Vendido por' apunta a la tienda", h.includes('href="/tienda/sipo-tcg"') && h.includes("Ver tienda"));
 check("no envia al perfil general del vendedor", !h.includes('href="/vendedor/'));
@@ -94,7 +94,7 @@ r = await anon.req(`/tienda/pokepink/producto/${foreign.slug}`);
 check("tienda sin plan: redirige a la ficha general", r.status >= 300 && r.status < 400 && r.location?.includes(`/producto/${foreign.slug}`), `${r.status} ${r.location}`);
 
 r = await anon.req(`/producto/${own.slug}`);
-check("ficha general de Win Condition sigue igual (con su menu)", r.status === 200 && /href="\/cartas/.test(r.data) && r.data.includes("Ver perfil"), r.status);
+check("ficha general de TCG Cardeck sigue igual (con su menu)", r.status === 200 && /href="\/cartas/.test(r.data) && r.data.includes("Ver perfil"), r.status);
 
 console.log(`\nRESULTADO: ${passed} OK, ${failed} fallas`);
 await db.end();

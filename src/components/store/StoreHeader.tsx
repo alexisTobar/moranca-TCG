@@ -6,7 +6,7 @@ import { GAMES, type GameId } from "@/lib/games";
 const TYPE_LABEL: Record<string, string> = { SINGLE: "Singles", SEALED: "Sellados", DECK: "Mazos", ACCESSORY: "Accesorios" };
 
 /**
- * Menú propio de una tienda premium. Va debajo del menú de Win Condition (que se mantiene arriba para
+ * Menú propio de una tienda premium. Va debajo del menú de TCG Cardeck (que se mantiene arriba para
  * quien quiera pasar al marketplace) y todo lo que hay aquí filtra solo el catálogo de esta tienda.
  */
 export function StoreHeader({

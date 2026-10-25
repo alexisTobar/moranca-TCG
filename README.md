@@ -1,4 +1,4 @@
-# Win Condition TCG
+# TCG Cardeck
 
 Marketplace chileno de cartas coleccionables: **singles, sellados y mazos armados** de
 Magic, Pokémon, One Piece y Mitos y Leyendas.
@@ -256,8 +256,7 @@ Mitos y Leyendas no tiene carga masiva.
 
 Un vendedor puede tener **su propia tienda** en `/tienda/[slug]`, con solo sus publicaciones:
 banner, logo, color de marca, anuncio, redes (WhatsApp / Instagram / Facebook / sitio),
-productos destacados, insignia "Tienda verificada" y estadísticas. Sigue siendo parte de Win
-Condition (no hay dominio propio ni se quita la marca).
+productos destacados, insignia "Tienda verificada" y estadísticas. Sigue siendo parte de TCG Cardeck (no hay dominio propio ni se quita la marca).
 
 - **Todos los perfiles** se comparten con link corto `/v/[slug]` y QR (Panel → Mi perfil). Con
   tienda vigente el link es `/t/[slug]` y el QR lleva **el logo de la tienda al centro**
@@ -275,7 +274,7 @@ Condition (no hay dominio propio ni se quita la marca).
   `/tienda/[slug]` redirige al perfil normal. Las visitas y escaneos de QR se cuentan por día
   (`StoreVisitDay`); el dueño y el administrador no cuentan.
 - La base se actualiza sola en el deploy (`prisma db push`, solo tablas nuevas).
-- **Menú propio de la tienda**: `/tienda/[slug]` mantiene arriba el logo y el menú de Win Condition
+- **Menú propio de la tienda**: `/tienda/[slug]` mantiene arriba el logo y el menú de TCG Cardeck
   (para quien quiera pasar al marketplace) y, debajo, un menú propio con el logo y buscador de la
   tienda y filtros solo de su catálogo (los tipos y juegos que ese vendedor tiene). La ficha de
   producto (`/tienda/[slug]/producto/[producto]`) también usa ese menú y no muestra a otros
@@ -347,7 +346,7 @@ Enlazadas desde el footer (columna "Legal") y desde el registro y el checkout:
 `/terminos-y-condiciones`, `/politica-de-privacidad`, `/devoluciones` y `/quienes-somos`.
 
 - Están redactadas para cómo funciona la plataforma: somos un marketplace, el pago va directo al
-  vendedor por transferencia y **Win Condition no maneja el dinero de las ventas, por eso no hace
+  vendedor por transferencia y **TCG Cardeck no maneja el dinero de las ventas, por eso no hace
   devoluciones ni reembolsos** (los resuelven comprador y vendedor; la plataforma orienta y actúa
   sobre las cuentas que incumplan). La única excepción explicada son las membresías de tienda.
 - **Registro**: hay una casilla obligatoria para aceptar términos y privacidad. Se valida en el
@@ -478,3 +477,15 @@ Vercel comprueba `/api/cron/news` diariamente a las 09:00 UTC. `NewsSyncState` l
 Los textos ingleses se publican solo si se tradujeron correctamente. La consulta y la ficha excluyen artículos heredados sin verificar, publicaciones de más de 90 días, fechas futuras y eventos vencidos. Se mantienen los enlaces a las fuentes, las imágenes propias de cada nota y una portada por juego cuando falta la imagen; ya no se reutiliza una carta genérica como foto de todas las noticias.
 
 Antes de desplegar esta versión, ejecutar `npm run db:push` con conexiones reales. Se agregan `country`, `kind`, `eventAt` y `originalTitle` a `NewsItem`, además de `NewsSyncState` (protegida con RLS por el script del proyecto). No se modifican publicaciones existentes para adivinar su categoría: si un accesorio se guardó como Sellado, editarlo, seleccionar Accesorios y guardar. El nuevo acceso `/panel/publicar?type=ACCESSORY` abre directamente el formulario correcto y al publicar lleva al catálogo de accesorios, con invalidación de caché.
+
+## TCG Cardeck: inicio, mazos y crecimiento
+
+La marca pública es TCG Cardeck. El logo original aportado por el usuario vive en `public/tcg-cardeck-logo.png`; Next optimiza sus tamaños y el CDN del despliegue lo sirve. La cabecera, pie, favicon, imagen social, metadatos, correos y textos usan la nueva marca. Se conservan los identificadores técnicos de sesión/carrito existentes para mantener compatibilidad con cuentas y carritos previos.
+
+El inicio es una vitrina horizontal manual: categorías, fotos reales, precio y vendedor. No usa autoplay ni la antigua escena de cartas flotantes. Roboto es la tipografía común. Los productos tienen bordes propios y el directorio distingue una tienda con catálogo de un perfil de vendedor.
+
+Mazos admite preconstruidos y mazos armados; la lista es opcional. Las publicaciones históricas de tipo Sellado cuyo título comienza explícitamente por «Mazo», «Deck» o un tipo de deck preconstruido se muestran en Mazos (exceptuando deck boxes/protectores). No se duplican ni se modifican ventas existentes. Al crear/editar se guarda el tipo normalizado. Esto también se aplica al inicio, a la ficha y a los filtros de tienda.
+
+Para cientos de perfiles: el directorio agrega inventario en dos consultas y lo asocia por ID en tiempo lineal; el resultado público se cachea por 60 segundos. La vista del mapa pagina 18 perfiles; `/vendedores` consulta 24 por página y calcula estadísticas solo para esa página. El catálogo sigue paginado a 24 productos y aprovecha un filtro indexable de tipo antes de clasificar mazos históricos. Se añaden índices compuestos para perfiles activos y publicaciones por vendedor/estado/fecha. Aplicarlos con `npm run db:push` antes del despliegue. La prueba funcional usa 120 perfiles; no representa una prueba de concurrencia de producción.
+
+Skills complementarias instaladas: `frontend-design` (Anthropic, dirección visual y rechazo de plantillas genéricas) y `web-design-guidelines` (Vercel, accesibilidad e interacción). Se usan junto con `impeccable` y estarán disponibles automáticamente en los siguientes turnos.

@@ -26,7 +26,7 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   title: "Quiénes somos",
   description:
-    "Win Condition TCG es el marketplace chileno de cartas coleccionables: conectamos a compradores y vendedores de Magic, Pokémon, One Piece y Mitos y Leyendas con reglas claras y compra segura.",
+    "TCG Cardeck es el marketplace chileno de cartas coleccionables: conectamos a compradores y vendedores de Magic, Pokémon, One Piece y Mitos y Leyendas con reglas claras y compra segura.",
   alternates: { canonical: "/quienes-somos" },
 };
 
@@ -76,9 +76,9 @@ export default async function AboutPage() {
         data={{
           "@context": "https://schema.org",
           "@type": "AboutPage",
-          name: "Quiénes somos · Win Condition TCG",
+          name: "Quiénes somos · TCG Cardeck",
           url: `${siteUrl()}/quienes-somos`,
-          about: { "@type": "Organization", name: "Win Condition TCG", url: siteUrl() },
+          about: { "@type": "Organization", name: "TCG Cardeck", url: siteUrl() },
         }}
       />
 
@@ -95,7 +95,7 @@ export default async function AboutPage() {
             El punto de encuentro de la comunidad <span className="text-gold-gradient">TCG</span> de Chile
           </h1>
           <p className="animate-fade-up delay-2 mx-auto mt-6 max-w-2xl text-[16px] leading-relaxed text-white/70">
-            Win Condition TCG nació para que comprar y vender cartas coleccionables en Chile sea simple, ordenado y
+            TCG Cardeck nació para que comprar y vender cartas coleccionables en Chile sea simple, ordenado y
             confiable, sin perderte entre chats, capturas y transferencias sueltas.
           </p>
         </div>

@@ -1,4 +1,5 @@
-import { revalidatePath } from "next/cache";
+import { publicListingType } from "@/lib/listing-kind";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
@@ -22,6 +23,8 @@ export async function POST(req: Request) {
       );
     }
     const data = parsed.data.type === "ACCESSORY" ? { ...parsed.data, game:"generic" as const, language:null, externalId:null, isFoil:false, setName:null, cardNumber:null, rarity:null, family:null, illustrator:null } : parsed.data;
+
+    data.type = publicListingType(data.type, data.title);
 
     // Solo el admin puede publicar en nombre de otro vendedor.
     const sellerId =
@@ -82,6 +85,7 @@ export async function POST(req: Request) {
       select: { id: true, slug: true },
     });
 
+    revalidateTag("store-directory");
     revalidatePath("/cartas");
     revalidatePath("/");
     revalidatePath("/tienda/[slug]", "page");

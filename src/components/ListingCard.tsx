@@ -1,3 +1,4 @@
+import { publicListingType } from "@/lib/listing-kind";
 import Link from "next/link";
 import { clp } from "@/lib/format";
 import { GAMES, isGameId } from "@/lib/games";
@@ -17,7 +18,8 @@ export interface ListingCardData {
 }
 const TYPE_LABEL: Record<string, string> = { SINGLE: "Single", SEALED: "Sellado", DECK: "Mazo", ACCESSORY: "Accesorios" };
 
-export function ListingCard({ listing, href }: { listing: ListingCardData; href?: string }) {
+export function ListingCard({ listing: original, href }: { listing: ListingCardData; href?: string }) {
+  const listing = {...original,type:publicListingType(original.type,original.title)};
   const hasOffer = listing.offerPrice != null && listing.offerPrice < listing.price;
   const price = hasOffer ? listing.offerPrice! : listing.price;
   const target = href ?? (listing.market ? cardMarketHref(listing.game, listing.market.identity) : `/producto/${listing.slug}`);
@@ -33,7 +35,7 @@ export function ListingCard({ listing, href }: { listing: ListingCardData; href?
       {listing.type === "ACCESSORY" && listing.description && <p className="listing-set line-clamp-2">{listing.description}</p>}
       <dl className="listing-specs" style={listing.type === "ACCESSORY" ? {gridTemplateColumns:"repeat(2,minmax(0,1fr))"} : undefined}><div><dt>Estado</dt><dd>{listing.condition === "NEW" ? "Nuevo" : listing.condition === "USED" ? "Usado" : listing.condition || "—"}</dd></div>{listing.type !== "ACCESSORY" && <div><dt>Idioma</dt><dd>{listing.language || "—"}</dd></div>}<div><dt>Stock</dt><dd>{Math.max(0, listing.market?.stock ?? listing.stock)}</dd></div></dl>
       <p className="listing-price">{listing.market ? <span>Desde</span> : hasOffer && <del>{clp(listing.price)}</del>}<strong>{clp(price)}</strong></p>
-      <p className="listing-seller">{listing.market ? `${listing.market.sellers} vendedores · ${listing.market.stock} disponibles` : listing.seller.name}</p>
+      <p className="listing-seller">{listing.market ? `${listing.market.sellers} ${listing.market.sellers === 1 ? "vendedor" : "vendedores"} · ${listing.market.stock} disponibles` : `Vende ${listing.seller.name}`}</p>
     </div>
     {listing.market ? <Link className="btn btn-secondary w-full" href={target}>Comparar ofertas</Link> : <AddToCartMini listingId={listing.id} slug={listing.slug} title={listing.title} price={price} originalPrice={hasOffer ? listing.price : null} imageUrl={listing.imageUrl} game={listing.game} type={listing.type} maxStock={listing.stock} sellerId={listing.sellerId} sellerName={listing.seller.name} />}
   </article>;

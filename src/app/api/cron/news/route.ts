@@ -17,7 +17,7 @@ async function run() {
   const summary = await Promise.all(NEWS_SOURCES.map(async source => {
     let saved = 0, skipped = 0;
     try {
-      const response = await fetch(source.url, {headers:{"User-Agent":"WinConditionTCG/1.0"}, cache:"no-store", signal:AbortSignal.timeout(15000)});
+      const response = await fetch(source.url, {headers:{"User-Agent":"TCG Cardeck/1.0"}, cache:"no-store", signal:AbortSignal.timeout(15000)});
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const body = await response.text();
       const items: SourceItem[] = source.format === "playlatam" ? parsePlayLatam(body, now)

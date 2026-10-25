@@ -59,7 +59,7 @@ check("terminos: cita Ley 19.496 y SERNAC", tt.includes("Ley N° 19.496") && tt.
 r = await get("/devoluciones");
 const td = text(r.data);
 check("devoluciones: aclara que no hay reembolso propio ni manejo de dinero", td.includes("no realiza devoluciones ni reembolsos") && td.includes("no manejamos el dinero"));
-check("devoluciones: tabla de quien hace que + pasos", td.includes("Comprador") && td.includes("Vendedor") && td.includes("Win Condition TCG") && td.includes("Junta pruebas"));
+check("devoluciones: tabla de quien hace que + pasos", td.includes("Comprador") && td.includes("Vendedor") && td.includes("TCG Cardeck") && td.includes("Junta pruebas"));
 check("devoluciones: NO promete garantia de reembolso ni 'compra protegida'", !/compra protegida/i.test(td) && td.includes("no significa garantizar un reembolso"));
 r = await get("/politica-de-privacidad");
 const tp = text(r.data);

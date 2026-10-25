@@ -6,7 +6,7 @@ import { B, Note, P, Steps, UL } from "@/components/legal/blocks";
 export const metadata: Metadata = {
   title: "Términos y condiciones",
   description:
-    "Reglas de uso de Win Condition TCG: cómo funciona el marketplace, tus derechos y obligaciones como comprador o vendedor, pagos, envíos y tiendas premium.",
+    "Reglas de uso de TCG Cardeck: cómo funciona el marketplace, tus derechos y obligaciones como comprador o vendedor, pagos, envíos y tiendas premium.",
   alternates: { canonical: "/terminos-y-condiciones" },
 };
 
@@ -17,7 +17,7 @@ const sections: LegalSection[] = [
     body: (
       <>
         <P>
-          Estos términos regulan el uso del sitio y los servicios de Win Condition TCG. Al crear una cuenta, publicar
+          Estos términos regulan el uso del sitio y los servicios de TCG Cardeck. Al crear una cuenta, publicar
           productos, comprar o navegar por la plataforma, aceptas estos términos y nuestra{" "}
           <Link href="/politica-de-privacidad" className="font-semibold text-brand-600 hover:text-brand-700">
             Política de privacidad
@@ -26,7 +26,7 @@ const sections: LegalSection[] = [
         </P>
         <UL
           items={[
-            <><B>Plataforma:</B> el sitio web Win Condition TCG y sus herramientas.</>,
+            <><B>Plataforma:</B> el sitio web TCG Cardeck y sus herramientas.</>,
             <><B>Usuario:</B> cualquier persona que usa la plataforma, con o sin cuenta.</>,
             <><B>Comprador:</B> usuario con cuenta que adquiere productos de un vendedor.</>,
             <><B>Vendedor:</B> usuario aprobado por nosotros para publicar y vender productos.</>,
@@ -39,11 +39,11 @@ const sections: LegalSection[] = [
   },
   {
     id: "rol",
-    title: "Qué es Win Condition TCG y cuál es nuestro rol",
+    title: "Qué es TCG Cardeck y cuál es nuestro rol",
     body: (
       <>
         <P>
-          Win Condition TCG es un <B>marketplace</B>: un espacio donde compradores y vendedores de cartas
+          TCG Cardeck es un <B>marketplace</B>: un espacio donde compradores y vendedores de cartas
           coleccionables (Magic, Pokémon, One Piece y Mitos y Leyendas) se encuentran. Ponemos la tecnología:
           catálogo, carrito, reserva de stock, código de referencia, chat de la orden, reseñas y herramientas para
           vendedores.
@@ -134,7 +134,7 @@ const sections: LegalSection[] = [
           cupones los define cada vendedor; se aplican al confirmar la compra y quedan registrados en la orden.
         </P>
         <Note title="Ojo con las transferencias">
-          Win Condition TCG no interviene en la transferencia y no puede revertirla. Antes de pagar, verifica que los
+          TCG Cardeck no interviene en la transferencia y no puede revertirla. Antes de pagar, verifica que los
           datos coincidan con los de tu orden. Nunca pagues a una cuenta distinta ni por fuera del proceso.
         </Note>
       </>
@@ -147,7 +147,7 @@ const sections: LegalSection[] = [
       <>
         <P>
           El vendedor define y ejecuta el despacho o el retiro en persona: courier, costo, plazos y seguimiento son de su
-          responsabilidad y se informan al comprar. Win Condition TCG no despacha productos ni contrata couriers en nombre
+          responsabilidad y se informan al comprar. TCG Cardeck no despacha productos ni contrata couriers en nombre
           de los usuarios. En los retiros en persona, recomendamos elegir lugares públicos y concurridos.
         </P>
       </>
@@ -187,7 +187,7 @@ const sections: LegalSection[] = [
         </P>
         <UL
           items={[
-            "El pago de la membresía es una transferencia a la cuenta de Win Condition TCG, con un código único, y se acredita con el comprobante.",
+            "El pago de la membresía es una transferencia a la cuenta de TCG Cardeck, con un código único, y se acredita con el comprobante.",
             "La tienda se activa cuando la administración aprueba el pago, por el período contratado.",
             "No hay renovación automática: al terminar el período, la tienda deja de mostrarse. Tu perfil de vendedor y tus datos se conservan, y al renovar todo vuelve a estar como lo dejaste.",
             "El período contratado no es reembolsable, salvo que la ley disponga otra cosa o que una falla imputable a la plataforma te impida usar el servicio, caso en que extenderemos el período afectado.",
@@ -203,13 +203,13 @@ const sections: LegalSection[] = [
     body: (
       <>
         <P>
-          El diseño, el código y los textos de la plataforma pertenecen a Win Condition TCG. Al publicar fotos y
+          El diseño, el código y los textos de la plataforma pertenecen a TCG Cardeck. Al publicar fotos y
           descripciones nos otorgas una licencia gratuita y no exclusiva para mostrarlas en la plataforma y en su
           promoción, y declaras que tienes derecho a usarlas.
         </P>
         <P>
           Los nombres, imágenes y símbolos de los juegos son marcas y obras de sus respectivos titulares.
-          Win Condition TCG no está afiliado ni respaldado por ellos. Las imágenes de catálogo provienen de servicios
+          TCG Cardeck no está afiliado ni respaldado por ellos. Las imágenes de catálogo provienen de servicios
           públicos de terceros. Si crees que algún contenido infringe tus derechos, avísanos y lo revisaremos.
         </P>
       </>
@@ -305,7 +305,7 @@ export default function TermsPage() {
       current="/terminos-y-condiciones"
       eyebrow="Documento legal"
       title="Términos y condiciones"
-      intro="Las reglas del juego de Win Condition TCG, explicadas de forma clara: cómo funciona el marketplace y qué esperamos de compradores y vendedores."
+      intro="Las reglas del juego de TCG Cardeck, explicadas de forma clara: cómo funciona el marketplace y qué esperamos de compradores y vendedores."
       summary={
         <Note title="En resumen">
           <ul className="list-disc space-y-1 pl-5">

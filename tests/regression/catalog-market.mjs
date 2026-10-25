@@ -36,11 +36,12 @@ test('catálogo SQL: agrupa por impresión, elige stock/precio real, filtra y pa
     await insert('manual-b',null,600,2,'b');
     await insert('manual-other',null,500,1,'a','SINGLE',null,'Set B');
     const identity=load('src/lib/card-identity.ts',{'@prisma/client':{Prisma}});
+    const kinds=load('src/lib/listing-kind.ts',{});
     const prisma={
       $queryRaw:async q=>(await db.query(q.text,q.values)).rows,
       listing:{findMany:async({where})=> (await db.query('SELECT * FROM "Listing" WHERE id=ANY($1::text[])',[where.id.in])).rows}
     };
-    const {catalogMarket}=load('src/lib/catalog-market.ts',{'server-only':{},'@prisma/client':{Prisma},'./db':{prisma},'./card-identity':identity,'./catalog':{LISTING_CARD_SELECT:{}}});
+    const {catalogMarket}=load('src/lib/catalog-market.ts',{'server-only':{},'@prisma/client':{Prisma},'./db':{prisma},'./listing-kind':kinds,'./card-identity':identity,'./catalog':{LISTING_CARD_SELECT:{}}});
     const base={type:'SINGLE',sort:'precio-asc',page:1};
     const result=await catalogMarket(base);
     assert.equal(result.total,4);
@@ -50,6 +51,13 @@ test('catálogo SQL: agrupa por impresión, elige stock/precio real, filtra y pa
     assert.equal(result.listings.find(x=>x.id==='manual-b').market.stock,3);
     assert.deepEqual((await catalogMarket({...base,type:'SEALED'})).listings.map(x=>x.id),['box']);
     assert.deepEqual((await catalogMarket({...base,type:'DECK'})).listings.map(x=>x.id),['deck']);
+    await insert('legacy-warrior',null,10000,1,'a','SEALED',null,'Imperio','Mazo Guerrero formato Imperio');
+    await insert('legacy-dragon',null,7000,1,'a','SEALED',null,'Imperio','Mazo Dragón formato Imperio');
+    await insert('deck-box',null,9000,1,'a','SEALED',null,null,'Deck box rígido');
+    assert.deepEqual((await catalogMarket({...base,type:'DECK'})).listings.map(x=>x.id),['deck','legacy-dragon','legacy-warrior']);
+    assert.equal((await catalogMarket({...base,type:'DECK'})).listings.find(x=>x.id==='legacy-dragon').type,'DECK');
+    assert.deepEqual((await catalogMarket({...base,type:'SEALED'})).listings.map(x=>x.id),['box','deck-box']);
+
     assert.equal((await catalogMarket({...base,type:'ACCESSORY'})).total,2);
     assert.equal((await catalogMarket({...base,type:'ACCESSORY',game:'magic',language:'JP'})).total,2);
     assert.deepEqual((await catalogMarket({...base,type:'ACCESSORY',accessoryCategory:'SLEEVES'})).listings.map(x=>x.id),['sleeves']);

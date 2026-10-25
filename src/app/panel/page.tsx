@@ -101,7 +101,7 @@ export default async function PanelHome() {
           <p className="mt-1 text-[13px] text-ink-400">
             {isAdmin
               ? "Tienes control total sobre publicaciones, perfiles y órdenes."
-              : "Administra tus publicaciones en Win Condition TCG."}
+              : "Administra tus publicaciones en TCG Cardeck."}
           </p>
         </div>
         <Link

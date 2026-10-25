@@ -148,6 +148,7 @@ model User {
   writtenReviews  Review[] @relation("BuyerReviews")
 
   @@index([active])
+  @@index([active, role, name, id])
 }
 
 /// Historial de decisiones. La aplicación solo permite insertar y consultar.
@@ -279,6 +280,9 @@ model Listing {
 
   @@index([game, status])
   @@index([type, status])
+  @@index([sellerId, status, createdAt, id])
+  @@index([status, stock, sellerId, game])
+  @@index([status, createdAt, id])
   @@index([sellerId])
   @@index([createdAt])
 }

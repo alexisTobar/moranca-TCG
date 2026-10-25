@@ -1,4 +1,5 @@
-import { revalidatePath } from "next/cache";
+import { publicListingType } from "@/lib/listing-kind";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
@@ -11,7 +12,7 @@ export const dynamic = "force-dynamic";
 async function loadOwned(id: string, userId: string, isAdmin: boolean) {
   const listing = await prisma.listing.findUnique({
     where: { id },
-    select: { id: true, sellerId: true, price: true, offerPrice: true, type: true, game: true },
+    select: { id: true, sellerId: true, price: true, offerPrice: true, type: true, game: true, title: true },
   });
   if (!listing) return { error: "Publicación no encontrada", status: 404 as const };
   if (!isAdmin && listing.sellerId !== userId) {
@@ -39,9 +40,11 @@ export async function PATCH(
         { status: 400 }
       );
     }
-    const effectiveType = parsed.data.type ?? owned.listing.type;
+    const effectiveType = publicListingType(parsed.data.type ?? owned.listing.type, parsed.data.title ?? owned.listing.title);
     if (effectiveType === "ACCESSORY" && (parsed.data.description?.length ?? 0) > 500) return NextResponse.json({error:"La descripción corta admite hasta 500 caracteres."},{status:400});
     const data = effectiveType === "ACCESSORY" ? {...parsed.data,game:"generic" as const,language:null,externalId:null,isFoil:false,setName:null,cardNumber:null,rarity:null,family:null,illustrator:null} : parsed.data;
+
+    if (effectiveType !== owned.listing.type || parsed.data.type) data.type = effectiveType;
 
     if ((data.game ?? owned.listing.game) === "generic" && (data.type ?? owned.listing.type) !== "ACCESSORY") {
       return NextResponse.json({ error: "Selecciona un juego para cartas, mazos y sellados." }, {status:400});
@@ -114,6 +117,7 @@ export async function PATCH(
       });
     });
 
+    revalidateTag("store-directory");
     revalidatePath("/cartas");
     revalidatePath("/");
     revalidatePath("/tienda/[slug]", "page");

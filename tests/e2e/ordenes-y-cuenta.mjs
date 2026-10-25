@@ -64,7 +64,7 @@ const oid = r.data?.orders?.[0]?.orderId, ref = r.data?.orders?.[0]?.reference;
 check("correo al VENDEDOR: nueva orden", await mailed(SELLER, "Nueva orden", ref));
 check("correo al COMPRADOR: pedido reservado", await mailed(b.email, "Reservamos tu pedido", ref));
 const body = fs.readFileSync(LOG, "utf8");
-check("el correo trae el codigo de referencia, la marca y el boton", body.includes(ref) && body.includes("WIN CONDITION TCG") && body.includes("Ver la orden"));
+check("el correo trae el codigo de referencia, la marca y el boton", body.includes(ref) && body.includes("TCG Cardeck") && body.includes("Ver la orden"));
 
 const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
 const fd = new FormData(); fd.append("file", new Blob([png], { type: "image/png" }), "c.png");

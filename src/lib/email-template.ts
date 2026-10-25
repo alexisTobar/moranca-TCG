@@ -14,7 +14,7 @@ export interface EmailContent {
 }
 
 /**
- * Correo con la marca de Win Condition. Usa tablas e estilos en línea porque los clientes de correo
+ * Correo con la marca de TCG Cardeck. Usa tablas e estilos en línea porque los clientes de correo
  * (Gmail, Outlook) ignoran casi todo el CSS moderno.
  */
 export function renderEmail(c: EmailContent, origin: string): string {
@@ -31,7 +31,7 @@ export function renderEmail(c: EmailContent, origin: string): string {
 <html lang="es"><body style="margin:0;background:#f3f4f6;padding:24px 12px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto">
     <tr><td style="background:#080b16;border-radius:16px 16px 0 0;padding:20px 28px">
-      <span style="color:#f5c451;font-weight:800;font-size:15px;letter-spacing:.06em">WIN CONDITION TCG</span>
+      <span style="color:#f5c451;font-weight:800;font-size:15px;letter-spacing:.06em">TCG Cardeck</span>
     </td></tr>
     <tr><td style="background:#ffffff;padding:30px 28px;border-radius:0 0 16px 16px">
       <h1 style="margin:0 0 14px;font-size:22px;line-height:1.25;color:#0b0f1a">${esc(c.heading)}</h1>
@@ -45,7 +45,7 @@ export function renderEmail(c: EmailContent, origin: string): string {
       ${c.note ? `<p style="margin:14px 0 0;font-size:12px;line-height:1.5;color:#6b7280">${esc(c.note)}</p>` : ""}
     </td></tr>
     <tr><td style="padding:16px 8px;text-align:center;font-size:11px;line-height:1.6;color:#9ca3af">
-      Recibes este correo porque tienes una cuenta en Win Condition TCG.<br>
+      Recibes este correo porque tienes una cuenta en TCG Cardeck.<br>
       <a href="${esc(origin)}/politica-de-privacidad" style="color:#9ca3af">Privacidad</a> ·
       <a href="${esc(origin)}/terminos-y-condiciones" style="color:#9ca3af">Términos</a>
     </td></tr>

@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans } from "next/font/google";
+import { Roboto } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { UsageConsent } from "@/components/UsageConsent";
 
-const bodyFont = DM_Sans({
+const bodyFont = Roboto({
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
@@ -13,8 +13,8 @@ const bodyFont = DM_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
-    default: "Win Condition TCG — Compra y vende cartas coleccionables en Chile",
-    template: "%s · Win Condition TCG",
+    default: "TCG Cardeck — Compra y vende cartas coleccionables en Chile",
+    template: "%s · TCG Cardeck",
   },
   description:
     "Singles, sobres sellados y mazos armados de Magic, Pokémon, One Piece y Mitos y Leyendas. Envíos a todo Chile.",
@@ -31,11 +31,11 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_CL",
-    siteName: "Win Condition TCG",
-    title: "Win Condition TCG — Cartas coleccionables en Chile",
+    siteName: "TCG Cardeck",
+    title: "TCG Cardeck — Cartas coleccionables en Chile",
     description:
       "Singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas.",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Win Condition TCG — cartas TCG en Chile" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "TCG Cardeck — cartas TCG en Chile" }],
   },
   twitter: { card: "summary_large_image" },
   robots: { index: true, follow: true },

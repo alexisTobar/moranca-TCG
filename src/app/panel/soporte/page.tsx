@@ -75,7 +75,7 @@ export default async function SupportPage({
         <p className="mt-1 text-[13px] text-ink-400">
           {isAdmin
             ? "Tickets de los vendedores con tienda. Al responder, el vendedor recibe el aviso en su panel."
-            : "Canal directo con el administrador de Win Condition, exclusivo para vendedores con tienda."}
+            : "Canal directo con el administrador de TCG Cardeck, exclusivo para vendedores con tienda."}
         </p>
       </header>
 

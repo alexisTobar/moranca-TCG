@@ -35,7 +35,7 @@ async function listing(sellerId, title, slug, price, game = "pokemon") {
   );
 }
 
-const admin = await user({ email: "admin@test.cl", name: "Dream Deck TCG", slug: "dream-deck-tcg", role: "ADMIN", password: SELLER_PASS });
+const admin = await user({ email: "admin@test.cl", name: "TCG Cardeck", slug: "dream-deck-tcg", role: "ADMIN", password: SELLER_PASS });
 const sipo = await user({ email: "sel_sipo@t.cl", name: "Sipo TCG", slug: "sipo-tcg", role: "SELLER", password: SELLER_PASS });
 const nico = await user({ email: "sel_nico@t.cl", name: "Nicolás Rivero", slug: "nicolas-rivero", role: "SELLER", password: SELLER_PASS });
 const pink = await user({ email: "sel_pink@t.cl", name: "PokéPink", slug: "pokepink", role: "SELLER", password: SELLER_PASS });

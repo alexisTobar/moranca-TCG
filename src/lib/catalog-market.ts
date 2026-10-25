@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 import { CARD_IDENTITY_SQL } from "./card-identity";
 import { LISTING_CARD_SELECT } from "./catalog";
+import { publicListingType, PRECONSTRUCTED_DECK_PATTERN, DECK_BOX_PATTERN } from "./listing-kind";
 
 export interface MarketFilters {
   type: "SINGLE" | "SEALED" | "DECK" | "ACCESSORY"; game?: string; q?: string;
@@ -12,7 +13,9 @@ const PRICE = Prisma.sql`LEAST(l.price, COALESCE(l."offerPrice", l.price))`;
 
 /** Filtering, cheapest-offer selection, deduplication and pagination happen in PostgreSQL. */
 export async function catalogMarket(filters: MarketFilters) {
-  const clauses = [Prisma.sql`l.status = 'ACTIVE' AND l.type = ${filters.type}::"ListingType" AND u.active = true AND u.role IN ('SELLER','ADMIN')`];
+  const effectiveType = Prisma.sql`CASE WHEN l.type = 'SEALED' AND l.title ~* ${PRECONSTRUCTED_DECK_PATTERN} AND l.title !~* ${DECK_BOX_PATTERN} THEN 'DECK' ELSE l.type::text END`;
+  const storedType = filters.type === "DECK" ? Prisma.sql`l.type IN ('DECK','SEALED')` : Prisma.sql`l.type = ${filters.type}::"ListingType"`;
+  const clauses = [Prisma.sql`l.status = 'ACTIVE' AND ${storedType} AND ${effectiveType} = ${filters.type} AND u.active = true AND u.role IN ('SELLER','ADMIN')`];
   if (filters.accessoryCategory && filters.type === "ACCESSORY") clauses.push(Prisma.sql`l."accessoryCategory" = ${filters.accessoryCategory}`);
   if (filters.game && filters.type !== "ACCESSORY") clauses.push(Prisma.sql`l.game = ${filters.game}`);
   if (filters.condition) clauses.push(Prisma.sql`l.condition = ${filters.condition}`);
@@ -47,6 +50,6 @@ export async function catalogMarket(filters: MarketFilters) {
     SELECT id, identity, sellers, "totalStock" FROM cards ORDER BY ("totalStock" > 0) DESC, ${sorting}, id ASC LIMIT 24 OFFSET ${(page-1)*24}`);
   const rows = await prisma.listing.findMany({ where: { id: { in: groups.map(g=>g.id) } }, select: LISTING_CARD_SELECT });
   const byId = new Map(rows.map(r=>[r.id,r]));
-  const listings = groups.flatMap(group => { const row=byId.get(group.id); return row ? [{...row, market: filters.type === "SINGLE" ? {identity:group.identity, sellers:group.sellers, stock:group.totalStock} : undefined}] : []; });
+  const listings = groups.flatMap(group => { const row=byId.get(group.id); return row ? [{...row, type:publicListingType(row.type,row.title), market: filters.type === "SINGLE" ? {identity:group.identity, sellers:group.sellers, stock:group.totalStock} : undefined}] : []; });
   return { total, pages, page, listings };
 }

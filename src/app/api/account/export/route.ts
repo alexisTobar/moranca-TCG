@@ -81,7 +81,7 @@ export async function GET(req: Request) {
     const body = {
       consentimientos: await prisma.consentRecord.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } }),
       generadoEl: new Date().toISOString(),
-      nota: "Copia de los datos personales de tu cuenta en Win Condition TCG. No incluye contraseñas ni claves secretas.",
+      nota: "Copia de los datos personales de tu cuenta en TCG Cardeck. No incluye contraseñas ni claves secretas.",
       perfil: profile,
       cuentasVinculadas: oauth,
       comprasComoComprador: ordersAsBuyer,
@@ -97,7 +97,7 @@ export async function GET(req: Request) {
     return new Response(JSON.stringify(body, null, 2), {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        "Content-Disposition": 'attachment; filename="mis-datos-win-condition.json"',
+        "Content-Disposition": 'attachment; filename="mis-datos-tcg-cardeck.json"',
         "Cache-Control": "no-store",
       },
     });

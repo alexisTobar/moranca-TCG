@@ -6,7 +6,7 @@ import { B, Note, P, Steps, Table, UL } from "@/components/legal/blocks";
 export const metadata: Metadata = {
   title: "Devoluciones y reclamos",
   description:
-    "Qué hacer si tu compra no llega bien: cómo se gestionan devoluciones, cambios y reembolsos entre comprador y vendedor, y qué puede hacer Win Condition TCG.",
+    "Qué hacer si tu compra no llega bien: cómo se gestionan devoluciones, cambios y reembolsos entre comprador y vendedor, y qué puede hacer TCG Cardeck.",
   alternates: { canonical: "/devoluciones" },
 };
 
@@ -17,7 +17,7 @@ const sections: LegalSection[] = [
     body: (
       <>
         <P>
-          En Win Condition TCG la venta es <B>entre el comprador y el vendedor</B>. El pago se transfiere directamente a
+          En TCG Cardeck la venta es <B>entre el comprador y el vendedor</B>. El pago se transfiere directamente a
           la cuenta del vendedor, por lo que <B>nosotros no tenemos ese dinero</B> y, por eso, no podemos devolverlo ni
           ofrecer un reembolso propio. Tampoco recibimos ni reenviamos los productos.
         </P>
@@ -37,7 +37,7 @@ const sections: LegalSection[] = [
         rows={[
           ["Comprador", "Revisar el producto al recibirlo, reportar el problema al vendedor con pruebas y acordar la solución."],
           ["Vendedor", "Responder por lo que vendió, atender el reclamo, y devolver el dinero o reenviar cuando corresponda."],
-          ["Win Condition TCG", "Proveer el chat y el historial de la orden, orientar a las partes y tomar medidas sobre cuentas que incumplan. No gestiona reembolsos."],
+          ["TCG Cardeck", "Proveer el chat y el historial de la orden, orientar a las partes y tomar medidas sobre cuentas que incumplan. No gestiona reembolsos."],
         ]}
       />
     ),
@@ -126,7 +126,7 @@ const sections: LegalSection[] = [
     title: "Membresías de tienda",
     body: (
       <P>
-        Es el único caso en que el pago se hace a Win Condition TCG. Puedes cancelar una solicitud mientras esté pendiente
+        Es el único caso en que el pago se hace a TCG Cardeck. Puedes cancelar una solicitud mientras esté pendiente
         de aprobación. Una vez activa, el período contratado no es reembolsable, salvo que la ley disponga otra cosa o que
         una falla nuestra te impida usar el servicio, caso en que extenderemos tu período. Más detalles en los{" "}
         <Link href="/terminos-y-condiciones#membresias" className="font-semibold text-brand-600 hover:text-brand-700">
@@ -143,7 +143,7 @@ const sections: LegalSection[] = [
       <UL
         items={[
           "Desconfía de quien te pida pagar fuera del proceso, a otra cuenta o sin el código de referencia.",
-          "Ninguna persona de Win Condition TCG te pedirá tu contraseña.",
+          "Ninguna persona de TCG Cardeck te pedirá tu contraseña.",
           "Si ves una publicación sospechosa o un vendedor que no cumple, repórtalo. Lo revisamos.",
         ]}
       />
@@ -157,11 +157,11 @@ export default function ReturnsPage() {
       current="/devoluciones"
       eyebrow="Ayuda y política"
       title="Devoluciones y reclamos"
-      intro="Cómo se resuelven los problemas de una compra en Win Condition TCG, con las cosas claras sobre qué hace cada parte."
+      intro="Cómo se resuelven los problemas de una compra en TCG Cardeck, con las cosas claras sobre qué hace cada parte."
       summary={
         <Note tone="warn" title="Lo más importante">
           <p>
-            Win Condition TCG <B>no realiza devoluciones ni reembolsos</B>: no vendemos los productos y no manejamos el
+            TCG Cardeck <B>no realiza devoluciones ni reembolsos</B>: no vendemos los productos y no manejamos el
             dinero de las ventas. Compradores y vendedores lo resuelven entre ellos, con el chat y el historial de la orden
             como respaldo, y nosotros intervenimos sobre las cuentas que incumplan.
           </p>

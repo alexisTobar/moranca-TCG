@@ -159,7 +159,7 @@ async function uniqueSlug(model, base) {
 async function main() {
   const email = (process.env.ADMIN_EMAIL ?? "admin@dreamdecktcg.cl").toLowerCase();
   const password = process.env.ADMIN_PASSWORD ?? "DreamDeckTCG2026!";
-  const name = process.env.ADMIN_NAME ?? "Dream Deck TCG";
+  const name = process.env.ADMIN_NAME ?? "TCG Cardeck";
 
   const admin = await prisma.user.upsert({
     where: { email },
@@ -171,7 +171,7 @@ async function main() {
       password: await bcrypt.hash(password, 12),
       role: "ADMIN",
       city: "Santiago",
-      bio: "Tienda oficial de Dream Deck TCG. Singles, sellados y mazos con envío a todo Chile.",
+      bio: "Tienda oficial de TCG Cardeck. Singles, sellados y mazos con envío a todo Chile.",
     },
   });
 

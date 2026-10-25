@@ -1,3 +1,4 @@
+import { publicListingType } from "@/lib/listing-kind";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -48,7 +49,7 @@ export default async function EditListingPage({
 
   const initial: Partial<ListingFormValues> = {
     id: listing.id,
-    type: listing.type,
+    type: publicListingType(listing.type,listing.title),
     status: listing.status,
     game: listing.game as GameId,
     title: listing.title,

@@ -31,7 +31,7 @@ await db.query(`DELETE FROM "StoreVisitDay"`);
 await db.query(`DELETE FROM "Store"`);
 await db.query(`DELETE FROM "StorePlan"`);
 // El admin necesita datos bancarios para recibir las transferencias de membresía
-await db.query(`UPDATE "User" SET "bankName"='Banco Estado', "bankAccountType"='Cuenta Vista', "bankAccountNumber"='123456789', "bankHolderName"='Win Condition SpA', "bankRut"='76.123.456-7' WHERE email='admin@test.cl'`);
+await db.query(`UPDATE "User" SET "bankName"='Banco Estado', "bankAccountType"='Cuenta Vista', "bankAccountNumber"='123456789', "bankHolderName"='TCG Cardeck SpA', "bankRut"='76.123.456-7' WHERE email='admin@test.cl'`);
 
 console.log("\n== Permisos ==");
 let r = await buyer.req("/api/store/subscribe", { method: "POST", json: { planCode: "TIENDA", months: 1 } });
@@ -153,9 +153,9 @@ const titles = (await db.query(`SELECT title FROM "Listing" WHERE "sellerId"<>(S
 const mineTitles = new Set((await db.query(`SELECT title FROM "Listing" WHERE "sellerId"=(SELECT id FROM "User" WHERE email='sel_sipo@t.cl')`)).rows.map((x) => x.title));
 const leak = titles.find((t) => !mineTitles.has(t.title) && html.includes(t.title.replace(/&/g, "&amp;")));
 check("no aparecen productos de otros vendedores", !leak, leak?.title);
-check("marca Win Condition se mantiene", html.includes("Win Condition"));
-check("mantiene el menu de Win Condition arriba (Cartas, Vendedores)", html.includes('href="/cartas"') && html.includes('href="/vendedores"'));
-check("el logo de Win Condition lleva a la home", html.includes('aria-label="Win Condition TCG - inicio"'));
+check("marca TCG Cardeck se mantiene", html.includes("TCG Cardeck"));
+check("mantiene el menu de TCG Cardeck arriba (Cartas, Vendedores)", html.includes('href="/cartas"') && html.includes('href="/vendedores"'));
+check("el logo de TCG Cardeck lleva a la home", html.includes('aria-label="TCG Cardeck - inicio"'));
 check("la tienda tiene ADEMAS su menu propio", html.includes('aria-label="Categorías de la tienda"'));
 check("filtros del encabezado son de la tienda", html.includes('href="/tienda/sipo-tcg?game=') || html.includes('href="/tienda/sipo-tcg?type='));
 check("buscador apunta a la tienda", html.includes('action="/tienda/sipo-tcg#catalogo"'));

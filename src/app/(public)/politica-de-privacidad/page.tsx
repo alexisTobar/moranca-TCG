@@ -7,7 +7,7 @@ import { CONTACT_EMAIL } from "@/lib/legal";
 export const metadata: Metadata = {
   title: "Política de privacidad",
   description:
-    "Qué datos personales recopila Win Condition TCG, para qué los usa, con quién los comparte, qué cookies usamos y cómo ejercer tus derechos.",
+    "Qué datos personales recopila TCG Cardeck, para qué los usa, con quién los comparte, qué cookies usamos y cómo ejercer tus derechos.",
   alternates: { canonical: "/politica-de-privacidad" },
 };
 
@@ -17,7 +17,7 @@ const sections: LegalSection[] = [
     title: "Quién es responsable de tus datos",
     body: (
       <P>
-        Win Condition TCG (“nosotros”) es el responsable del tratamiento de los datos personales que recopilamos en
+        TCG Cardeck (“nosotros”) es el responsable del tratamiento de los datos personales que recopilamos en
         este sitio, conforme a la Ley N° 19.628 sobre protección de la vida privada y a la Ley N° 21.719 sobre protección
         y tratamiento de los datos personales, que entra en vigencia el 1 de diciembre de 2026. Los datos de contacto
         están al final de esta página.

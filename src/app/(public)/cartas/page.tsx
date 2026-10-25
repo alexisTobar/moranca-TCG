@@ -139,7 +139,7 @@ export default async function CatalogPage({
         </p>
       </header>
 
-      {type === "ACCESSORY" && <Link href="/panel/publicar?type=ACCESSORY" className="btn btn-primary mb-6">Vender un accesorio</Link>}
+      {(type === "ACCESSORY" || type === "DECK") && <Link href={`/panel/publicar?type=${type}`} className="btn btn-primary mb-6">{type === "DECK" ? "Vender un mazo" : "Vender un accesorio"}</Link>}
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
         {/* FILTROS */}
         <FilterDrawer activeCount={[game, type, accessoryCategory, condition, language, min, max].filter(Boolean).length}>

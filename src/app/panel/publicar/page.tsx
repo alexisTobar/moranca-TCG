@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function PublishPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const accessory = sp.type === "ACCESSORY";
+  const deck = sp.type === "DECK";
   const user = await getCurrentUser();
   if (!user) return null;
   const isAdmin = user.role === "ADMIN";
@@ -30,10 +31,10 @@ export default async function PublishPage({ searchParams }: { searchParams: Prom
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-bold text-carbon">
-            {accessory ? "Publicar accesorio" : "Nueva publicación"}
+            {accessory ? "Publicar accesorio" : deck ? "Publicar mazo" : "Nueva publicación"}
           </h1>
           <p className="mt-1 text-[13px] text-ink-400">
-            {accessory ? "Agrega fotos, título, una descripción corta, precio y stock. Los accesorios no necesitan juego ni idioma." : "Busca la carta por nombre o publica un sellado, mazo o accesorio. El precio lo pones tú."}
+            {accessory ? "Agrega fotos, título, una descripción corta, precio y stock. Los accesorios no necesitan juego ni idioma." : deck ? "Vende un mazo preconstruido o armado. Agrega fotos y descripción; la lista de cartas es opcional." : "Busca la carta por nombre o publica un sellado, mazo o accesorio. El precio lo pones tú."}
           </p>
         </div>
         <Link
@@ -44,7 +45,7 @@ export default async function PublishPage({ searchParams }: { searchParams: Prom
         </Link>
       </header>
 
-      <ListingForm initial={accessory ? {type:"ACCESSORY",game:"generic",language:null,condition:"NEW"} : undefined} sellers={sellers} isAdmin={isAdmin} currentUserId={user.id} />
+      <ListingForm initial={accessory ? {type:"ACCESSORY",game:"generic",language:null,condition:"NEW"} : deck ? {type:"DECK"} : undefined} sellers={sellers} isAdmin={isAdmin} currentUserId={user.id} />
     </div>
   );
 }

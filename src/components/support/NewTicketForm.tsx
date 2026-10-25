@@ -38,7 +38,7 @@ export function NewTicketForm() {
       <div>
         <h2 className="font-display text-lg font-bold text-carbon">Nuevo ticket</h2>
         <p className="mt-0.5 text-[12px] text-ink-400">
-          Te responde directamente el administrador de Win Condition. Recibirás el aviso en tu panel.
+          Te responde directamente el administrador de TCG Cardeck. Recibirás el aviso en tu panel.
         </p>
       </div>
 

@@ -88,7 +88,7 @@ export function SiteFooter() {
           ]}
         />
         <FooterCol
-          title="Win Condition"
+          title="TCG Cardeck"
           links={[
             { href: "/quienes-somos", label: "Quiénes somos" },
             { href: "/ayuda", label: "Cómo comprar" },
@@ -104,7 +104,7 @@ export function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-[11px] text-white/40 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>© {new Date().getFullYear()} Win Condition TCG · Hecho en Chile</span>
+            <span>© {new Date().getFullYear()} TCG Cardeck · Hecho en Chile</span>
             <Link href="/terminos-y-condiciones" className="transition hover:text-white/70">Términos</Link>
             <Link href="/politica-de-privacidad" className="transition hover:text-white/70">Privacidad</Link>
             <Link href="/devoluciones" className="transition hover:text-white/70">Devoluciones</Link>

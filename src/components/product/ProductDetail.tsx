@@ -1,3 +1,4 @@
+import { publicListingType } from "@/lib/listing-kind";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ACCESSORY_CATEGORIES } from "@/lib/games";
 import { ReportButton } from "@/components/ReportButton";
@@ -20,12 +21,12 @@ import { ArrowRight, LineChart } from "lucide-react";
 const TYPE_LABEL: Record<string, string> = {
   SINGLE: "Carta individual",
   SEALED: "Producto sellado",
-  DECK: "Mazo armado",
+  DECK: "Mazo",
   ACCESSORY: "Accesorio",
 };
 
 export async function getProductListing(slug: string) {
-  return safeQuery(
+  const listing = await safeQuery(
     () =>
       prisma.listing.findUnique({
         where: { slug },
@@ -38,6 +39,7 @@ export async function getProductListing(slug: string) {
       }),
     null
   );
+  return listing ? {...listing,type:publicListingType(listing.type,listing.title)} : null;
 }
 
 export type ProductListing = NonNullable<Awaited<ReturnType<typeof getProductListing>>>;
@@ -218,7 +220,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
             )}
             {conditionLabel && <Spec label="Estado" value={conditionLabel} />}
             {listing.type !== "ACCESSORY" && languageLabel && <Spec label="Idioma" value={languageLabel} />}
-            {listing.type === "DECK" && (
+            {listing.type === "DECK" && listing.deckCards.length > 0 && (
               <Spec label="Cartas" value={`${totalCards} unidades`} />
             )}
           </div>
@@ -278,7 +280,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
                 {store ? store.name : listing.seller.name}
               </span>
               <span className="block text-[11px] text-ink-400">
-                {store ? "Tienda oficial" : "Vendedor en Win Condition"}
+                {store ? "Tienda oficial" : "Vendedor en TCG Cardeck"}
                 {listing.seller.city ? ` · ${listing.seller.city}` : ""}
               </span>
             </span>

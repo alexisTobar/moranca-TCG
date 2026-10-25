@@ -1,3 +1,4 @@
+import { listingTypeWhere, publicListingTypeCounts } from "@/lib/listing-kind";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
@@ -69,7 +70,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const name = store.displayName || seller.name;
   return {
     title: name,
-    description: store.tagline || `Catálogo de ${name} en Win Condition TCG.`,
+    description: store.tagline || `Catálogo de ${name} en TCG Cardeck.`,
     alternates: { canonical: `/tienda/${slug}` },
     openGraph: { title: name, images: store.bannerUrl ? [store.bannerUrl] : store.logoUrl ? [store.logoUrl] : ["/opengraph-image"] },
     twitter: { card: "summary_large_image" },
@@ -114,7 +115,7 @@ export default async function StorefrontPage({
   const where: Prisma.ListingWhereInput = {
     ...baseWhere,
     ...(game ? { game } : {}),
-    ...(type ? { type: type as Prisma.ListingWhereInput["type"] } : {}),
+    ...(type ? {AND:[listingTypeWhere(type)]} : {}),
     ...(q
       ? {
           OR: [
@@ -143,7 +144,10 @@ export default async function StorefrontPage({
       [] as Array<{ game: string; _count: { _all: number } }>
     ),
     safeQuery(
-      () => prisma.listing.groupBy({ by: ["type"], where: baseWhere, _count: { _all: true } }),
+      async () => {
+        const rows = await prisma.listing.findMany({where:baseWhere,select:{type:true,title:true}});
+        return publicListingTypeCounts(rows);
+      },
       [] as Array<{ type: string; _count: { _all: number } }>
     ),
     store.featuredListingIds.length > 0
@@ -462,7 +466,7 @@ export default async function StorefrontPage({
       </div>
 
       <p className="mx-auto max-w-7xl px-4 pb-2 pt-10 text-center text-[12px] text-ink-400">
-        {name} vende con la garantía de Win Condition TCG: stock reservado, código de pago y comprobante en cada compra.
+        {name} vende con la garantía de TCG Cardeck: stock reservado, código de pago y comprobante en cada compra.
       </p>
     </div>
   );
