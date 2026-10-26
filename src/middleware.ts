@@ -3,10 +3,15 @@ import { jwtVerify } from "jose";
 
 const SESSION_COOKIE = "dreamdeck_session";
 
-const CSP = [
+/**
+ * Política de contenido con nonce: cada respuesta lleva un código aleatorio y solo los scripts que lo traen
+ * (los de Next, que lo lee de la cabecera de la petición) pueden ejecutarse. Un script inyectado en la página
+ * no lo conoce, así que el navegador lo bloquea. 'strict-dynamic' deja que esos scripts carguen los suyos.
+ * unsafe-eval solo lo necesita el modo desarrollo de Next (recarga en caliente).
+ */
+const csp = (nonce: string) => [
   "default-src 'self'",
-  // unsafe-eval solo lo necesita el modo desarrollo de Next (recarga en caliente).
-  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"}`,
+  `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://cards.scryfall.io https://images.pokemontcg.io https://images.scrydex.com https://static.dotgg.gg https://api.myl.cl https://assets.tcgdex.net https://*.supabase.co https://upload.wikimedia.org https://static.wikia.nocookie.net https://en.onepiece-cardgame.com https://play.pokemon.com https://assets.pokemon.com https://img.pokemondb.net https://i0.wp.com https://i1.wp.com https://i2.wp.com https://bleedingcool.com",
   "font-src 'self' data:",
@@ -18,8 +23,8 @@ const CSP = [
   "object-src 'none'",
 ].join("; ");
 
-function securityHeaders(res: NextResponse) {
-  res.headers.set("Content-Security-Policy", CSP);
+function securityHeaders(res: NextResponse, nonce: string) {
+  res.headers.set("Content-Security-Policy", csp(nonce));
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -75,10 +80,17 @@ function crossSiteMutation(req: NextRequest): boolean {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const nonce = btoa(crypto.randomUUID());
+  // Next toma el nonce de la cabecera CSP de la petición y lo pone en sus propios scripts.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", csp(nonce));
+  const next = () => NextResponse.next({ request: { headers: requestHeaders } });
 
   if (crossSiteMutation(req)) {
     return securityHeaders(
-      NextResponse.json({ error: "Petición bloqueada: origen no permitido." }, { status: 403 })
+      NextResponse.json({ error: "Petición bloqueada: origen no permitido." }, { status: 403 }),
+      nonce
     );
   }
   const isPanel = pathname.startsWith("/panel");
@@ -87,7 +99,7 @@ export async function middleware(req: NextRequest) {
   const isLogin = pathname === "/ingresar";
 
   if (!isPanel && !isAccount && !isCheckout && !isLogin) {
-    return securityHeaders(NextResponse.next());
+    return securityHeaders(next(), nonce);
   }
 
   const session = await readSession(req.cookies.get(SESSION_COOKIE)?.value);
@@ -96,7 +108,7 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     url.pathname = "/ingresar";
     url.search = `?next=${encodeURIComponent(pathname)}`;
-    return securityHeaders(NextResponse.redirect(url));
+    return securityHeaders(NextResponse.redirect(url), nonce);
   }
 
   // El filtro fino de "comprador no entra al panel de vendedor" vive en
@@ -109,10 +121,10 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     url.pathname = session.role === "BUYER" ? "/cuenta" : "/panel";
     url.search = "";
-    return securityHeaders(NextResponse.redirect(url));
+    return securityHeaders(NextResponse.redirect(url), nonce);
   }
 
-  return securityHeaders(NextResponse.next());
+  return securityHeaders(next(), nonce);
 }
 
 export const config = {

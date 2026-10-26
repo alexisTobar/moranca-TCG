@@ -171,7 +171,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
     <div className="mx-auto max-w-7xl px-4 py-8">
       <JsonLd data={productLd} />
       <ViewBeacon listingId={listing.id} />
-      <nav className="mb-6 flex flex-wrap items-center gap-1.5 text-[12px] text-ink-400">
+      <nav aria-label="Ruta de navegación" className="mb-6 flex flex-wrap items-center gap-1.5 text-[12px] text-ink-400 [&_a]:inline-flex [&_a]:min-h-6 [&_a]:items-center">
         {store ? (
           <>
             <Link href={`/tienda/${store.slug}`} className="hover:text-carbon">

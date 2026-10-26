@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { reviewSchema, reviewReplySchema } from "@/lib/validators";
 import { containsProfanity } from "@/lib/profanity";
-import { memoryRateLimit, clientKey } from "@/lib/rate-limit";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,7 +38,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: "Ya calificaste esta orden" }, { status: 409 });
     }
 
-    const limiter = memoryRateLimit(clientKey(req, `review:${user.id}`), 10, 300);
+    const limiter = await rateLimit(clientKey(req, `review:${user.id}`), 10, 300);
     if (!limiter.allowed) {
       return NextResponse.json({ error: "Demasiadas reseñas seguidas." }, { status: 429 });
     }

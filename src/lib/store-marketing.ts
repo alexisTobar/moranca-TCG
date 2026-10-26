@@ -47,7 +47,6 @@ export function planBenefits(p: MarketingPlan): string[] {
     `Hasta ${p.maxFeatured} productos destacados arriba de tu catálogo`,
     p.advancedStats ? "Estadísticas completas: visitas, escaneos de QR y ventas" : "Estadísticas de visitas y escaneos de QR",
     "Insignia “Tienda verificada”",
-    "Soporte directo con el equipo de TCG Cardeck",
     ...(p.showcase ? ["Vitrina “Tiendas destacadas” en el inicio"] : []),
   ];
 }

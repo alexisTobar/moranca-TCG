@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { USAGE_PAGES, utcDay } from "@/lib/usage-policy";
-import { clientKey, memoryRateLimit } from "@/lib/rate-limit";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { CONSENT_VERSION } from "@/lib/consent-policy";
 
 export const runtime = "nodejs";
@@ -12,7 +12,7 @@ const schema = z.object({ id: z.string().uuid(), session: z.string().uuid(), pag
 export async function POST(req: Request) {
   if ((await cookies()).get("wc_consent_version")?.value !== CONSENT_VERSION) return new NextResponse(null, { status: 204 });
   if ((await cookies()).get("wc_analytics")?.value !== "yes" || req.headers.get("dnt") === "1" || req.headers.get("sec-gpc") === "1") return new NextResponse(null, { status: 204 });
-  if (!memoryRateLimit(clientKey(req, "usage"), 60, 60).allowed) return new NextResponse(null, { status: 429 });
+  if (!(await rateLimit(clientKey(req, "usage"), 60, 60)).allowed) return new NextResponse(null, { status: 429 });
   if (!process.env.AUTH_SECRET) return new NextResponse(null, { status: 503 });
   if (Number(req.headers.get("content-length") || 0) > 1024) return new NextResponse(null, { status: 413 });
   let body: unknown;

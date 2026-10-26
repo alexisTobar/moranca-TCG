@@ -51,7 +51,7 @@ export function ReportButton({ targetType, targetId }: { targetType: "LISTING" |
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-ink-400 transition hover:text-rose-600"
+        className="inline-flex min-h-6 items-center gap-1.5 py-1 text-[12px] font-semibold text-ink-400 transition hover:text-rose-600"
       >
         <Flag className="h-3.5 w-3.5" strokeWidth={2} />
         Reportar

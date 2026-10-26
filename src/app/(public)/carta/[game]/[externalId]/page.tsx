@@ -121,7 +121,7 @@ export default async function CardPage({ params }: { params: Params }) {
   return (
     <div className="card-market-page mx-auto max-w-7xl px-4 py-8">
       <JsonLd data={{"@context":"https://schema.org", "@type":"Product", name:sample.title, image:sample.imageUrl || undefined, url:`${siteUrl()}${cardMarketHref(game,externalId)}`, ...(stats.all ? {offers:{"@type":"AggregateOffer",priceCurrency:"CLP",lowPrice:stats.all.min,highPrice:stats.all.max,offerCount:offers.length,availability:"https://schema.org/InStock"}} : {})}} />
-      <nav className="mb-6 flex flex-wrap items-center gap-1.5 text-[12px] text-ink-400">
+      <nav aria-label="Ruta de navegación" className="mb-6 flex flex-wrap items-center gap-1.5 text-[12px] text-ink-400 [&_a]:inline-flex [&_a]:min-h-6 [&_a]:items-center">
         <Link href="/" className="hover:text-carbon">Inicio</Link>
         <span>/</span>
         <Link href="/cartas" className="hover:text-carbon">Catálogo</Link>

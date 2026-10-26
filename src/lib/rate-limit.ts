@@ -7,6 +7,9 @@ export interface RateLimitResult {
   retryAfterSeconds: number;
 }
 
+/** Ninguna ventana de límite supera un día: los registros más antiguos se pueden borrar. */
+const MAX_WINDOW_SECONDS = 86400;
+
 /**
  * Límite por ventana deslizante, persistido en la base de datos para que
  * funcione también en entornos serverless (Vercel) con múltiples instancias.
@@ -18,9 +21,13 @@ export async function rateLimit(
 ): Promise<RateLimitResult> {
   const since = new Date(Date.now() - windowSeconds * 1000);
 
-  await prisma.loginAttempt.deleteMany({
-    where: { createdAt: { lt: new Date(Date.now() - windowSeconds * 4000) } },
-  });
+  // Cada clave limpia solo lo suyo: antes, una ventana corta (p. ej. 60 s del cotizador) borraba
+  // los intentos de TODAS las claves y reiniciaba límites largos como el del login o el registro.
+  await prisma.loginAttempt.deleteMany({ where: { key, createdAt: { lt: since } } });
+  // Barrido general de lo que ya no sirve a ningún límite (la ventana más larga es de horas).
+  if (Math.random() < 0.05) {
+    await prisma.loginAttempt.deleteMany({ where: { createdAt: { lt: new Date(Date.now() - MAX_WINDOW_SECONDS * 1000) } } });
+  }
 
   const count = await prisma.loginAttempt.count({
     where: { key, createdAt: { gte: since } },

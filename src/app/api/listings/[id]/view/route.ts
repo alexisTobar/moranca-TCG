@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { clientKey, memoryRateLimit } from "@/lib/rate-limit";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   if (!/^[a-z0-9]{10,40}$/i.test(id) || BOT.test(req.headers.get("user-agent") ?? "")) return new NextResponse(null, { status: 204 });
   // Una vista por persona y publicación cada 30 minutos, para que recargar no infle el número.
-  if (!memoryRateLimit(clientKey(req, `view:${id}`), 1, 1800).allowed) return new NextResponse(null, { status: 204 });
+  if (!(await rateLimit(clientKey(req, `view:${id}`), 1, 1800)).allowed) return new NextResponse(null, { status: 204 });
   try {
     const session = await getSession();
     // El vendedor mirando su propia publicación no cuenta.

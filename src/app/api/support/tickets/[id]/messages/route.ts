@@ -3,15 +3,14 @@ import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { supportMessageSchema } from "@/lib/validators";
 import { containsProfanity } from "@/lib/profanity";
-import { clientKey, memoryRateLimit } from "@/lib/rate-limit";
-import { isStoreActive } from "@/lib/store";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { notifyAdmins, notifyUser } from "@/lib/notify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Responder en un ticket. El admin responde siempre; el vendedor solo mientras tenga membresía vigente
+ * Responder en un ticket. El admin responde siempre; vendedores y compradores en sus propios tickets
  * y el comprador mientras el ticket siga abierto.
  */
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -38,26 +37,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const fromBuyer = ticket.requesterRole === "BUYER";
 
     if (!isAdmin) {
-      // Los tickets de vendedor dependen de la membresía; los de comprador no.
-      if (!fromBuyer) {
-        if (user.role !== "SELLER") return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
-        const store = await prisma.store.findUnique({
-          where: { sellerId: user.id },
-          select: { status: true, planId: true, activeUntil: true },
-        });
-        if (!store || !isStoreActive(store)) {
-          return NextResponse.json(
-            { error: "Tu membresía no está vigente. Renuévala para seguir escribiendo en soporte." },
-            { status: 403 }
-          );
-        }
-      }
+      // Un ticket abierto como vendedor sigue siendo de un vendedor: si la cuenta dejó de serlo, no puede escribir.
+      if (!fromBuyer && user.role !== "SELLER") return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
       if (ticket.status === "CLOSED") {
         return NextResponse.json({ error: "Este ticket está cerrado. Abre uno nuevo si aún necesitas ayuda." }, { status: 409 });
       }
     }
 
-    const limiter = memoryRateLimit(clientKey(req, `ticket-msg:${user.id}`), 20, 60);
+    const limiter = await rateLimit(clientKey(req, `ticket-msg:${user.id}`), 20, 60);
     if (!limiter.allowed) {
       return NextResponse.json({ error: "Estás mandando mensajes muy rápido, espera un poco." }, { status: 429 });
     }

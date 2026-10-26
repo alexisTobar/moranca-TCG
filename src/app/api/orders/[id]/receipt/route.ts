@@ -2,7 +2,7 @@ import { mailReceiptUploaded } from "@/lib/order-mail";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
-import { memoryRateLimit, clientKey } from "@/lib/rate-limit";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 import {
   IMAGE_SIGNATURES,
   PDF_SIGNATURE,
@@ -23,7 +23,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const user = await requireUser();
     const { id } = await params;
 
-    const limiter = memoryRateLimit(clientKey(req, `receipt:${user.id}`), 10, 300);
+    const limiter = await rateLimit(clientKey(req, `receipt:${user.id}`), 10, 300);
     if (!limiter.allowed) {
       return NextResponse.json(
         { error: "Demasiados intentos, espera un momento." },

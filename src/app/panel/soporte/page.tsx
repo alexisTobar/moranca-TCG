@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ChevronRight, Inbox, LifeBuoy, LockKeyhole } from "lucide-react";
+import { ChevronRight, Inbox, LifeBuoy } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { timeAgo } from "@/lib/format";
-import { isStoreActive } from "@/lib/store";
 import { REQUESTER_LABEL, TICKET_STATUS_LABEL, categoryLabel } from "@/lib/support-shared";
 import { NewTicketForm } from "@/components/support/NewTicketForm";
 
@@ -50,13 +49,6 @@ export default async function SupportPage({
   const filterHref = (estado: string, tipo: string) =>
     `/panel/soporte?estado=${estado}${tipo !== "todos" ? `&tipo=${tipo}` : ""}`;
 
-  const store = isAdmin
-    ? null
-    : await prisma.store.findUnique({
-        where: { sellerId: user.id },
-        select: { status: true, planId: true, activeUntil: true, plan: { select: { name: true } } },
-      });
-  const active = Boolean(store && isStoreActive(store));
 
   const [tickets, counts] = await Promise.all([
     prisma.supportTicket.findMany({
@@ -89,36 +81,12 @@ export default async function SupportPage({
         <h1 className="font-display text-3xl font-bold text-carbon">Soporte</h1>
         <p className="mt-1 text-[13px] text-ink-400">
           {isAdmin
-            ? "Tickets de vendedores con tienda y de compradores. Al responder, el usuario recibe el aviso por correo y en su panel o cuenta."
-            : "Canal directo con el administrador de TCG Cardeck, exclusivo para vendedores con tienda."}
+            ? "Tickets de vendedores y de compradores. Al responder, el usuario recibe el aviso por correo y en su panel o cuenta."
+            : "Canal directo con el administrador de TCG Cardeck. Escríbenos por pedidos, pagos, tu cuenta, tu tienda o tu plan."}
         </p>
       </header>
 
-      {!isAdmin &&
-        (active ? (
-          <NewTicketForm />
-        ) : (
-          <div className="flex items-start gap-4 rounded-2xl border border-dashed border-ink-700 p-6">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ink-850 text-ink-500">
-              <LockKeyhole className="h-5 w-5" strokeWidth={1.75} />
-            </span>
-            <div>
-              <p className="font-display text-base font-bold text-carbon">Soporte directo con la membresía de tienda</p>
-              <p className="mt-1 max-w-xl text-[13px] leading-relaxed text-ink-400">
-                Con un plan Tienda o Pro puedes escribirle al administrador y hacer seguimiento de tus consultas aquí
-                mismo.{" "}
-                <Link href="/panel/tienda" className="font-semibold text-brand-600 hover:text-brand-700">
-                  Ver planes
-                </Link>
-                . Mientras tanto, revisa el{" "}
-                <Link href="/ayuda" className="font-semibold text-brand-600 hover:text-brand-700">
-                  centro de ayuda
-                </Link>
-                .
-              </p>
-            </div>
-          </div>
-        ))}
+      {!isAdmin && <NewTicketForm />}
 
       {isAdmin && (
         <div className="space-y-2">

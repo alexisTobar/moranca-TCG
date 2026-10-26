@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { orderMessageSchema } from "@/lib/validators";
 import { containsProfanity } from "@/lib/profanity";
-import { memoryRateLimit, clientKey } from "@/lib/rate-limit";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,7 +59,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: "Orden no encontrada" }, { status: 404 });
     }
 
-    const limiter = memoryRateLimit(clientKey(req, `order-msg:${user.id}`), 20, 60);
+    const limiter = await rateLimit(clientKey(req, `order-msg:${user.id}`), 20, 60);
     if (!limiter.allowed) {
       return NextResponse.json(
         { error: "Estás mandando mensajes muy rápido, espera un poco." },

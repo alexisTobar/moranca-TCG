@@ -198,10 +198,23 @@ for (const [name, value] of [["content-security-policy", /frame-ancestors 'none'
   check(`cabecera ${name}`, value.test(r.headers.get(name) ?? ""), r.headers.get(name));
 }
 check("no se anuncia la tecnología del servidor (x-powered-by)", !r.headers.get("x-powered-by"));
+const scriptSrc = (r.headers.get("content-security-policy") ?? "").match(/script-src ([^;]*)/)?.[1] ?? "";
+const nonce = scriptSrc.match(/'nonce-([^']+)'/)?.[1];
+check("la política de scripts usa nonce y no permite scripts inyectados ('unsafe-inline')", !!nonce && !scriptSrc.includes("'unsafe-inline'"), scriptSrc);
+const execScripts = [...r.raw.matchAll(/<script(?![^>]*application\/ld\+json)[^>]*>/g)].map((m) => m[0]);
+check(`todos los scripts de la página llevan el nonce (${execScripts.length})`, execScripts.length > 0 && execScripts.every((tag) => tag.includes(`nonce="${nonce}"`)), execScripts.find((tag) => !tag.includes(`nonce="${nonce}"`)));
+const second = await anon.req("/");
+check("el nonce cambia en cada visita", !!nonce && !(second.headers.get("content-security-policy") ?? "").includes(nonce));
 await db.query(`DELETE FROM "LoginAttempt"`);
 let last;
 for (let i = 0; i < 12; i++) last = await anon.req("/api/auth/login", { method: "POST", json: { email: b1.email, password: `Incorrecta${i}!!` } });
 check("muchos intentos de clave se bloquean (429)", last.status === 429, last.status);
+await db.query(`DELETE FROM "LoginAttempt"`);
+// Antes, una ventana corta (cotizador: 60 s) borraba los intentos de todas las claves de más de 4 minutos.
+for (let i = 0; i < 6; i++) await db.query(`INSERT INTO "LoginAttempt"(id, key, "createdAt") VALUES ($1, 'prueba:login-largo', now() - interval '10 minutes')`, [`seg${Date.now()}${i}`]);
+await buyer.req("/api/checkout/quote", { method: "POST", json: { items: cart.items, shipMethod: "PICKUP", paymentMethod: "TRANSFER" } });
+const [kept] = (await db.query(`SELECT count(*)::int n FROM "LoginAttempt" WHERE key='prueba:login-largo'`)).rows;
+check("un límite corto no borra los intentos de otros límites (login de 15 min)", kept.n === 6, kept.n);
 await db.query(`DELETE FROM "LoginAttempt"`);
 r = await anon.req("/api/auth/login", { method: "POST", json: { email: "no-existe@nada.cl", password: "Cualquiera123!" } });
 const r2 = await anon.req("/api/auth/login", { method: "POST", json: { email: b1.email, password: "Cualquiera123!" } });

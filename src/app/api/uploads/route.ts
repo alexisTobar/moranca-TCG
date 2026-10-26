@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
-import { memoryRateLimit, clientKey } from "@/lib/rate-limit";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { IMAGE_SIGNATURES, detectSignature } from "@/lib/file-signature";
 
 export const runtime = "nodejs";
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   try {
     const user = await requireUser();
 
-    const limiter = memoryRateLimit(clientKey(req, `upload:${user.id}`), 30, 60);
+    const limiter = await rateLimit(clientKey(req, `upload:${user.id}`), 30, 60);
     if (!limiter.allowed) {
       return NextResponse.json(
         { error: "Demasiadas subidas seguidas, espera un momento." },

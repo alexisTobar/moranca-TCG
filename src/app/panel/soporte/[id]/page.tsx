@@ -69,7 +69,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
             )}{" "}
             · {ticket.seller.email}
             {!fromBuyer &&
-              ` · ${sellerActive ? `Plan ${ticket.seller.store?.plan?.name ?? ""} vigente` : "Sin membresía vigente"}`}
+              ` · ${sellerActive ? `Plan ${ticket.seller.store?.plan?.name ?? ""} vigente` : "Sin plan de tienda"}`}
           </p>
         )}
       </header>
@@ -79,8 +79,8 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
         viewer={isAdmin ? "admin" : "seller"}
         requesterRole={ticket.requesterRole}
         initialStatus={ticket.status}
-        canWrite={isAdmin || fromBuyer || sellerActive}
-        blockedReason="Tu membresía no está vigente. Renuévala en Mi tienda para seguir escribiendo."
+        canWrite
+        blockedReason=""
       />
     </div>
   );

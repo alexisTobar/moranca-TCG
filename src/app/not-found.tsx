@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { Logo } from "@/components/Logo";
 
-export default function NotFound() {
+export default async function NotFound() {
+  // Se genera por visita para llevar el nonce de la política de scripts (una página estática no lo tendría).
+  await connection();
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center px-4 text-center">
       <Logo variant="full" height={120} />

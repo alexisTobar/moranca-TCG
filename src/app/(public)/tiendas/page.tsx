@@ -70,8 +70,8 @@ const BENEFITS: Array<{ icon: LucideIcon; title: string; text: string }> = [
   },
   {
     icon: LifeBuoy,
-    title: "Soporte directo",
-    text: "Un canal exclusivo con el equipo de TCG Cardeck para resolver dudas de tu tienda, tus pagos o tus órdenes.",
+    title: "Soporte por ticket",
+    text: "Escríbele al equipo de TCG Cardeck desde tu panel por dudas de tu tienda, tus pagos o tus órdenes. Está disponible para todos los vendedores, con o sin plan.",
   },
 ];
 
@@ -251,7 +251,7 @@ export default async function StoresLandingPage() {
                     ["Tienda propia (banner, logo y colores)", () => true, false],
                     ["QR con tu logo al centro", () => true, false],
                     ["Insignia “Tienda verificada”", () => true, false],
-                    ["Soporte directo con el equipo", () => true, false],
+                    ["Soporte por ticket con el equipo", () => true, true],
                   ] as Array<[string, () => boolean, boolean]>
                 ).map(([label, has, free]) => (
                   <tr key={label}>

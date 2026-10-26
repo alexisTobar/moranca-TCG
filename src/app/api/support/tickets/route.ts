@@ -42,7 +42,7 @@ export async function GET() {
   }
 }
 
-/** Abrir un ticket: vendedores con membresía de tienda vigente o compradores desde su cuenta. */
+/** Abrir un ticket: cualquier vendedor aprobado (con o sin plan de tienda) o un comprador desde su cuenta. */
 export async function POST(req: Request) {
   try {
     const user = await requireUser();
@@ -51,19 +51,14 @@ export async function POST(req: Request) {
     }
     const requesterRole = user.role;
 
+    // El plan solo se informa al admin para darle contexto; ya no limita quién puede pedir ayuda.
     let planName: string | null = null;
     if (requesterRole === "SELLER") {
       const store = await prisma.store.findUnique({
         where: { sellerId: user.id },
         select: { status: true, planId: true, activeUntil: true, plan: { select: { name: true } } },
       });
-      if (!store || !isStoreActive(store)) {
-        return NextResponse.json(
-          { error: "El soporte directo es parte de la membresía de tienda. Activa un plan para usarlo." },
-          { status: 403 }
-        );
-      }
-      planName = store.plan?.name ?? null;
+      planName = store && isStoreActive(store) ? store.plan?.name ?? null : "sin plan de tienda";
     }
 
     const limiter = await rateLimit(clientKey(req, `ticket:${user.id}`), 6, 3600);
