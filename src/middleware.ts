@@ -55,6 +55,16 @@ async function readSession(token: string | undefined) {
   }
 }
 
+/** Dominio propio configurado (p. ej. "tcgcardeck.cl"); null si aún apunta a localhost o a vercel.app. */
+function canonicalHost(): string | null {
+  try {
+    const host = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "").host;
+    return host && !host.endsWith(".vercel.app") && !host.startsWith("localhost") ? host : null;
+  } catch {
+    return null;
+  }
+}
+
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 /**
@@ -86,6 +96,15 @@ export async function middleware(req: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", csp(nonce));
   const next = () => NextResponse.next({ request: { headers: requestHeaders } });
+
+  // Un solo dominio para buscadores y sesiones: en producción, *.vercel.app redirige al dominio propio
+  // (NEXT_PUBLIC_SITE_URL). Las vistas previas de Vercel y el cron siguen funcionando en su dirección.
+  const canonical = canonicalHost();
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "";
+  if (canonical && process.env.VERCEL_ENV === "production" && host.endsWith(".vercel.app") && !pathname.startsWith("/api/cron/")) {
+    const url = new URL(req.nextUrl.pathname + req.nextUrl.search, `https://${canonical}`);
+    return NextResponse.redirect(url, 308);
+  }
 
   if (crossSiteMutation(req)) {
     return securityHeaders(
