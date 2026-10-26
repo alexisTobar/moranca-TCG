@@ -75,7 +75,7 @@ test('crear, editar y pausar persiste accesorios y fotos sin borrar adjuntos exi
   };
   const prisma = { listing, $transaction: async cb => cb({listing}) };
   const mocks = {
-    '@/lib/listing-kind':load('src/lib/listing-kind.ts'), 'next/cache': {revalidatePath:()=>{},revalidateTag:()=>{}}, '@/lib/db': {prisma}, '@/lib/auth': { requireUser: async () => ({id:'seller', role:'SELLER'}), AuthError: class extends Error {} },
+    '@/lib/listing-kind':load('src/lib/listing-kind.ts'), 'next/cache': {revalidatePath:()=>{},revalidateTag:()=>{}}, '@/lib/db': {prisma}, '@/lib/auth': { requireUser: async () => ({id:'seller', role:'SELLER'}), requireSeller: async () => ({id:'seller', role:'SELLER'}), AuthError: class extends Error {} },
     '@/lib/validators': {listingSchema, listingBaseSchema}, '@/lib/catalog': {uniqueSlug: async () => 'protectores'},
     '@/lib/external-id': {normalizeExternalId: (_game,id) => id},
   };

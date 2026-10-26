@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { timeAgo } from "@/lib/format";
 import { isStoreActive } from "@/lib/store";
-import { TICKET_STATUS_LABEL, categoryLabel } from "@/lib/support-shared";
+import { REQUESTER_LABEL, TICKET_STATUS_LABEL, categoryLabel } from "@/lib/support-shared";
 import { NewTicketForm } from "@/components/support/NewTicketForm";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +16,17 @@ const FILTERS = [
   { key: "cerrados", label: "Cerrados", where: { status: "CLOSED" } },
   { key: "todos", label: "Todos", where: {} },
 ] as const;
+
+const KINDS = [
+  { key: "todos", label: "Todos", where: {} },
+  { key: "vendedores", label: "Vendedores", where: { requesterRole: "SELLER" } },
+  { key: "compradores", label: "Compradores", where: { requesterRole: "BUYER" } },
+] as const;
+
+const REQUESTER_STYLE: Record<string, string> = {
+  SELLER: "bg-brand-500/10 text-brand-700",
+  BUYER: "bg-sky-500/15 text-sky-700",
+};
 
 const STATUS_STYLE: Record<string, string> = {
   OPEN: "bg-amber-500/15 text-amber-700",
@@ -35,6 +46,9 @@ export default async function SupportPage({
 
   const sp = await searchParams;
   const filter = FILTERS.find((f) => f.key === sp.estado) ?? FILTERS[0];
+  const kind = KINDS.find((k) => k.key === sp.tipo) ?? KINDS[0];
+  const filterHref = (estado: string, tipo: string) =>
+    `/panel/soporte?estado=${estado}${tipo !== "todos" ? `&tipo=${tipo}` : ""}`;
 
   const store = isAdmin
     ? null
@@ -46,7 +60,7 @@ export default async function SupportPage({
 
   const [tickets, counts] = await Promise.all([
     prisma.supportTicket.findMany({
-      where: { ...(isAdmin ? {} : { sellerId: user.id }), ...(isAdmin ? filter.where : {}) },
+      where: { ...(isAdmin ? {} : { sellerId: user.id }), ...(isAdmin ? { ...filter.where, ...kind.where } : {}) },
       orderBy: { lastMessageAt: "desc" },
       take: 100,
       select: {
@@ -55,6 +69,7 @@ export default async function SupportPage({
         subject: true,
         category: true,
         status: true,
+        requesterRole: true,
         adminUnread: true,
         sellerUnread: true,
         lastMessageAt: true,
@@ -62,7 +77,7 @@ export default async function SupportPage({
       },
     }),
     isAdmin
-      ? prisma.supportTicket.groupBy({ by: ["status"], _count: { _all: true } })
+      ? prisma.supportTicket.groupBy({ by: ["status"], where: kind.where, _count: { _all: true } })
       : Promise.resolve([] as Array<{ status: string; _count: { _all: number } }>),
   ]);
   const countOf = (s?: string) =>
@@ -74,7 +89,7 @@ export default async function SupportPage({
         <h1 className="font-display text-3xl font-bold text-carbon">Soporte</h1>
         <p className="mt-1 text-[13px] text-ink-400">
           {isAdmin
-            ? "Tickets de los vendedores con tienda. Al responder, el vendedor recibe el aviso en su panel."
+            ? "Tickets de vendedores con tienda y de compradores. Al responder, el usuario recibe el aviso por correo y en su panel o cuenta."
             : "Canal directo con el administrador de TCG Cardeck, exclusivo para vendedores con tienda."}
         </p>
       </header>
@@ -106,20 +121,30 @@ export default async function SupportPage({
         ))}
 
       {isAdmin && (
-        <div className="no-scrollbar flex gap-1.5 overflow-x-auto">
-          {FILTERS.map((f) => {
-            const n = f.key === "pendientes" ? countOf("OPEN") : f.key === "respondidos" ? countOf("ANSWERED") : f.key === "cerrados" ? countOf("CLOSED") : countOf();
-            return (
-              <Link
-                key={f.key}
-                href={`/panel/soporte?estado=${f.key}`}
-                data-active={filter.key === f.key}
-                className="pill shrink-0"
-              >
-                {f.label} <span className="opacity-60">{n}</span>
+        <div className="space-y-2">
+          <div className="no-scrollbar flex gap-1.5 overflow-x-auto">
+            {FILTERS.map((f) => {
+              const n = f.key === "pendientes" ? countOf("OPEN") : f.key === "respondidos" ? countOf("ANSWERED") : f.key === "cerrados" ? countOf("CLOSED") : countOf();
+              return (
+                <Link
+                  key={f.key}
+                  href={filterHref(f.key, kind.key)}
+                  data-active={filter.key === f.key}
+                  className="pill shrink-0"
+                >
+                  {f.label} <span className="opacity-60">{n}</span>
+                </Link>
+              );
+            })}
+          </div>
+          <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto">
+            <span className="shrink-0 text-[12px] font-semibold text-ink-400">Quién escribe:</span>
+            {KINDS.map((k) => (
+              <Link key={k.key} href={filterHref(filter.key, k.key)} data-active={kind.key === k.key} className="pill shrink-0">
+                {k.label}
               </Link>
-            );
-          })}
+            ))}
+          </div>
         </div>
       )}
 
@@ -158,8 +183,13 @@ export default async function SupportPage({
                     <span className="mt-0.5 block truncate text-[12px] text-ink-400">
                       {isAdmin && (
                         <>
+                          <span
+                            className={`mr-1.5 inline-block rounded-full px-1.5 py-px text-[10px] font-bold uppercase tracking-wide ${REQUESTER_STYLE[t.requesterRole] ?? REQUESTER_STYLE.SELLER}`}
+                          >
+                            {REQUESTER_LABEL[t.requesterRole] ?? "Vendedor"}
+                          </span>
                           {t.seller.name}
-                          {t.seller.store?.plan ? ` · ${t.seller.store.plan.name}` : ""} ·{" "}
+                          {t.requesterRole !== "BUYER" && t.seller.store?.plan ? ` · ${t.seller.store.plan.name}` : ""} ·{" "}
                         </>
                       )}
                       {t.code} · {categoryLabel(t.category)} · {timeAgo(t.lastMessageAt)}

@@ -141,6 +141,15 @@ export async function requireUser() {
   return user;
 }
 
+/** Publicar y editar productos es solo de vendedores aprobados (o del admin). Un comprador recibe 403. */
+export async function requireSeller() {
+  const user = await requireUser();
+  if (user.role !== "SELLER" && user.role !== "ADMIN") {
+    throw new AuthError("Solo los vendedores aprobados pueden publicar. Solicita ser vendedor desde Mi cuenta.", 403);
+  }
+  return user;
+}
+
 export async function requireAdmin() {
   const user = await requireUser();
   if (user.role !== "ADMIN") throw new AuthError("Requiere rol administrador", 403);

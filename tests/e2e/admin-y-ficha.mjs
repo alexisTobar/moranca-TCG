@@ -50,7 +50,7 @@ const stId = (await db.query(`SELECT id FROM "Store" WHERE "sellerId"=$1`, [admi
 r = await admin.req(`/api/admin/stores/${stId}`, { method: "PATCH", json: { action: "feature", value: true } });
 check("si puede destacarse en el inicio (200)", r.status === 200, r.status);
 r = await anon.req("/");
-check("aparece en 'Tiendas destacadas' del inicio", r.data.includes("Tiendas oficiales"));
+check("aparece en 'Tiendas destacadas' del inicio", r.data.includes("Tiendas destacadas"));
 await admin.req(`/api/admin/stores/${stId}`, { method: "PATCH", json: { action: "feature", value: false } });
 
 r = await admin.req("/panel/tienda");
@@ -79,7 +79,7 @@ const h = r.data ?? "";
 check("ficha en tienda (200)", r.status === 200, r.status);
 check("muestra el producto", h.includes(own.title.replace(/&/g, "&amp;")) || h.includes(own.title));
 check("usa el encabezado de la tienda (buscador propio)", h.includes('action="/tienda/sipo-tcg#catalogo"'));
-check("mantiene el menu de TCG Cardeck arriba", h.includes('href="/cartas"') && h.includes('href="/vendedores"'));
+check("mantiene el menu de TCG Cardeck arriba", h.includes('href="/cartas"') && h.includes('href="/explorar"'));
 check("logo de TCG Cardeck lleva a la home y hay menu propio de la tienda", h.includes('aria-label="TCG Cardeck - inicio"') && h.includes('aria-label="Categorías de la tienda"'));
 check("NO ofrece otros vendedores con la misma carta", !h.includes("Otros vendedores con esta carta") && !h.includes("vendedores tienen esta carta") && !h.includes("vendedor tiene esta carta"));
 check("tarjeta 'Vendido por' apunta a la tienda", h.includes('href="/tienda/sipo-tcg"') && h.includes("Ver tienda"));

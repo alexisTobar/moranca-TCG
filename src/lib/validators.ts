@@ -326,7 +326,7 @@ export const adminSubscriptionActionSchema = z.object({
 
 export const supportTicketSchema = z.object({
   subject: z.string().trim().min(4, "Escribe un asunto de al menos 4 caracteres").max(120),
-  category: z.enum(["PLAN", "TIENDA", "ORDEN", "CUENTA", "OTRO"]),
+  category: z.enum(["PLAN", "TIENDA", "ORDEN", "PAGO", "CUENTA", "OTRO"]),
   body: z.string().trim().min(5, "Cuéntanos un poco más (mínimo 5 caracteres)").max(2000),
 });
 

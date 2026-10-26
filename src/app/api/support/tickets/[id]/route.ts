@@ -6,7 +6,7 @@ import { supportTicketActionSchema } from "@/lib/validators";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Devuelve el ticket solo si el usuario es el admin o el vendedor dueño. */
+/** Devuelve el ticket solo si el usuario es el admin o quien lo abrió (vendedor o comprador). */
 async function loadTicket(id: string, user: { id: string; role: string }) {
   const ticket = await prisma.supportTicket.findUnique({
     where: { id },
@@ -14,6 +14,7 @@ async function loadTicket(id: string, user: { id: string; role: string }) {
       id: true,
       code: true,
       sellerId: true,
+      requesterRole: true,
       subject: true,
       category: true,
       status: true,
@@ -58,7 +59,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   }
 }
 
-/** Cerrar o reabrir. El vendedor puede cerrar el suyo; reabrir es cosa del admin. */
+/** Cerrar o reabrir. Quien abrió el ticket puede cerrarlo; reabrir es cosa del admin. */
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireUser();
@@ -80,7 +81,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         data: {
           status: "CLOSED",
           adminUnread: false,
-          // Si lo cierra el admin, el vendedor se entera; si lo cierra el vendedor no hace falta avisarle.
+          // Si lo cierra el admin, el usuario se entera; si lo cierra el usuario no hace falta avisarle.
           ...(user.role === "ADMIN" ? { sellerUnread: true } : { sellerUnread: false }),
         },
       });

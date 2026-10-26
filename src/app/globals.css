@@ -1146,7 +1146,7 @@ img,svg { max-width:100%; }
 .hero-table {position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:center;gap:24px;min-height:460px;padding:56px 56px 48px;overflow:hidden;border-radius:16px 16px 0 0;color:#fff;
   background:radial-gradient(120% 90% at 72% 55%,#1d3a52 0%,#152a3b 45%,#0d1b29 100%);}
 .hero-table::before {content:"";position:absolute;inset:18px;z-index:-1;border:1px solid #e6b94a33;border-radius:10px;pointer-events:none;}
-.hero-table-copy h1 {font-size:clamp(40px,5vw,76px);font-weight:800;letter-spacing:-.045em;line-height:.98;text-wrap:balance;max-width:11ch;}
+.hero-table-copy h1 {font-size:clamp(40px,5vw,76px);font-weight:800;letter-spacing:-.045em;line-height:.98;text-wrap:balance;max-width:13ch;}
 .hero-table-copy p {margin-top:22px;max-width:44ch;color:#d5dfe9;font-size:17px;line-height:1.6;}
 .hero-table-copy > div {display:flex;align-items:center;gap:24px;margin-top:30px;flex-wrap:wrap;}
 .hero-hand {position:relative;height:380px;display:flex;justify-content:center;align-items:flex-end;padding-bottom:12px;}
@@ -1167,10 +1167,11 @@ img,svg { max-width:100%; }
 @media(max-width:900px){
   .hero-table {grid-template-columns:1fr;padding:32px 22px 28px;min-height:0;gap:8px;}
   .hero-hand {order:-1;height:250px;}
-  .hero-hand li {width:120px;margin-left:-60px;transform:translateX(calc(var(--o) * 52%)) translateY(calc(var(--o) * var(--o) * 6px)) rotate(calc(var(--o) * 6deg));}
+  .hero-hand li {width:116px;margin-left:-58px;transform:translateX(calc(var(--os) * 66%)) translateY(calc(var(--os) * var(--os) * 6px)) rotate(calc(var(--os) * 5deg));}
+  .hero-hand li.hero-hand-wide-only {display:none;}
+  .hero-hand-from {display:none;}
   .hero-hand-tag {opacity:1;transform:none;padding:4px 6px;} .hero-hand-tag small{display:none} .hero-hand-tag strong{font-size:12px}
   .hero-table-copy h1 {font-size:40px;}
   .hero-table-copy p {font-size:15px;}
 }
-@media(max-width:420px){.hero-hand li:nth-child(1),.hero-hand li:nth-child(5){display:none}}
 @media(prefers-reduced-motion:reduce){.hero-hand li{animation:none}.hero-hand-card,.hero-hand-tag{transition:none}}

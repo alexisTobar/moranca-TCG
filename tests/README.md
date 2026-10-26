@@ -13,6 +13,9 @@ correos, SEO…): **469 comprobaciones**. Viven en `tests/e2e/`.
 | `ordenes-y-cuenta.mjs` | Correos de órdenes, seguimiento de envío, autocompra, cambio de clave y sesiones |
 | `verificacion-2fa-google.mjs` | Confirmación de email, 2FA (TOTP), login con Google (con un Google falso que valida PKCE), CSRF |
 | `auditoria-reportes-datos.mjs` | Auditoría, reportes, descargar datos, eliminar cuenta |
+| `flujo-completo.mjs` | Ciclo de una venta: publicar, cupón, compra, chat de la orden, pago, despacho, recepción, reseña y cancelación con devolución de stock |
+| `contacto-y-mercado.mjs` | Contacto público sin cuenta, soporte del comprador, análisis de mercado y registro de búsquedas con consentimiento |
+| `seguridad.mjs` | Token y secretos fuera del HTML/JSON/JavaScript, quién compra y quién publica, datos ajenos, tokens falsificados, cierre de sesión, CSRF, cabeceras y fuerza bruta |
 
 ## Regresiones sin base de datos
 
@@ -45,6 +48,8 @@ BASE_URL=http://localhost:3011 DEV_LOG=./dev.log CRON_SECRET=testcron node tests
 O una sola batería: `node tests/e2e/seo.mjs`.
 
 ## Cosas que conviene saber
+
+- **`seguridad.mjs` debe correr contra una compilación de producción** (`next build` + `next start`). En `next dev`, React agrega información de depuración al HTML que incluye los valores de las cookies leídas en el servidor; eso no existe en producción y la batería lo marcaría como falla.
 
 - Los correos no se envían de verdad: sin `RESEND_API_KEY` quedan en el log del servidor y las pruebas los leen de
   ahí (`DEV_LOG`). `TEST_FORCE_MAIL=1` (solo en desarrollo) hace que el sitio se comporte como si el correo estuviera

@@ -386,6 +386,19 @@ model UsageEvent {
   @@index([day, visitor])
 }
 
+/// Búsquedas del catálogo, solo con estadísticas aceptadas. Sin usuario, sesión ni IP:
+/// término normalizado en minúsculas, juego filtrado y cantidad de resultados.
+model SearchEvent {
+  id        String   @id @default(cuid())
+  day       DateTime @db.Date
+  term      String
+  game      String?
+  results   Int
+  createdAt DateTime @default(now())
+
+  @@index([day, term])
+}
+
 model UsageReport {
   weekStart DateTime @id @db.Date
   weekEnd   DateTime @db.Date
@@ -496,19 +509,23 @@ model StoreVisitDay {
   @@unique([storeId, day])
 }
 
-/// Ticket de soporte: solo los vendedores con tienda vigente pueden abrirlos y los atiende el administrador.
+/// Ticket de soporte: lo abren vendedores con tienda vigente o compradores, y lo atiende el administrador.
 model SupportTicket {
   id            String   @id @default(cuid())
   code          String   @unique
+  /// Quien abrió el ticket, sea vendedor o comprador (el nombre se mantiene por compatibilidad).
   sellerId      String
   seller        User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   subject       String
-  /// PLAN | TIENDA | ORDEN | CUENTA | OTRO
+  /// PLAN | TIENDA | ORDEN | PAGO | CUENTA | OTRO
   category      String   @default("OTRO")
-  /// OPEN (espera al admin) | ANSWERED (espera al vendedor) | CLOSED
+  /// OPEN (espera al admin) | ANSWERED (espera al usuario) | CLOSED
   status        String   @default("OPEN")
   adminUnread   Boolean  @default(true)
+  /// No leído por quien abrió el ticket (vendedor o comprador).
   sellerUnread  Boolean  @default(false)
+  /// SELLER | BUYER: con qué rol se abrió. Los tickets anteriores a este campo son de vendedores.
+  requesterRole String   @default("SELLER")
   lastMessageAt DateTime @default(now())
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -654,4 +671,24 @@ model Upload {
   createdAt  DateTime @default(now())
 
   @@index([createdAt])
+}
+
+/// Consulta enviada desde el formulario público de /ayuda, sin necesidad de cuenta (por ejemplo, "no puedo ingresar").
+/// El administrador la responde por correo desde el panel.
+model ContactMessage {
+  id         String    @id @default(cuid())
+  code       String    @unique
+  name       String
+  email      String
+  /// CUENTA | VENDER | COMPRA | OTRO
+  topic      String    @default("OTRO")
+  subject    String
+  body       String
+  /// OPEN | ANSWERED | CLOSED
+  status     String    @default("OPEN")
+  reply      String?
+  repliedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([status, createdAt])
 }

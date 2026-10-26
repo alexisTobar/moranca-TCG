@@ -40,7 +40,14 @@ const T = { subject: "Mi QR no muestra el logo", category: "TIENDA", body: "Subi
 let r = await nico.req("/api/support/tickets", { method: "POST", json: T });
 check("vendedor SIN plan NO puede (403)", r.status === 403, r.status);
 r = await buyer.req("/api/support/tickets", { method: "POST", json: T });
-check("comprador NO puede (403)", r.status === 403, r.status);
+check("comprador no puede usar un tema de vendedor (400)", r.status === 400, r.status);
+r = await buyer.req("/api/support/tickets", { method: "POST", json: { subject: "Mi pedido no llega", category: "ORDEN", body: "Pagué hace una semana y no tengo seguimiento." } });
+check("comprador SÍ puede abrir una consulta de pedido (201)", r.status === 201, JSON.stringify(r.data));
+const buyerTicketId = r.data?.ticket?.id ?? r.data?.id;
+r = await buyer.req("/api/support/tickets");
+check("el comprador ve solo su consulta", r.status === 200 && r.data.tickets.length === 1 && r.data.tickets[0].requesterRole === "BUYER", JSON.stringify(r.data));
+if (buyerTicketId) await buyer.req(`/api/support/tickets/${buyerTicketId}`, { method: "PATCH", json: { action: "close" } });
+await db.query(`DELETE FROM "SupportTicket" WHERE "requesterRole" = 'BUYER'`);
 r = await anon.req("/api/support/tickets", { method: "POST", json: T });
 check("anonimo NO puede (401)", r.status === 401, r.status);
 r = await admin.req("/api/support/tickets", { method: "POST", json: T });

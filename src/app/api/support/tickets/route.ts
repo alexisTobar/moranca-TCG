@@ -6,16 +6,15 @@ import { containsProfanity } from "@/lib/profanity";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { isStoreActive } from "@/lib/store";
 import { generateTicketCode, notifyAdmins } from "@/lib/notify";
-import { MAX_OPEN_TICKETS, categoryLabel } from "@/lib/support-shared";
+import { MAX_OPEN_TICKETS, REQUESTER_LABEL, categoriesFor, categoryLabel } from "@/lib/support-shared";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Lista de tickets: el admin ve todos, el vendedor solo los suyos. */
+/** Lista de tickets: el admin ve todos; vendedores y compradores, solo los suyos. */
 export async function GET() {
   try {
     const user = await requireUser();
-    if (user.role === "BUYER") return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
     const tickets = await prisma.supportTicket.findMany({
       where: user.role === "ADMIN" ? {} : { sellerId: user.id },
       orderBy: { lastMessageAt: "desc" },
@@ -26,6 +25,7 @@ export async function GET() {
         subject: true,
         category: true,
         status: true,
+        requesterRole: true,
         adminUnread: true,
         sellerUnread: true,
         lastMessageAt: true,
@@ -42,23 +42,28 @@ export async function GET() {
   }
 }
 
-/** Abrir un ticket: exclusivo de vendedores con membresía de tienda vigente. */
+/** Abrir un ticket: vendedores con membresía de tienda vigente o compradores desde su cuenta. */
 export async function POST(req: Request) {
   try {
     const user = await requireUser();
-    if (user.role !== "SELLER") {
-      return NextResponse.json({ error: "Solo los vendedores con tienda pueden abrir tickets." }, { status: 403 });
+    if (user.role !== "SELLER" && user.role !== "BUYER") {
+      return NextResponse.json({ error: "El administrador no abre tickets." }, { status: 403 });
     }
+    const requesterRole = user.role;
 
-    const store = await prisma.store.findUnique({
-      where: { sellerId: user.id },
-      select: { status: true, planId: true, activeUntil: true, plan: { select: { name: true } } },
-    });
-    if (!store || !isStoreActive(store)) {
-      return NextResponse.json(
-        { error: "El soporte directo es parte de la membresía de tienda. Activa un plan para usarlo." },
-        { status: 403 }
-      );
+    let planName: string | null = null;
+    if (requesterRole === "SELLER") {
+      const store = await prisma.store.findUnique({
+        where: { sellerId: user.id },
+        select: { status: true, planId: true, activeUntil: true, plan: { select: { name: true } } },
+      });
+      if (!store || !isStoreActive(store)) {
+        return NextResponse.json(
+          { error: "El soporte directo es parte de la membresía de tienda. Activa un plan para usarlo." },
+          { status: 403 }
+        );
+      }
+      planName = store.plan?.name ?? null;
     }
 
     const limiter = await rateLimit(clientKey(req, `ticket:${user.id}`), 6, 3600);
@@ -71,6 +76,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Datos inválidos" }, { status: 400 });
     }
     const { subject, category, body } = parsed.data;
+    if (!categoriesFor(requesterRole).some((c) => c.value === category)) {
+      return NextResponse.json({ error: "Elige un tema válido para tu consulta." }, { status: 400 });
+    }
     if (containsProfanity(subject) || containsProfanity(body)) {
       return NextResponse.json({ error: "Evita groserías o lenguaje ofensivo, reformula tu mensaje." }, { status: 400 });
     }
@@ -90,6 +98,7 @@ export async function POST(req: Request) {
           data: {
             code: generateTicketCode(),
             sellerId: user.id,
+            requesterRole,
             subject,
             category,
             adminUnread: true,
@@ -106,8 +115,14 @@ export async function POST(req: Request) {
     if (!ticket) throw new Error("No se pudo generar el código del ticket");
 
     await notifyAdmins(
-      `Nuevo ticket ${ticket.code} de ${user.name}`,
-      [`Plan: ${store.plan?.name ?? "—"} · ${categoryLabel(category)}`, `Asunto: ${subject}`, body.slice(0, 400)],
+      `Nuevo ticket ${ticket.code} de ${user.name} (${REQUESTER_LABEL[requesterRole].toLowerCase()})`,
+      [
+        requesterRole === "SELLER"
+          ? `Plan: ${planName ?? "—"} · ${categoryLabel(category)}`
+          : `Comprador · ${categoryLabel(category)}`,
+        `Asunto: ${subject}`,
+        body.slice(0, 400),
+      ],
       `/panel/soporte/${ticket.id}`
     );
 

@@ -55,8 +55,8 @@ export function HomeLanding({latest,byGame,sellers,news,paymentWindowHours,unava
     <section className="cardeck-campaign max-w-7xl" aria-labelledby="home-title">
       {hand.length>=3?<div className="hero-table">
         <div className="hero-table-copy">
-          <h1 id="home-title">Tu próxima jugada empieza aquí.</h1>
-          <p>Cartas, sellados y mazos de vendedores de todo Chile. Compara precios, elige a quién comprarle y paga directo al vendedor.</p>
+          <h1 id="home-title">Compra y vende cartas TCG en Chile.</h1>
+          <p>Singles, sellados y mazos de vendedores de todo el país. Compara precios, elige a quién comprarle y paga directo al vendedor.</p>
           <div><Link href="/cartas" className="btn btn-gold btn-lg">Explorar cartas</Link><Link href="/explorar" className="campaign-stores-link">Ver tiendas por región</Link></div>
         </div>
         <HeroHand cards={hand}/>
@@ -64,7 +64,7 @@ export function HomeLanding({latest,byGame,sellers,news,paymentWindowHours,unava
         <Image src="/cardeck-tabletop.webp" alt="" fill priority sizes="(max-width:1440px) 100vw, 1440px" className="cardeck-campaign-art"/>
         <div className="cardeck-campaign-shade"/>
         <div className="cardeck-campaign-copy">
-          <h1 id="home-title">Tu próxima jugada<br/>empieza aquí.</h1>
+          <h1 id="home-title">Compra y vende<br/>cartas TCG en Chile.</h1>
           <p>Compra, vende y colecciona cartas TCG en Chile.<br className="hidden sm:block"/> Encuentra tu juego, tu vendedor y las cartas que te faltan.</p>
           <div><Link href="/cartas" className="btn btn-gold btn-lg">Explorar cartas <ArrowRight size={18}/></Link><Link href="/explorar" className="campaign-stores-link">Conocer las tiendas</Link></div>
         </div>
@@ -104,7 +104,7 @@ export function HomeLanding({latest,byGame,sellers,news,paymentWindowHours,unava
     <section className="cardeck-community" aria-labelledby="community-title"><div className="max-w-7xl">
       <header className="cardeck-section-heading"><div><h2 id="community-title">Detrás de cada carta hay un vendedor.</h2><p>Conoce su catálogo, dónde está y cómo entrega. Compra con contexto.</p></div><Link href="/explorar">Explorar por región <MapPin size={17}/></Link></header>
       {sellers.length>0?<div className="cardeck-seller-list">{sellers.map(person=><Link key={person.id} href={`/vendedor/${person.slug}`}><span className="cardeck-seller-initial" aria-hidden="true">{person.name.charAt(0)}</span><div><h3>{person.name}</h3><p>{person.city??"Vendedor en Chile"} · {person._count.listings} publicaciones con stock</p></div><ArrowRight size={19}/></Link>)}</div>:<p className="cardeck-community-note">Usa el directorio para encontrar perfiles por región y comuna, y revisar las opciones de envío o retiro.</p>}
-      <div className="cardeck-community-links"><Link href="/explorar">Buscar tiendas y vendedores</Link><Link href="/tiendas">Conoce cómo abrir tu tienda</Link></div>
+      <div className="cardeck-community-links"><Link href="/explorar">Buscar tiendas y vendedores</Link><Link href="/tiendas">Abre tu tienda: sin comisiones por venta</Link></div>
     </div></section>
     <StoreShowcase/>
 

@@ -34,11 +34,11 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
   const kpis: Array<[string, string]> = [
     ["Ventas confirmadas", clp(data.revenue)], ["Unidades vendidas", data.units.toLocaleString("es-CL")],
     ["Órdenes creadas", data.orders.toLocaleString("es-CL")], ["Conversión a pago", `${(data.conversion * 100).toFixed(1)} %`],
-    ["Ticket promedio", clp(data.paidCount ? Math.round(data.revenue / data.paidCount) : 0)], ["Compradores nuevos", data.newBuyers.toLocaleString("es-CL")],
+    ["Ticket promedio", clp(data.paidOrders ? Math.round(data.revenue / data.paidOrders) : 0)], ["Compradores nuevos", data.newBuyers.toLocaleString("es-CL")],
   ];
   return <div className="space-y-7">
     <header className="flex flex-wrap items-end justify-between gap-4">
-      <div><p className="text-xs font-bold uppercase tracking-widest text-brand-600">Solo administración</p><h1 className="mt-2 font-display text-3xl font-bold">Análisis de mercado</h1><p className="mt-2 text-sm text-ink-400">Qué se vende, qué se mira, dónde compran y qué falta publicar. Calculado con órdenes pagadas, enviadas o entregadas.</p></div>
+      <div><p className="text-xs font-bold uppercase tracking-widest text-brand-600">Solo administración</p><h1 className="mt-2 font-display text-3xl font-bold">Análisis de mercado</h1><p className="mt-2 text-sm text-ink-400">Qué se vende, qué se mira, dónde compran y qué falta publicar. Las ventas son lo que pagaron los compradores en órdenes pagadas, enviadas o entregadas; las tablas por producto usan el precio de cada artículo.</p></div>
       <nav aria-label="Periodo" className="flex gap-1.5">{RANGES.map((r) => <Link key={r} href={`/panel/mercado?dias=${r}`} aria-current={r === days ? "page" : undefined} className={`btn btn-sm ${r === days ? "btn-primary" : "btn-secondary"}`}>{r === 365 ? "1 año" : `${r} días`}</Link>)}</nav>
     </header>
 
@@ -59,6 +59,15 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
       </section>
       <section className="rounded-2xl card-surface p-5"><h2 className="font-bold">Publicaciones más vistas</h2><p className="mt-1 text-xs text-ink-400">Contador histórico de vistas de cada publicación activa.</p>
         {data.viewed.length ? <ul className="mt-3 divide-y divide-ink-800 text-sm">{data.viewed.map((l) => <li key={l.id} className="flex justify-between gap-3 py-2.5"><Link href={`/producto/${l.slug}`} className="truncate hover:underline">{l.title}</Link><span className="shrink-0 tabular-nums text-ink-400">{l.views} vistas · stock {l.stock}</span></li>)}</ul> : <p className="mt-3 text-sm text-ink-400">Sin datos.</p>}
+      </section>
+    </div>
+
+    <div className="grid gap-5 lg:grid-cols-2">
+      <section className="rounded-2xl card-surface p-5"><h2 className="font-bold">Lo que más buscan</h2><p className="mt-1 text-xs text-ink-400">Búsquedas del catálogo de quienes aceptaron estadísticas. No guarda quién buscó.</p>
+        {data.searches.length ? <ul className="mt-3 divide-y divide-ink-800 text-sm">{data.searches.map((s) => <li key={s.term} className="flex justify-between gap-3 py-2.5"><Link href={`/cartas?q=${encodeURIComponent(s.term)}`} className="truncate hover:underline">{s.term}</Link><span className="shrink-0 tabular-nums text-ink-400">{s.count} {s.count === 1 ? "búsqueda" : "búsquedas"}, {s.avgResults} {s.avgResults === 1 ? "resultado" : "resultados"}</span></li>)}</ul> : <p className="mt-3 text-sm text-ink-400">Aún no hay búsquedas registradas.</p>}
+      </section>
+      <section className="rounded-2xl card-surface p-5"><h2 className="font-bold">Buscan y no encuentran</h2><p className="mt-1 text-xs text-ink-400">Búsquedas sin resultados: productos que conviene conseguir o pedir a los vendedores.</p>
+        {data.emptySearches.length ? <ul className="mt-3 divide-y divide-ink-800 text-sm">{data.emptySearches.map((s) => <li key={s.term} className="flex justify-between gap-3 py-2.5"><span className="truncate">{s.term}</span><span className="shrink-0 tabular-nums text-ink-400">{s.count} {s.count === 1 ? "vez" : "veces"}</span></li>)}</ul> : <p className="mt-3 text-sm text-ink-400">Ninguna búsqueda quedó sin resultados.</p>}
       </section>
     </div>
 

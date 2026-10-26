@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const suites = fs
   .readdirSync(dir)
-  .filter((f) => f.endsWith(".mjs") && !["fixtures.mjs", "run-all.mjs"].includes(f))
+  .filter((f) => f.endsWith(".mjs") && !["fixtures.mjs", "run-all.mjs", "checkout-payload.mjs"].includes(f))
   .sort();
 
 let totalOk = 0, totalFail = 0;

@@ -122,7 +122,7 @@ function consentFixture({ user = null, fail = false, allowed = true } = {}) {
     "@/lib/rate-limit": { clientKey: () => "test", memoryRateLimit: () => ({ allowed }) },
     "@/lib/db": { prisma: { consentRecord: { create: async ({ data }) => { if (fail) throw new Error("offline"); records.push(data); return data; } } } },
   });
-  const post = (body = { accepted: true, version: "2026-10-17" }, headers = {}) => route.POST(new Request("http://localhost/api/consent", { method: "POST", headers, body: JSON.stringify(body) }));
+  const post = (body = { accepted: true, version: "2026-10-25" }, headers = {}) => route.POST(new Request("http://localhost/api/consent", { method: "POST", headers, body: JSON.stringify(body) }));
   return { post, records };
 }
 test("consentimiento guarda decisión y versión antes de habilitar cookies", async () => {
@@ -131,21 +131,21 @@ test("consentimiento guarda decisión y versión antes de habilitar cookies", as
   assert.equal(response.status, 200);
   assert.equal(f.records.length, 1);
   assert.equal(f.records[0].userId, "buyer");
-  assert.equal(f.records[0].version, "2026-10-17");
+  assert.equal(f.records[0].version, "2026-10-25");
   assert.ok(f.records[0].statement.includes("retirar"));
   assert.match(response.headers.get("set-cookie"), /wc_analytics=yes/);
   assert.match(response.headers.get("set-cookie"), /HttpOnly/i);
 });
 test("rechazo anónimo también deja respaldo sin inventar usuario", async () => {
   const f = consentFixture();
-  const response = await f.post({ accepted: false, version: "2026-10-17" });
+  const response = await f.post({ accepted: false, version: "2026-10-25" });
   assert.equal(response.status, 200); assert.equal(f.records[0].accepted, false);
   assert.equal(f.records[0].userId, undefined); assert.match(f.records[0].subject, /^[a-f0-9-]{36}$/);
   assert.match(response.headers.get("set-cookie"), /wc_analytics=no/);
 });
 test("consentimiento rechaza versión antigua y propiedades inyectadas", async () => {
   const f = consentFixture();
-  for (const body of [{ accepted: true, version: "old" }, { accepted: true, version: "2026-10-17", userId: "admin" }, { accepted: "true", version: "2026-10-17" }]) assert.equal((await f.post(body)).status, 400);
+  for (const body of [{ accepted: true, version: "old" }, { accepted: true, version: "2026-10-25", userId: "admin" }, { accepted: "true", version: "2026-10-25" }]) assert.equal((await f.post(body)).status, 400);
   assert.equal(f.records.length, 0);
 });
 test("fallo de persistencia no entrega una cookie de aceptación", async () => {

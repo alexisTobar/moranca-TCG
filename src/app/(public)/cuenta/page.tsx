@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PrivacyCard } from "@/components/account/PrivacyCard";
 import { TwoFactorSection } from "@/components/account/TwoFactorSection";
 import { VerifyEmailBanner } from "@/components/account/VerifyEmailBanner";
@@ -135,6 +136,16 @@ export default async function AccountPage() {
       <PrivacyCard canDelete={user.role !== "ADMIN"} />
 
       {user.role === "BUYER" && <SellerRequestBox status={user.sellerRequestStatus} />}
+
+      {user.role === "BUYER" && (
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl card-surface p-5">
+          <div>
+            <h2 className="text-sm font-semibold text-carbon">Soporte</h2>
+            <p className="mt-1 text-[13px] text-ink-400">¿Problemas con un pedido, un pago o tu cuenta? Abre una consulta.</p>
+          </div>
+          <Link href="/cuenta/soporte" className="btn btn-secondary btn-sm">Ir a soporte</Link>
+        </section>
+      )}
 
       <section>
         <h2 className="mb-3 text-sm font-semibold text-carbon">Mis compras</h2>

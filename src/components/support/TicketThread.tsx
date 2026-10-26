@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Lock, RotateCcw, Send } from "lucide-react";
 import { usePanelCounts } from "@/components/panel/PanelCounts";
-import { TICKET_STATUS_LABEL } from "@/lib/support-shared";
+import { REQUESTER_LABEL, TICKET_STATUS_LABEL } from "@/lib/support-shared";
 
 interface Msg {
   id: string;
@@ -24,11 +24,14 @@ export function TicketThread({
   ticketId,
   viewer,
   initialStatus,
+  requesterRole = "SELLER",
   canWrite,
   blockedReason,
 }: {
   ticketId: string;
-  viewer: "admin" | "seller";
+  viewer: "admin" | "seller" | "buyer";
+  /** Con qué rol se abrió el ticket: así el admin ve "Vendedor" o "Comprador". */
+  requesterRole?: string;
   initialStatus: string;
   /** Un vendedor sin membresía vigente puede leer pero no escribir. */
   canWrite: boolean;
@@ -144,7 +147,7 @@ export function TicketThread({
                   }`}
                 >
                   <p className="mb-0.5 text-[10px] font-bold uppercase tracking-wider opacity-70">
-                    {m.fromAdmin ? "Administrador" : viewer === "admin" ? "Vendedor" : "Tú"}
+                    {m.fromAdmin ? "Administrador" : viewer === "admin" ? REQUESTER_LABEL[requesterRole] ?? "Usuario" : "Tú"}
                   </p>
                   <p className="whitespace-pre-line leading-relaxed">{m.body}</p>
                   <p className="mt-1 text-[10px] opacity-60">
@@ -170,7 +173,11 @@ export function TicketThread({
               onChange={(e) => setBody(e.target.value)}
               maxLength={2000}
               rows={2}
-              placeholder={viewer === "admin" ? "Responder al vendedor…" : "Escribe tu mensaje…"}
+              placeholder={
+                viewer === "admin"
+                  ? `Responder al ${(REQUESTER_LABEL[requesterRole] ?? "usuario").toLowerCase()}…`
+                  : "Escribe tu mensaje…"
+              }
               className="input min-h-12 flex-1 resize-y"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) send(e);

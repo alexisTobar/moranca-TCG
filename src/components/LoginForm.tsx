@@ -51,6 +51,7 @@ export function LoginForm() {
         </span>
         <input
           name="email"
+          aria-label="Email"
           type="email"
           required
           autoComplete="username"
@@ -71,6 +72,7 @@ export function LoginForm() {
         <div className="relative">
           <input
             name="password"
+            aria-label="Contraseña"
             type={showPassword ? "text" : "password"}
             required
             autoComplete="current-password"
@@ -95,7 +97,8 @@ export function LoginForm() {
         <input
           type="checkbox"
           name="remember"
-          className="h-4 w-4 accent-[#1d4ed8]"
+          aria-label="Recordar sesión por 30 días"
+          className="h-4 w-4 accent-[#b13a25]"
         />
         <span className="text-[12px] text-ink-300">Recordar sesión por 30 días</span>
       </label>

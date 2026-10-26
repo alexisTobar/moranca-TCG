@@ -17,6 +17,7 @@ import { cardHref } from "@/lib/card-url";
 import { JsonLd } from "@/components/JsonLd";
 import { siteUrl } from "@/lib/seo";
 import { ArrowRight, LineChart } from "lucide-react";
+import { ViewBeacon } from "./ViewBeacon";
 
 const TYPE_LABEL: Record<string, string> = {
   SINGLE: "Carta individual",
@@ -169,6 +170,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <JsonLd data={productLd} />
+      <ViewBeacon listingId={listing.id} />
       <nav className="mb-6 flex flex-wrap items-center gap-1.5 text-[12px] text-ink-400">
         {store ? (
           <>

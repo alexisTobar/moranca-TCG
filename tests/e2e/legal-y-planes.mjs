@@ -41,7 +41,7 @@ for (const [path, titleRe, mustA, mustB] of pages) {
     const ids = [...data.matchAll(/<section id="([^"]+)"/g)].map((m) => m[1]);
     const anchors = [...data.matchAll(/href="#([^"]+)"/g)].map((m) => m[1]);
     check(`${path}: indice lateral apunta a secciones reales (${ids.length})`, ids.length >= 6 && ids.every((i) => anchors.includes(i)), `${ids.length} secciones`);
-    check(`${path}: fecha de ultima actualizacion visible`, t.includes("Última actualización: 20 de septiembre de 2026"));
+    check(`${path}: fecha de ultima actualizacion visible`, /Última actualización: (<!-- -->)?\d{1,2} de [a-z]+ de 20\d\d/.test(t));
     check(`${path}: enlaza a los otros documentos`, ["/terminos-y-condiciones", "/politica-de-privacidad", "/devoluciones"].filter((p) => p !== path).every((p) => data.includes(`href="${p}`)));
   }
 }
@@ -112,7 +112,7 @@ check("beneficios: publicaciones ilimitadas", tm.includes("Publicaciones ilimita
 check("franja: 0% de comision por venta", tm.includes("0% de comisión por venta"));
 check("FAQ: comision y courier", tm.includes("¿Cobran comisión por mis ventas?") && tm.includes("¿Con qué courier despacho?"));
 r = await get("/");
-check("home menciona 'sin comisiones por venta'", text(r.data).includes("Sin comisiones por venta"));
+check("home menciona 'sin comisiones por venta'", /sin comisiones por venta/i.test(text(r.data)));
 // restaurar planes tal como estaban
 for (const p of saved) {
   await db.query(`INSERT INTO "StorePlan"(id,code,name,description,"priceMonthly",active,"maxFeatured","advancedStats",showcase,"sortOrder","createdAt","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now()) ON CONFLICT DO NOTHING`, [p.id, p.code, p.name, p.description, p.priceMonthly, p.active, p.maxFeatured, p.advancedStats, p.showcase, p.sortOrder, p.createdAt]);

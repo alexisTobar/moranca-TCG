@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AuthError, requireUser } from "@/lib/auth";
+import { AuthError, requireSeller } from "@/lib/auth";
 import { bulkPreviewSchema } from "@/lib/validators";
 import { memoryRateLimit, clientKey } from "@/lib/rate-limit";
 import { parseDecklist, parseOnePieceList, parsePokemonList } from "@/lib/decklist";
@@ -159,7 +159,7 @@ async function previewOtherGame(game: "pokemon" | "onepiece", text: string) {
 
 export async function POST(req: Request) {
   try {
-    const user = await requireUser();
+    const user = await requireSeller();
     const body = await req.json();
     const parsed = bulkPreviewSchema.safeParse(body);
     if (!parsed.success) {

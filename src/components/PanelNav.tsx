@@ -18,6 +18,7 @@ import {
   ClipboardList,
   BarChart3,
   TrendingUp,
+  Mail,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { CountBadge, usePanelCounts, type Counts } from "@/components/panel/PanelCounts";
@@ -41,6 +42,7 @@ const ITEMS: Array<{
   { href: "/panel/perfil", label: "Mi perfil", icon: UserCircle },
   { href: "/panel/usuarios", label: "Vendedores", icon: Users, adminOnly: true, badge: "sellerRequests" },
   { href: "/panel/tiendas", label: "Tiendas premium", icon: Gem, adminOnly: true, badge: "subscriptions" },
+  { href: "/panel/contacto", label: "Consultas de contacto", icon: Mail, adminOnly: true },
   { href: "/panel/reportes", label: "Reportes", icon: Flag, adminOnly: true, badge: "reports" },
   { href: "/panel/auditoria", label: "Auditoría", icon: ClipboardList, adminOnly: true },
   { href: "/panel/consentimientos", label: "Consentimientos", icon: ShieldCheck, adminOnly: true },

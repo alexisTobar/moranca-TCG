@@ -2,7 +2,7 @@ import { publicListingType } from "@/lib/listing-kind";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { AuthError, requireUser } from "@/lib/auth";
+import { AuthError, requireSeller } from "@/lib/auth";
 import { listingSchema } from "@/lib/validators";
 import { uniqueSlug } from "@/lib/catalog";
 import { normalizeExternalId } from "@/lib/external-id";
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
-    const user = await requireUser();
+    const user = await requireSeller();
     const body = await req.json();
     const parsed = listingSchema.safeParse(body);
 

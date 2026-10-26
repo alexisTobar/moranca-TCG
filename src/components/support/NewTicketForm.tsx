@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Send } from "lucide-react";
-import { TICKET_CATEGORIES } from "@/lib/support-shared";
+import { categoriesFor, type TicketRequester } from "@/lib/support-shared";
 
-export function NewTicketForm() {
+/** Formulario para abrir un ticket. Vendedores lo usan en /panel/soporte y compradores en /cuenta/soporte. */
+export function NewTicketForm({ requester = "SELLER" }: { requester?: TicketRequester }) {
   const router = useRouter();
+  const categories = categoriesFor(requester);
+  const basePath = requester === "BUYER" ? "/cuenta/soporte" : "/panel/soporte";
   const [subject, setSubject] = useState("");
-  const [category, setCategory] = useState<string>("PLAN");
+  const [category, setCategory] = useState<string>(categories[0].value);
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +28,7 @@ export function NewTicketForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "No se pudo crear el ticket");
-      router.push(`/panel/soporte/${data.ticket.id}`);
+      router.push(`${basePath}/${data.ticket.id}`);
       router.refresh();
     } catch (err) {
       setError((err as Error).message);
@@ -38,7 +41,8 @@ export function NewTicketForm() {
       <div>
         <h2 className="font-display text-lg font-bold text-carbon">Nuevo ticket</h2>
         <p className="mt-0.5 text-[12px] text-ink-400">
-          Te responde directamente el administrador de TCG Cardeck. Recibirás el aviso en tu panel.
+          Te responde directamente el administrador de TCG Cardeck.{" "}
+          {requester === "BUYER" ? "Te avisaremos por correo cuando responda." : "Recibirás el aviso en tu panel."}
         </p>
       </div>
 
@@ -46,7 +50,7 @@ export function NewTicketForm() {
         <label className="block">
           <span className="text-[12px] font-semibold text-ink-300">Tema</span>
           <select value={category} onChange={(e) => setCategory(e.target.value)} className="input mt-1.5">
-            {TICKET_CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <option key={c.value} value={c.value}>
                 {c.label}
               </option>
@@ -60,7 +64,7 @@ export function NewTicketForm() {
             onChange={(e) => setSubject(e.target.value)}
             maxLength={120}
             required
-            placeholder="Ej: Mi QR no muestra el logo"
+            placeholder={requester === "BUYER" ? "Ej: El vendedor no confirma mi pago" : "Ej: Mi QR no muestra el logo"}
             className="input mt-1.5"
           />
         </label>

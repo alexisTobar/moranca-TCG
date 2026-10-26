@@ -10,7 +10,10 @@ import { notifyAdmins, notifyUser } from "@/lib/notify";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Responder en un ticket. El admin responde siempre; el vendedor solo mientras tenga membresía vigente. */
+/**
+ * Responder en un ticket. El admin responde siempre; el vendedor solo mientras tenga membresía vigente
+ * y el comprador mientras el ticket siga abierto.
+ */
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireUser();
@@ -19,23 +22,35 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const ticket = await prisma.supportTicket.findUnique({
       where: { id },
-      select: { id: true, code: true, subject: true, sellerId: true, status: true, seller: { select: { name: true, email: true } } },
+      select: {
+        id: true,
+        code: true,
+        subject: true,
+        sellerId: true,
+        status: true,
+        requesterRole: true,
+        seller: { select: { name: true, email: true } },
+      },
     });
     if (!ticket || (!isAdmin && ticket.sellerId !== user.id)) {
       return NextResponse.json({ error: "Ticket no encontrado" }, { status: 404 });
     }
+    const fromBuyer = ticket.requesterRole === "BUYER";
 
     if (!isAdmin) {
-      if (user.role !== "SELLER") return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
-      const store = await prisma.store.findUnique({
-        where: { sellerId: user.id },
-        select: { status: true, planId: true, activeUntil: true },
-      });
-      if (!store || !isStoreActive(store)) {
-        return NextResponse.json(
-          { error: "Tu membresía no está vigente. Renuévala para seguir escribiendo en soporte." },
-          { status: 403 }
-        );
+      // Los tickets de vendedor dependen de la membresía; los de comprador no.
+      if (!fromBuyer) {
+        if (user.role !== "SELLER") return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
+        const store = await prisma.store.findUnique({
+          where: { sellerId: user.id },
+          select: { status: true, planId: true, activeUntil: true },
+        });
+        if (!store || !isStoreActive(store)) {
+          return NextResponse.json(
+            { error: "Tu membresía no está vigente. Renuévala para seguir escribiendo en soporte." },
+            { status: 403 }
+          );
+        }
       }
       if (ticket.status === "CLOSED") {
         return NextResponse.json({ error: "Este ticket está cerrado. Abre uno nuevo si aún necesitas ayuda." }, { status: 409 });
@@ -75,11 +90,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         ticket.seller.email,
         `Respondieron tu ticket ${ticket.code}`,
         [`Asunto: ${ticket.subject}`, parsed.data.body.slice(0, 400)],
-        `/panel/soporte/${ticket.id}`
+        fromBuyer ? `/cuenta/soporte/${ticket.id}` : `/panel/soporte/${ticket.id}`
       );
     } else {
       await notifyAdmins(
-        `Nuevo mensaje en ${ticket.code} de ${ticket.seller.name}`,
+        `Nuevo mensaje en ${ticket.code} de ${ticket.seller.name}${fromBuyer ? " (comprador)" : ""}`,
         [`Asunto: ${ticket.subject}`, parsed.data.body.slice(0, 400)],
         `/panel/soporte/${ticket.id}`
       );

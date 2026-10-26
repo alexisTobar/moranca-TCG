@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { isStoreActive } from "@/lib/store";
-import { categoryLabel } from "@/lib/support-shared";
+import { REQUESTER_LABEL, categoryLabel } from "@/lib/support-shared";
 import { TicketThread } from "@/components/support/TicketThread";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +22,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
       id: true,
       code: true,
       sellerId: true,
+      requesterRole: true,
       subject: true,
       category: true,
       status: true,
@@ -31,6 +32,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
           name: true,
           email: true,
           slug: true,
+          role: true,
           store: { select: { status: true, planId: true, activeUntil: true, plan: { select: { name: true } } } },
         },
       },
@@ -38,6 +40,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
   });
   if (!ticket || (!isAdmin && ticket.sellerId !== user.id)) notFound();
 
+  const fromBuyer = ticket.requesterRole === "BUYER";
   const sellerActive = Boolean(ticket.seller.store && isStoreActive(ticket.seller.store));
 
   return (
@@ -56,13 +59,17 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
         <h1 className="mt-1 font-display text-2xl font-bold text-carbon">{ticket.subject}</h1>
         {isAdmin && (
           <p className="mt-2 text-[13px] text-ink-400">
-            <Link href={`/vendedor/${ticket.seller.slug}`} className="font-semibold text-ink-300 hover:text-brand-600">
-              {ticket.seller.name}
-            </Link>{" "}
-            · {ticket.seller.email} ·{" "}
-            {sellerActive
-              ? `Plan ${ticket.seller.store?.plan?.name ?? ""} vigente`
-              : "Sin membresía vigente"}
+            <span className="font-bold text-ink-300">{REQUESTER_LABEL[ticket.requesterRole] ?? "Vendedor"}</span> ·{" "}
+            {ticket.seller.role === "SELLER" && ticket.seller.slug ? (
+              <Link href={`/vendedor/${ticket.seller.slug}`} className="font-semibold text-ink-300 hover:text-brand-600">
+                {ticket.seller.name}
+              </Link>
+            ) : (
+              <span className="font-semibold text-ink-300">{ticket.seller.name}</span>
+            )}{" "}
+            · {ticket.seller.email}
+            {!fromBuyer &&
+              ` · ${sellerActive ? `Plan ${ticket.seller.store?.plan?.name ?? ""} vigente` : "Sin membresía vigente"}`}
           </p>
         )}
       </header>
@@ -70,8 +77,9 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
       <TicketThread
         ticketId={ticket.id}
         viewer={isAdmin ? "admin" : "seller"}
+        requesterRole={ticket.requesterRole}
         initialStatus={ticket.status}
-        canWrite={isAdmin || sellerActive}
+        canWrite={isAdmin || fromBuyer || sellerActive}
         blockedReason="Tu membresía no está vigente. Renuévala en Mi tienda para seguir escribiendo."
       />
     </div>

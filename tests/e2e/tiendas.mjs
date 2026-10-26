@@ -131,7 +131,7 @@ const others = (await db.query(`SELECT id FROM "Listing" WHERE "sellerId"<>(SELE
 r = await sipo.req("/api/store", { method: "PUT", json: { featuredListingIds: [others[0].id] } });
 const [fo] = (await db.query(`SELECT "featuredListingIds" f FROM "Store" WHERE "sellerId"=(SELECT id FROM "User" WHERE email='sel_sipo@t.cl')`)).rows;
 check("publicaciones ajenas se descartan (no quedan destacadas)", !fo.f.includes(others[0].id), JSON.stringify(fo));
-r = await sipo.req("/api/store", { method: "PUT", json: { featuredListingIds: mine.map((m) => m.id) } });
+r = await sipo.req("/api/store", { method: "PUT", json: { featuredListingIds: mine.slice(0, 6).map((m) => m.id) } });
 check("destaca las suyas (200)", r.status === 200, JSON.stringify(r.data));
 await db.query(`UPDATE "StorePlan" SET "maxFeatured"=1 WHERE code='TIENDA'`);
 r = await sipo.req("/api/store", { method: "PUT", json: { featuredListingIds: mine.map((m) => m.id) } });
@@ -154,7 +154,7 @@ const mineTitles = new Set((await db.query(`SELECT title FROM "Listing" WHERE "s
 const leak = titles.find((t) => !mineTitles.has(t.title) && html.includes(t.title.replace(/&/g, "&amp;")));
 check("no aparecen productos de otros vendedores", !leak, leak?.title);
 check("marca TCG Cardeck se mantiene", html.includes("TCG Cardeck"));
-check("mantiene el menu de TCG Cardeck arriba (Cartas, Vendedores)", html.includes('href="/cartas"') && html.includes('href="/vendedores"'));
+check("mantiene el menu de TCG Cardeck arriba (Cartas, Tiendas por región)", html.includes('href="/cartas"') && html.includes('href="/explorar"'));
 check("el logo de TCG Cardeck lleva a la home", html.includes('aria-label="TCG Cardeck - inicio"'));
 check("la tienda tiene ADEMAS su menu propio", html.includes('aria-label="Categorías de la tienda"'));
 check("filtros del encabezado son de la tienda", html.includes('href="/tienda/sipo-tcg?game=') || html.includes('href="/tienda/sipo-tcg?type='));
@@ -192,17 +192,17 @@ check("/panel/tienda (premium) carga con editor", r.status === 200 && r.data.inc
 
 console.log("\n== Vitrina destacada ==");
 r = await anon.req("/");
-check("inicio sin tiendas destacadas: no hay vitrina", !r.data.includes("Tiendas oficiales"));
+check("inicio sin tiendas destacadas: no hay vitrina", !r.data.includes("Tiendas destacadas"));
 st = (await db.query(`SELECT id FROM "Store" s WHERE "sellerId"=(SELECT id FROM "User" WHERE email='sel_sipo@t.cl')`)).rows[0];
 r = await admin.req(`/api/admin/stores/${st.id}`, { method: "PATCH", json: { action: "feature", value: true } });
 console.log("   feature en plan sin vitrina ->", r.status);
 r = await anon.req("/");
-check("plan sin showcase NO aparece en vitrina", !r.data.includes("Tiendas oficiales"));
+check("plan sin showcase NO aparece en vitrina", !r.data.includes("Tiendas destacadas"));
 r = await admin.req(`/api/admin/stores/${st.id}`, { method: "PATCH", json: { action: "grant", planCode: "PRO", months: 1 } });
 check("admin regala/cambia a PRO (200)", r.status === 200, JSON.stringify(r.data));
 r = await admin.req(`/api/admin/stores/${st.id}`, { method: "PATCH", json: { action: "feature", value: true } });
 r = await anon.req("/");
-check("PRO destacada aparece en el inicio", r.data.includes("Tiendas oficiales") && r.data.includes("Sipo Cards"));
+check("PRO destacada aparece en el inicio", r.data.includes("Tiendas destacadas") && r.data.includes("Sipo Cards"));
 r = await anon.req("/vendedores");
 check("vendedores muestra insignia Tienda", />\s*Tienda\s*</.test(r.data) || r.data.includes("Tienda</span>"));
 

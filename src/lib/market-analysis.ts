@@ -10,7 +10,7 @@ export async function marketAnalysis(days: number) {
   const since = new Date(Date.now() - days * 86400000);
   const paidWhere = { status: { in: [...PAID] }, paidAt: { gte: since } };
 
-  const [items, regions, statuses, supply, viewed, tickets, ticketCats, sellers, newBuyers, carts] = await Promise.all([
+  const [items, regions, statuses, supply, viewed, tickets, ticketCats, sellers, newBuyers, carts, searches, emptySearches, paid] = await Promise.all([
     prisma.orderItem.findMany({
       where: { order: paidWhere },
       select: { quantity: true, unitPrice: true, title: true, listing: { select: { game: true, type: true, externalId: true } } },
@@ -24,6 +24,10 @@ export async function marketAnalysis(days: number) {
     prisma.order.groupBy({ by: ["sellerId"], where: paidWhere, _count: { _all: true }, _sum: { total: true }, orderBy: { _sum: { total: "desc" } }, take: 8 }),
     prisma.user.count({ where: { role: "BUYER", createdAt: { gte: since } } }),
     prisma.order.count({ where: { createdAt: { gte: since } } }),
+    prisma.searchEvent.groupBy({ by: ["term"], where: { day: { gte: since } }, _count: { _all: true }, _avg: { results: true }, orderBy: { _count: { term: "desc" } }, take: 15 }),
+    prisma.searchEvent.groupBy({ by: ["term"], where: { day: { gte: since }, results: 0 }, _count: { _all: true }, orderBy: { _count: { term: "desc" } }, take: 15 }),
+    // Lo que pagaron los compradores (con descuentos y envío): misma base que el ranking de vendedores.
+    prisma.order.aggregate({ where: paidWhere, _sum: { total: true }, _count: { _all: true } }),
   ]);
 
   const sum = (rows: Map<string, MarketRow>, label: string, units: number, amount: number) => {
@@ -51,7 +55,8 @@ export async function marketAnalysis(days: number) {
 
   return {
     days,
-    revenue: items.reduce((n, i) => n + i.unitPrice * i.quantity, 0),
+    revenue: paid._sum.total ?? 0,
+    paidOrders: paid._count._all,
     units: items.reduce((n, i) => n + i.quantity, 0),
     orders: carts, paidCount, newBuyers,
     conversion: carts ? paidCount / carts : 0,
@@ -60,6 +65,8 @@ export async function marketAnalysis(days: number) {
     statuses: statuses.map((s) => ({ status: s.status, count: s._count._all })),
     supply: supply.map((s) => ({ game: s.game, type: s.type, listings: s._count._all, stock: s._sum.stock ?? 0, avgPrice: Math.round(s._avg.price ?? 0) })).sort((a, b) => b.listings - a.listings),
     viewed, gaps,
+    searches: searches.map((r) => ({ term: r.term, count: r._count._all, avgResults: Math.round(r._avg.results ?? 0) })),
+    emptySearches: emptySearches.map((r) => ({ term: r.term, count: r._count._all })),
     tickets: tickets.map((t) => ({ status: t.status, count: t._count._all })),
     ticketCategories: ticketCats.map((t) => ({ category: t.category, count: t._count._all })).sort((a, b) => b.count - a.count),
     sellers: sellers.map((s) => ({ name: (s.sellerId && sellerNames.get(s.sellerId)) || "Vendedor eliminado", orders: s._count._all, amount: s._sum.total ?? 0 })),

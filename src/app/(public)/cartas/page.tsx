@@ -12,6 +12,8 @@ import { SearchX } from "lucide-react";
 import { catalogPage, catalogPrice, paginationWindow } from "@/lib/catalog-query";
 import { JsonLd } from "@/components/JsonLd";
 import { siteUrl } from "@/lib/seo";
+import { after } from "next/server";
+import { logSearch, searchLogAllowed } from "@/lib/search-log";
 
 const TYPE_SEO: Record<string, string> = { SINGLE: "Singles", SEALED: "Sellados", DECK: "Mazos armados", ACCESSORY: "Accesorios" };
 
@@ -31,7 +33,7 @@ export async function generateMetadata({
   const filtered = ["q", "accessory", "condition", "language", "sort", "min", "max"].some(key => !!one(sp[key]));
   const pagination = page > 1 ? ` · Página ${page}` : "";
 
-  if (!gameName && !typeName) {
+  if (!gameName && type === "SINGLE") {
     return {
       title: `Catálogo de cartas TCG en Chile${pagination}`,
       description: "Explora singles, sellados y mazos de Magic, Pokémon, One Piece y Mitos y Leyendas con stock reservado y envíos a todo Chile.",
@@ -98,6 +100,7 @@ export default async function CatalogPage({
     if (pages > 1) corrected.set("page",String(pages));
     redirect('/cartas' + (corrected.size ? '?' + corrected : ''));
   }
+  if (q && !unavailable && page === 1 && await searchLogAllowed()) after(() => logSearch(q, game && isGameId(game) ? game : undefined, total));
   const startIndex = (page-1)*PAGE_SIZE;
 
   const buildHref = (patch: Record<string, string | undefined>) => {

@@ -58,7 +58,7 @@ export function UsageConsent() {
     {(choice === null || open) && <section aria-label="Preferencias de privacidad" aria-busy={busy} className="fixed bottom-4 left-4 right-4 z-[70] max-h-[80dvh] overflow-y-auto max-w-lg rounded-2xl border border-ink-700 bg-white p-5 shadow-2xl">
       <ShieldCheck className="mb-3 h-7 w-7 text-brand-600" aria-hidden="true" />
       <h2 className="font-display text-lg font-bold text-carbon">Tu privacidad, tu decisión</h2>
-      <p className="mt-2 text-sm text-ink-400">Usamos almacenamiento esencial para tu sesión y carrito. Si aceptas, contamos visitas para mejorar la tienda, sin guardar tu nombre, correo ni búsquedas. Solo la administración ve estas estadísticas.</p>
+      <p className="mt-2 text-sm text-ink-400">Usamos almacenamiento esencial para tu sesión y carrito. Si aceptas, contamos visitas y términos buscados para mejorar la tienda, sin guardar tu nombre ni tu correo. Solo la administración ve estas estadísticas.</p>
       <Link href="/politica-de-cookies" className="mt-2 inline-block text-xs underline">Ver política de cookies y analítica</Link>
       <p className="mt-2 text-xs text-ink-400">Guardamos tu decisión, fecha y versión como respaldo. Si tienes sesión, el registro se vincula a tu cuenta. Puedes cambiarla cuando quieras.</p>
       {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}

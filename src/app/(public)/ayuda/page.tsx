@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { CONDITIONS } from "@/lib/games";
+import { ContactForm } from "@/components/ContactForm";
 
 export const metadata: Metadata = {
   title: "Ayuda",
@@ -13,7 +15,7 @@ const FAQ = [
   },
   {
     q: "¿Los precios incluyen envío?",
-    a: "No. El precio publicado corresponde solo al producto. El costo de despacho se coordina con el vendedor según la región de destino.",
+    a: "No. El precio publicado corresponde solo al producto. El despacho es por pagar: el courier cobra el flete a quien recibe. El retiro en persona es gratis y se coordina con el vendedor por el chat de la orden.",
   },
   {
     q: "¿De dónde salen las imágenes de las cartas?",
@@ -21,7 +23,7 @@ const FAQ = [
   },
   {
     q: "¿Puedo vender mis cartas aquí?",
-    a: "Los perfiles de vendedor los crea el administrador de TCG Cardeck. Escríbenos y habilitamos tu cuenta para publicar singles, sellados y mazos.",
+    a: "Sí. Crea tu cuenta y, desde Mi cuenta, solicita ser vendedor. Cuando el equipo apruebe la solicitud podrás publicar singles, sellados, mazos y accesorios desde tu panel.",
   },
 ];
 
@@ -60,8 +62,9 @@ export default function HelpPage() {
             el vendedor.
           </li>
           <li>
-            Las cartas viajan en sleeve + toploader y sobre rígido para singles de alto
-            valor.
+            Recomendamos a los vendedores enviar las cartas en sleeve + toploader y sobre
+            rígido para singles de alto valor. Si tienes dudas, pregúntale al vendedor por
+            el chat de la orden.
           </li>
         </ul>
       </section>
@@ -87,6 +90,13 @@ export default function HelpPage() {
           </table>
         </div>
       </section>
+      <section id="contacto" className="mt-12 scroll-mt-40">
+        <h2 className="font-display text-2xl font-bold text-carbon">Contactar a soporte</h2>
+        <p className="mt-2 text-[14px] text-ink-400">
+          Si tienes cuenta, escríbenos desde <Link href="/cuenta/soporte" className="font-semibold text-brand-600 underline">Mi cuenta, Soporte</Link> para seguir la conversación en un solo lugar. Si no puedes ingresar o aún no tienes cuenta, usa este formulario y te responderemos por correo.
+        </p>
+        <div className="mt-5 rounded-2xl card-surface p-5"><ContactForm /></div>
+      </section>
     </div>
   );
-}
+}

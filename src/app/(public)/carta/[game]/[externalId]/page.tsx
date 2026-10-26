@@ -41,7 +41,9 @@ type Params = Promise<{ game: string; externalId: string }>;
 async function load(params: Params) {
   const { game, externalId: raw } = await params;
   if (!isGameId(game)) return null;
-  const externalId = raw;
+  // Next entrega el segmento tal como viene en la URL: "manual%3A…" debe volver a ser "manual:…".
+  let externalId = raw;
+  try { externalId = decodeURIComponent(raw); } catch { return null; }
   const sample = await safeQuery(() => getCardSample(game, externalId), null);
   if (!sample) return null;
   return { game, externalId, sample };

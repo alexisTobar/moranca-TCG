@@ -2,7 +2,7 @@ import { publicListingType } from "@/lib/listing-kind";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { AuthError, requireUser } from "@/lib/auth";
+import { AuthError, requireSeller, requireUser } from "@/lib/auth";
 import { listingBaseSchema } from "@/lib/validators";
 import { normalizeExternalId } from "@/lib/external-id";
 
@@ -26,7 +26,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireUser();
+    const user = await requireSeller(); // editar es publicar: un comprador no puede reactivar ni cambiar publicaciones
     const { id } = await params;
     const owned = await loadOwned(id, user.id, user.role === "ADMIN");
     if ("error" in owned) {
