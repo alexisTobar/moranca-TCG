@@ -41,6 +41,7 @@ const ITEMS: Array<{
   { href: "/panel/soporte", label: "Soporte", icon: LifeBuoy, badge: "tickets" },
   { href: "/panel/perfil", label: "Mi perfil", icon: UserCircle },
   { href: "/panel/usuarios", label: "Vendedores", icon: Users, adminOnly: true, badge: "sellerRequests" },
+  { href: "/panel/directorio", label: "Directorio de usuarios", icon: Users, adminOnly: true },
   { href: "/panel/tiendas", label: "Tiendas premium", icon: Gem, adminOnly: true, badge: "subscriptions" },
   { href: "/panel/contacto", label: "Consultas de contacto", icon: Mail, adminOnly: true },
   { href: "/panel/reportes", label: "Reportes", icon: Flag, adminOnly: true, badge: "reports" },
