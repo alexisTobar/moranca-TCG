@@ -4,6 +4,7 @@ import { AuthError, requireUser } from "@/lib/auth";
 import { storeSubscribeSchema } from "@/lib/validators";
 import { ensureDefaultPlans, ensureStore, generateStoreReference } from "@/lib/store";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
+import { notifyAdmins } from "@/lib/notify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,6 +67,12 @@ export async function POST(req: Request) {
       },
       select: { id: true, reference: true, amount: true, months: true },
     });
+
+    await notifyAdmins(
+      "Nueva solicitud de tienda",
+      [`${user.name} (${user.email}) pidió el plan ${plan.name} por ${subscription.months} mes(es).`, `Referencia de transferencia: ${subscription.reference}`],
+      "/panel/tiendas"
+    );
 
     return NextResponse.json({ ok: true, subscription }, { status: 201 });
   } catch (error) {

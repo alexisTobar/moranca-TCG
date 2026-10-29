@@ -17,6 +17,13 @@ const config: NextConfig = {
     ],
   },
   poweredByHeader: false,
+  async headers() {
+    // Lo privado (sesión, cuenta, panel, comprobantes) nunca se guarda en cachés compartidas ni del navegador.
+    const privateCache = [{ key: "Cache-Control", value: "private, no-store, max-age=0" }];
+    return ["/panel/:path*", "/cuenta/:path*", "/checkout", "/ingresar/:path*", "/api/auth/:path*", "/api/account/:path*", "/api/admin/:path*", "/api/users/:path*", "/api/orders/:path*"].map(
+      (source) => ({ source, headers: privateCache })
+    );
+  },
 };
 
 export default config;

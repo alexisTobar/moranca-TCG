@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
 import { sellerRequestSchema } from "@/lib/validators";
+import { rateLimit, clientKey } from "@/lib/rate-limit";
+import { notifyAdmins } from "@/lib/notify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,6 +21,11 @@ export async function POST(req: Request) {
 
     const unverified = emailNotVerifiedResponse(user);
     if (unverified) return unverified;
+
+    const limiter = await rateLimit(clientKey(req, `seller-request:${user.id}`), 5, 3600);
+    if (!limiter.allowed) {
+      return NextResponse.json({ error: "Demasiadas solicitudes. Intenta más tarde." }, { status: 429 });
+    }
 
     const current = await prisma.user.findUnique({
       where: { id: user.id },
@@ -44,6 +51,12 @@ export async function POST(req: Request) {
         sellerRequestAt: new Date(),
       },
     });
+
+    await notifyAdmins(
+      "Nueva solicitud para ser vendedor",
+      [`${user.name} (${user.email}) pidió pasar a vendedor.`, ...(parsed.data.message ? [`Mensaje: ${parsed.data.message}`] : [])],
+      "/panel/usuarios"
+    );
 
     return NextResponse.json({ ok: true });
   } catch (error) {

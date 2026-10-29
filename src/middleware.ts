@@ -29,6 +29,8 @@ function securityHeaders(res: NextResponse, nonce: string) {
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.headers.set("X-DNS-Prefetch-Control", "off");
+  res.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  res.headers.set("X-Permitted-Cross-Domain-Policies", "none");
   res.headers.set(
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=(), interest-cohort=()"

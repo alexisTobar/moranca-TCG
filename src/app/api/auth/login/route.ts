@@ -32,6 +32,14 @@ export async function POST(req: Request) {
 
   let limit;
   try {
+    // Además del límite por cuenta, un tope por IP frena el rociado de claves sobre muchos correos.
+    const byIp = await rateLimit(clientKey(req, "login-ip"), 40, 900);
+    if (!byIp.allowed) {
+      return NextResponse.json(
+        { error: "Demasiados intentos desde tu red. Reintenta más tarde." },
+        { status: 429, headers: { "Retry-After": String(byIp.retryAfterSeconds) } }
+      );
+    }
     limit = await rateLimit(key, 6, 900);
   } catch (error) {
     console.error("[login] base de datos", error);
@@ -70,7 +78,8 @@ export async function POST(req: Request) {
   }
 
   // Comparación constante incluso si el usuario no existe, para no filtrar cuentas.
-  const fakeHash = "$2a$12$aaaaaaaaaaaaaaaaaaaaaOxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+  // Hash bcrypt válido (costo 12) de una clave aleatoria: un formato inválido respondería más rápido y delataría cuentas.
+  const fakeHash = "$2a$12$cCiVeY/AE6kwcJTwhS9BIunkgVHOho1DioCvL4/Y5/LgdoPF7bJw2";
   const ok = await verifyPassword(parsed.data.password, user?.password ?? fakeHash);
 
   if (!user || !ok || !user.active) {

@@ -158,6 +158,10 @@ async function uniqueSlug(model, base) {
 
 async function main() {
   const email = (process.env.ADMIN_EMAIL ?? "admin@dreamdecktcg.cl").toLowerCase();
+  const isProd = process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production";
+  if (isProd && (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD.length < 12)) {
+    throw new Error("Define ADMIN_PASSWORD (12+ caracteres) para crear el administrador en producción.");
+  }
   const password = process.env.ADMIN_PASSWORD ?? "DreamDeckTCG2026!";
   const name = process.env.ADMIN_NAME ?? "TCG Cardeck";
 

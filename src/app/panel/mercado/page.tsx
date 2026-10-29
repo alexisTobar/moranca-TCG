@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { marketAnalysis, type MarketRow } from "@/lib/market-analysis";
 import { clp } from "@/lib/format";
 import { gameName } from "@/lib/games";
+import { LiveActivity } from "@/components/panel/LiveActivity";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Análisis de mercado", robots: { index: false } };
@@ -41,6 +42,8 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
       <div><p className="text-xs font-bold uppercase tracking-widest text-brand-600">Solo administración</p><h1 className="mt-2 font-display text-3xl font-bold">Análisis de mercado</h1><p className="mt-2 text-sm text-ink-400">Qué se vende, qué se mira, dónde compran y qué falta publicar. Las ventas son lo que pagaron los compradores en órdenes pagadas, enviadas o entregadas; las tablas por producto usan el precio de cada artículo.</p></div>
       <nav aria-label="Periodo" className="flex gap-1.5">{RANGES.map((r) => <Link key={r} href={`/panel/mercado?dias=${r}`} aria-current={r === days ? "page" : undefined} className={`btn btn-sm ${r === days ? "btn-primary" : "btn-secondary"}`}>{r === 365 ? "1 año" : `${r} días`}</Link>)}</nav>
     </header>
+
+    <LiveActivity />
 
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{kpis.map(([label, value]) => <div key={label} className="rounded-2xl card-surface p-5"><p className="text-xs text-ink-400">{label}</p><p className="mt-3 font-display text-3xl font-bold tabular-nums">{value}</p></div>)}</div>
 

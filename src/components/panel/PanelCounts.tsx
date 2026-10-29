@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import { Bell, CheckCheck, CreditCard, Flag, LifeBuoy, Package, UserPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -27,11 +28,19 @@ export const usePanelCounts = () => useContext(Ctx);
 export function PanelCountsProvider({ initial, children }: { initial: Counts; children: React.ReactNode }) {
   const [counts, setCounts] = useState<Counts>(initial);
   const pathname = usePathname();
+  const last = useRef<Counts>(initial);
 
   const refresh = useCallback(async () => {
     try {
       const res = await fetch("/api/panel/counts", { cache: "no-store" });
-      if (res.ok) setCounts((await res.json()) as Counts);
+      if (res.ok) {
+        const next = (await res.json()) as Counts;
+        // Aviso emergente cuando llega algo nuevo (solicitud de vendedor o de tienda) con el panel abierto.
+        if (next.sellerRequests > last.current.sellerRequests) toast.info("Nueva solicitud para ser vendedor", { description: "Revísala en Usuarios." });
+        if (next.subscriptions > last.current.subscriptions) toast.info("Nueva solicitud de tienda", { description: "Revísala en Tiendas." });
+        last.current = next;
+        setCounts(next);
+      }
     } catch {
       /* sin red: se reintenta en el siguiente ciclo */
     }

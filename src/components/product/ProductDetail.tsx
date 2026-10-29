@@ -1,4 +1,6 @@
 import { publicListingType } from "@/lib/listing-kind";
+import { CardArtwork } from "@/components/CardArtwork";
+import { DeckImageButton } from "./DeckImageButton";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ACCESSORY_CATEGORIES } from "@/lib/games";
 import { ReportButton } from "@/components/ReportButton";
@@ -409,6 +411,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
                 <h2 className="font-display text-xl font-bold text-carbon">
                   Lista del mazo
                 </h2>
+                <DeckImageButton filename={listing.slug} cards={listing.deckCards.map((c) => ({ imageUrl: c.imageUrl, quantity: c.quantity }))} />
                 <span className="text-[12px] text-ink-400">
                   {listing.deckCards.length} cartas distintas · {totalCards} en total
                 </span>
@@ -422,14 +425,7 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
                   >
                     <div className="relative aspect-[63/88]">
                       {card.imageUrl ? (
-                        <Image
-                          src={card.imageUrl}
-                          alt={card.name}
-                          fill
-                          sizes="150px"
-                          className="object-cover transition group-hover:scale-105"
-            unoptimized
-          />
+                        <CardArtwork src={card.imageUrl} alt={card.name} sizes="150px" className="object-cover transition group-hover:scale-105" />
                       ) : (
                         <div className="flex h-full items-center justify-center text-ink-700">
                           <ImageOff className="h-6 w-6" strokeWidth={1.5} />

@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { GAME_LIST } from "@/lib/games";
 import { LISTING_CARD_SELECT, safeQuery } from "@/lib/catalog";
-import { getSiteSettings } from "@/lib/site-settings";
+import { getCachedSiteSettings } from "@/lib/site-settings";
 import type { ListingCardData } from "@/components/ListingCard";
 import { HomeLanding } from "@/components/HomeLanding";
 import { homeNews } from "@/lib/news/query";
@@ -27,7 +27,7 @@ export default async function HomePage(){
     homeCardMarket().catch(()=>{unavailable=true;return [] as ListingCardData[];}),
     Promise.all((["SEALED","DECK","ACCESSORY"] as const).map(type=>prisma.listing.findMany({where:{...active,type},select:LISTING_CARD_SELECT,orderBy:[{featured:"desc"},{createdAt:"desc"}],take:6}).catch(()=>{unavailable=true;return [] as ListingCardData[];}))).then(groups=>groups.flat()),
     safeQuery(()=>prisma.user.findMany({where:{...seller,listings:{some:{status:"ACTIVE",stock:{gt:0}}}},select:{id:true,name:true,slug:true,city:true,_count:{select:{listings:{where:{status:"ACTIVE",stock:{gt:0}}}}}},orderBy:{name:"asc"},take:4}),[]),
-    homeNews().catch(()=>[]),getSiteSettings(),
+    homeNews().catch(()=>[]),getCachedSiteSettings(),
   ]);
   const latest=[...cards.slice(0,6),...otherProducts];
   const byGame=GAME_LIST.map(game=>cards.filter(card=>card.game===game.id).slice(0,4));

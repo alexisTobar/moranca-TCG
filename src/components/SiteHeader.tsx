@@ -1,14 +1,11 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Sparkles, UserRound, LogIn } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Logo } from "./Logo";
 import { GAME_LIST } from "@/lib/games";
-import { getCurrentUser } from "@/lib/auth";
-import { discountPctFor, getSiteSettings } from "@/lib/site-settings";
+import { discountPctFor, getCachedSiteSettings } from "@/lib/site-settings";
 import { SearchBox } from "./SearchBox";
-import { MobileNav } from "./MobileNav";
-import { CartButton } from "./cart/CartDrawer";
-import { LogoutButton } from "./LogoutButton";
+import { HeaderAccount } from "./HeaderAccount";
 
 const NAV = [
   { href: "/cartas", label: "Cartas" },
@@ -22,7 +19,7 @@ const NAV = [
 ];
 
 export async function SiteHeader() {
-  const [user, settings] = await Promise.all([getCurrentUser(), getSiteSettings()]);
+  const settings = await getCachedSiteSettings();
   const transferPct = discountPctFor(settings, "TRANSFER");
 
   return (
@@ -59,31 +56,7 @@ export async function SiteHeader() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
-            {user ? (
-              <Link
-                href={user.role === "BUYER" ? "/cuenta" : "/panel"}
-                className="btn btn-glass btn-sm hidden sm:inline-flex"
-              >
-                <UserRound className="h-4 w-4" strokeWidth={2} />
-                {user.role === "BUYER" ? "Mi cuenta" : "Mi panel"}
-              </Link>
-            ) : (
-              <Link href="/ingresar" className="btn btn-glass btn-sm hidden sm:inline-flex">
-                <LogIn className="h-4 w-4" strokeWidth={2} />
-                Ingresar
-              </Link>
-            )}
-            {user?.role === "BUYER" && (
-              <LogoutButton className="hidden !rounded-full !border-white/20 !px-3.5 !py-2 !text-[13px] !font-semibold !text-white/80 sm:block" />
-            )}
-            <CartButton />
-            <MobileNav
-              nav={NAV}
-              isLogged={Boolean(user)}
-              accountHref={user?.role === "BUYER" ? "/cuenta" : "/panel"}
-              accountLabel={user?.role === "BUYER" ? "Mi cuenta" : "Mi panel"}
-              showLogout={user?.role === "BUYER"}
-            />
+            <HeaderAccount nav={NAV} />
           </div>
         </div>
       </header>

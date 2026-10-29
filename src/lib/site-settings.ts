@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 
 export interface SiteSettings {
@@ -59,3 +60,6 @@ export function discountPctFor(
   }
   return settings.cashDiscountEnabled ? settings.cashDiscountPct : 0;
 }
+
+/** Versión en caché (60 s) para páginas públicas: evita 2 consultas a la base en cada visita. Checkout y admin usan la directa. */
+export const getCachedSiteSettings = unstable_cache(getSiteSettings, ["public-site-settings"], { revalidate: 60, tags: ["site-settings"] });

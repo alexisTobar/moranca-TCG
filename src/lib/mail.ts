@@ -24,9 +24,9 @@ export async function sendEmail({
   const from = process.env.RESEND_FROM_EMAIL || "TCG Cardeck <onboarding@resend.dev>";
 
   if (!apiKey) {
-    console.warn(
-      `[mail] RESEND_API_KEY no configurado. Correo no enviado a ${to}.\nAsunto: ${subject}\n${html}`
-    );
+    // El cuerpo lleva enlaces con tokens (recuperar clave, verificar correo): solo se muestra fuera de producción.
+    const body = process.env.NODE_ENV === "production" ? "(cuerpo omitido en producción)" : html;
+    console.warn(`[mail] RESEND_API_KEY no configurado. Correo no enviado.\nAsunto: ${subject}\n${body}`);
     return { sent: false };
   }
 
