@@ -70,8 +70,9 @@ export async function POST(req: Request) {
 
     await notifyAdmins(
       "Nueva solicitud de tienda",
-      [`${user.name} (${user.email}) pidió el plan ${plan.name} por ${subscription.months} mes(es).`, `Referencia de transferencia: ${subscription.reference}`],
-      "/panel/tiendas"
+      ["Un vendedor pidió contratar un plan de tienda. Cuando suba el comprobante de la transferencia, podrás confirmarla."],
+      "/panel/tiendas",
+      [["Vendedor", user.name], ["Correo", user.email], ["Plan", plan.name], ["Duración", `${subscription.months} mes(es)`], ["Monto", `$${subscription.amount.toLocaleString("es-CL")}`], ["Referencia", subscription.reference]]
     );
 
     return NextResponse.json({ ok: true, subscription }, { status: 201 });

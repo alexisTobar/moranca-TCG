@@ -3,8 +3,7 @@ import crypto from "node:crypto";
 import { prisma } from "@/lib/db";
 import { sendEmail } from "@/lib/mail";
 import { siteOrigin } from "@/lib/store";
-
-const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+import { renderEmail } from "@/lib/email-template";
 
 /** Código legible del ticket, por ejemplo SP-K7Q2M9XA. */
 export function generateTicketCode(): string {
@@ -14,18 +13,16 @@ export function generateTicketCode(): string {
 
 /**
  * Aviso por correo a los administradores (opcional: sin RESEND_API_KEY solo queda en el log).
+ * Usa la plantilla con la marca. `rows` agrega una tabla de datos (etiqueta y valor).
  * Nunca rompe la acción principal: cualquier falla se ignora.
  */
-export async function notifyAdmins(subject: string, lines: string[], path: string) {
+export async function notifyAdmins(subject: string, lines: string[], path: string, rows?: Array<[string, string]>) {
   try {
     const [admins, origin] = await Promise.all([
       prisma.user.findMany({ where: { role: "ADMIN", active: true }, select: { email: true } }),
       siteOrigin(),
     ]);
-    const html = `<div style="font-family:system-ui,sans-serif;max-width:520px">
-      <h2 style="margin:0 0 12px">${esc(subject)}</h2>
-      ${lines.map((l) => `<p style="margin:6px 0">${esc(l)}</p>`).join("")}
-      <p style="margin-top:18px"><a href="${origin}${path}">Abrir en el panel</a></p></div>`;
+    const html = renderEmail({ heading: subject, paragraphs: lines, rows, cta: { label: "Abrir en el panel", url: `${origin}${path}` } }, origin);
     await Promise.all(admins.map((a) => sendEmail({ to: a.email, subject, html })));
   } catch (error) {
     console.error("[notify] no se pudo avisar a los administradores", error);
@@ -36,10 +33,7 @@ export async function notifyAdmins(subject: string, lines: string[], path: strin
 export async function notifyUser(email: string, subject: string, lines: string[], path: string) {
   try {
     const origin = await siteOrigin();
-    const html = `<div style="font-family:system-ui,sans-serif;max-width:520px">
-      <h2 style="margin:0 0 12px">${esc(subject)}</h2>
-      ${lines.map((l) => `<p style="margin:6px 0">${esc(l)}</p>`).join("")}
-      <p style="margin-top:18px"><a href="${origin}${path}">Abrir en el panel</a></p></div>`;
+    const html = renderEmail({ heading: subject, paragraphs: lines, cta: { label: "Abrir en el panel", url: `${origin}${path}` } }, origin);
     await sendEmail({ to: email, subject, html });
   } catch (error) {
     console.error("[notify] no se pudo avisar al usuario", error);

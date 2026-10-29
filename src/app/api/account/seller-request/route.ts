@@ -54,8 +54,9 @@ export async function POST(req: Request) {
 
     await notifyAdmins(
       "Nueva solicitud para ser vendedor",
-      [`${user.name} (${user.email}) pidió pasar a vendedor.`, ...(parsed.data.message ? [`Mensaje: ${parsed.data.message}`] : [])],
-      "/panel/usuarios"
+      ["Un comprador quiere empezar a vender en TCG Cardeck. Revisa su solicitud y apruébala o recházala."],
+      "/panel/usuarios",
+      [["Nombre", user.name], ["Correo", user.email], ...(parsed.data.message ? [["Mensaje", parsed.data.message] as [string, string]] : [])]
     );
 
     return NextResponse.json({ ok: true });
