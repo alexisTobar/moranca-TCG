@@ -5,7 +5,7 @@ import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { containsProfanity } from "@/lib/profanity";
 import { generateTicketCode, notifyAdmins } from "@/lib/notify";
 import { sendEmail } from "@/lib/mail";
-import { contactTopicLabel } from "@/lib/contact-shared";
+import { PRIVACY_REQUEST_DAYS, contactTopicLabel } from "@/lib/contact-shared";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 const schema = z.object({
   name: z.string().trim().min(2, "Escribe tu nombre").max(80),
   email: z.string().trim().toLowerCase().email("Escribe un correo válido").max(160),
-  topic: z.enum(["CUENTA", "COMPRA", "VENDER", "OTRO"]),
+  topic: z.enum(["CUENTA", "COMPRA", "VENDER", "DATOS", "OTRO"]),
   subject: z.string().trim().min(4, "Escribe un asunto de al menos 4 caracteres").max(120),
   body: z.string().trim().min(10, "Cuéntanos un poco más (mínimo 10 caracteres)").max(2000),
   /** Campo trampa: las personas no lo ven; si viene con texto, es un bot. */
@@ -41,11 +41,11 @@ export async function POST(req: Request) {
   try {
     const code = generateTicketCode();
     const message = await prisma.contactMessage.create({ data: { code, name, email, topic, subject, body } });
-    await notifyAdmins(`Nueva consulta ${code} de ${name}`, [`Tema: ${contactTopicLabel(topic)}`, `Correo: ${email}`, `Asunto: ${subject}`, body.slice(0, 400)], "/panel/contacto");
+    await notifyAdmins(topic === "DATOS" ? `Solicitud de datos personales ${code} de ${name} (responder en ${PRIVACY_REQUEST_DAYS} días)` : `Nueva consulta ${code} de ${name}`, [`Tema: ${contactTopicLabel(topic)}`, `Correo: ${email}`, `Asunto: ${subject}`, body.slice(0, 400)], "/panel/contacto");
     await sendEmail({
       to: email,
       subject: `Recibimos tu consulta ${code}`,
-      html: `<div style="font-family:system-ui,sans-serif;max-width:520px"><h2 style="margin:0 0 12px">Recibimos tu consulta</h2><p>Hola ${esc(name)}, tu número de consulta es <strong>${code}</strong>. Te responderemos a este correo.</p><p style="color:#586174">Asunto: ${esc(subject)}</p></div>`,
+      html: `<div style="font-family:system-ui,sans-serif;max-width:520px"><h2 style="margin:0 0 12px">Recibimos tu consulta</h2><p>Hola ${esc(name)}, tu número de consulta es <strong>${code}</strong>. Te responderemos a este correo.</p>${topic === "DATOS" ? `<p>Tu solicitud sobre tus datos personales quedó registrada con esta fecha. Te responderemos dentro de ${PRIVACY_REQUEST_DAYS} días corridos (Ley N° 21.719). Si pediste el bloqueo temporal de tus datos mientras la resolvemos, te contestaremos sobre eso dentro de 2 días hábiles.</p>` : ""}<p style="color:#586174">Asunto: ${esc(subject)}</p></div>`,
     }).catch(() => undefined);
     return NextResponse.json({ ok: true, code: message.code });
   } catch (error) {

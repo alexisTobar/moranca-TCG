@@ -5,7 +5,7 @@ export function GoogleButton({ next, label = "Continuar con Google" }: { next?: 
       {next && <input type="hidden" name="next" value={next} />}
       <label className="mb-3 flex items-start gap-2 text-xs leading-relaxed text-ink-400">
         <input type="checkbox" name="acceptTerms" value="yes" required className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600" />
-        <span>Acepto los <a href="/terminos-y-condiciones" target="_blank" rel="noopener noreferrer" className="underline">Términos y condiciones</a> y he leído la <a href="/politica-de-privacidad" target="_blank" rel="noopener noreferrer" className="underline">Política de privacidad</a>.</span>
+        <span>Declaro ser mayor de 18 años, acepto los <a href="/terminos-y-condiciones" target="_blank" rel="noopener noreferrer" className="underline">Términos y condiciones</a> y he leído la <a href="/politica-de-privacidad" target="_blank" rel="noopener noreferrer" className="underline">Política de privacidad</a>.</span>
       </label>
       <button
         type="submit"

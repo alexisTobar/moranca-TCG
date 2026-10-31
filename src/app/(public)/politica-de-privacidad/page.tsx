@@ -4,7 +4,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { LegalLayout, type LegalSection } from "@/components/legal/LegalLayout";
 import { B, Note, P, Table, UL } from "@/components/legal/blocks";
-import { CONTACT_EMAIL } from "@/lib/legal";
+import { CONTACT_EMAIL, LEGAL_ENTITY, LEGAL_UPDATED, LEGAL_VERSION } from "@/lib/legal";
+
+const entity = [LEGAL_ENTITY.name, LEGAL_ENTITY.rut && `RUT ${LEGAL_ENTITY.rut}`, LEGAL_ENTITY.address && `domicilio en ${LEGAL_ENTITY.address}`].filter(Boolean).join(", ");
+const RIGHTS_FORM = "/ayuda?tema=DATOS#contacto";
 
 export const metadata: Metadata = {
   title: "Política de privacidad",
@@ -18,12 +21,32 @@ const sections: LegalSection[] = [
     id: "responsable",
     title: "Quién es responsable de tus datos",
     body: (
-      <P>
-        TCG Cardeck (“nosotros”) es el responsable del tratamiento de los datos personales que recopilamos en
-        este sitio, conforme a la Ley N° 19.628 sobre protección de la vida privada y a la Ley N° 21.719 sobre protección
-        y tratamiento de los datos personales, que entra en vigencia el 1 de diciembre de 2026. Los datos de contacto
-        están al final de esta página.
-      </P>
+      <>
+        <P>
+          TCG Cardeck (“nosotros”){entity ? <> ({entity})</> : null} es el responsable del tratamiento de los datos
+          personales que recopilamos en este sitio, conforme a la Ley N° 19.628 sobre protección de la vida privada y a
+          la Ley N° 21.719 sobre protección y tratamiento de los datos personales, que entra en vigencia el 1 de diciembre
+          de 2026. Los datos de contacto están al final de esta página.
+        </P>
+        <P>
+          Versión de esta política: {LEGAL_VERSION}, publicada el {LEGAL_UPDATED}. No hemos designado un delegado o
+          encargado de prevención; las solicitudes sobre tus datos las atiende directamente el equipo de TCG Cardeck.
+        </P>
+      </>
+    ),
+  },
+  {
+    id: "origen",
+    title: "De dónde obtenemos tus datos",
+    body: (
+      <UL
+        items={[
+          "De ti, cuando te registras, completas tu perfil, publicas, compras, vendes o nos escribes.",
+          "De Google, solo si eliges ingresar con tu cuenta de Google (nombre, email verificado e identificador).",
+          "De la otra parte de una orden: si compras, el vendedor puede agregar el código de seguimiento del envío; los mensajes y reseñas los escriben ambas partes.",
+          "De tu navegador, de forma automática: dirección IP y cookies descritas más abajo.",
+        ]}
+      />
     ),
   },
   {
@@ -55,16 +78,26 @@ const sections: LegalSection[] = [
     title: "Para qué usamos tus datos",
     body: (
       <>
-        <UL
-          items={[
-            "Crear y administrar tu cuenta y verificar tu identidad.",
-            "Gestionar tus compras y ventas: reservar stock, generar la orden, mostrar los datos necesarios a la otra parte y mantener el historial.",
-            "Enviarte avisos del servicio, como la recuperación de contraseña o novedades de tu orden o de tus tickets.",
-            "Darte soporte y resolver reclamos.",
-            "Proteger la plataforma: prevenir fraudes, abusos e intentos de acceso indebido.",
-            "Mejorar el sitio y cumplir obligaciones legales.",
+        <P>Cada uso tiene una base legal (Ley N° 19.628, arts. 12 y 13, según la Ley N° 21.719):</P>
+        <Table
+          head={["Para qué", "Base legal"]}
+          rows={[
+            ["Crear y administrar tu cuenta y verificar tu identidad.", "Ejecución del contrato que aceptas al registrarte (Términos y condiciones)."],
+            ["Gestionar tus compras y ventas: reservar stock, generar la orden, mostrar los datos necesarios a la otra parte y mantener el historial.", "Ejecución del contrato."],
+            ["Enviarte avisos del servicio, como la recuperación de contraseña o novedades de tu orden o de tus tickets.", "Ejecución del contrato."],
+            ["Darte soporte, resolver reclamos y responder tus solicitudes sobre tus datos.", "Ejecución del contrato y cumplimiento de obligaciones legales (Ley del Consumidor y Ley N° 19.628)."],
+            ["Conservar órdenes y comprobantes por el plazo que exigen las normas contables y tributarias.", "Cumplimiento de una obligación legal."],
+            ["Proteger la plataforma: límites de intentos, prevención de fraudes y abusos, y registro de acciones sensibles.", "Interés legítimo: mantener seguras las cuentas y las compras de todos. Puedes oponerte, y evaluaremos tu caso."],
+            ["Perfil público de vendedor y reseñas.", "Ejecución del contrato: quien vende acepta mostrar su perfil para que le compren."],
+            ["Estadísticas propias opcionales de navegación y búsqueda.", "Tu consentimiento, que puedes retirar cuando quieras desde el botón “Privacidad”, sin que eso afecte lo ya tratado ni tu uso del sitio."],
+            ["Responder ante tribunales u organismos públicos.", "Formulación, ejercicio o defensa de un derecho."],
           ]}
         />
+        <P>
+          <B>No tomamos decisiones automatizadas ni elaboramos perfiles</B> que produzcan efectos jurídicos en ti o te
+          afecten significativamente. Los únicos bloqueos automáticos son límites temporales de intentos (por ejemplo,
+          demasiadas claves erróneas); si crees que uno te afectó por error, escríbenos y una persona lo revisará.
+        </P>
         <P>
           Por ahora no enviamos publicidad. Si algún día lo hacemos, será solo con tu consentimiento y podrás retirarlo
           cuando quieras.
@@ -84,7 +117,7 @@ const sections: LegalSection[] = [
           items={[
             <><B>Con la otra parte de la orden.</B> Si compras, el vendedor ve tu nombre, email, teléfono y dirección de envío para poder despachar. Si vendes, el comprador ve tu nombre, tus datos bancarios (para transferirte) y tu ubicación aproximada.</>,
             <><B>De forma pública.</B> El perfil de un vendedor (nombre, foto, descripción, comuna o región, calificaciones) es visible para cualquiera. Las reseñas muestran el nombre de quien las escribió.</>,
-            <><B>Proveedores tecnológicos</B> que operan el servicio por encargo nuestro: alojamiento del sitio (Vercel), base de datos (Supabase) y envío de correos (Resend, cuando está configurado).</>,
+            <><B>Proveedores tecnológicos</B> que operan el servicio por encargo nuestro, solo según nuestras instrucciones y sin poder usar tus datos para otros fines: alojamiento del sitio (Vercel), base de datos (Supabase) y envío de correos (Resend, cuando está configurado).</>,
             <><B>Google</B>, si eliges ingresar con tu cuenta de Google: le pedimos tu nombre y email verificado.</>,
             <><B>Catálogos de cartas</B> (Scryfall, Pokémon TCG y TCGdex, dotGG y api.myl.cl): al buscar cartas o ver imágenes, tu navegador se conecta a esos servidores y ellos pueden ver tu dirección IP.</>,
             <><B>Autoridades</B>, cuando la ley o una orden judicial lo exijan.</>,
@@ -131,8 +164,10 @@ const sections: LegalSection[] = [
           ]}
         />
         <P>
-          Ningún sistema es infalible. Si detectamos una vulneración que afecte tus datos, actuaremos y te informaremos
-          según lo exige la ley.
+          Ningún sistema es infalible. Si ocurre una vulneración de seguridad que ponga en riesgo tus derechos, la
+          reportaremos sin demora a la Agencia de Protección de Datos Personales, la registraremos con sus efectos y las
+          medidas adoptadas y, cuando afecte datos sensibles o datos de obligaciones económicas o comerciales (como datos
+          bancarios), te avisaremos directamente en lenguaje claro, con qué datos se vieron afectados y qué hacer.
         </P>
       </>
     ),
@@ -145,7 +180,7 @@ const sections: LegalSection[] = [
         Mantenemos los datos de tu cuenta mientras esté activa. Las órdenes, comprobantes y mensajes se conservan por el
         tiempo necesario para atender reclamos y cumplir obligaciones legales, incluidas las contables y tributarias. Los
         registros técnicos de límites anti-abuso se eliminan automáticamente al cabo de pocas horas. Cuando ya no sean
-        necesarios, los eliminamos o los anonimizamos. Los eventos de analítica propia se eliminan al superar 90 días en la siguiente ejecución semanal; los informes agregados se conservan 52 semanas. Cuando el respaldo semanal está habilitado, las copias cifradas de la base se conservan hasta 90 días, tienen acceso restringido y se usan para recuperación. Una eliminación puede tardar hasta ese plazo en desaparecer de copias históricas. Al restaurar un respaldo deben reaplicarse las solicitudes de eliminación posteriores a su fecha.
+        necesarios, los eliminamos o los anonimizamos. Los eventos de analítica propia se eliminan al superar 90 días en la siguiente ejecución semanal; los informes agregados se conservan 52 semanas. Cuando el respaldo semanal está habilitado, las copias cifradas de la base se conservan hasta 90 días, tienen acceso restringido y se usan para recuperación. Una eliminación puede tardar hasta ese plazo en desaparecer de copias históricas. Al restaurar un respaldo deben reaplicarse las solicitudes de eliminación posteriores a su fecha. Las solicitudes sobre tus datos y nuestras respuestas se conservan para poder acreditar que las atendimos.
       </P>
     ),
   },
@@ -165,10 +200,29 @@ const sections: LegalSection[] = [
           ]}
         />
         <P>
-          Para ejercerlos, escríbenos por los canales de contacto indicados abajo, desde el email de tu cuenta.
-          Responderemos dentro de los plazos legales. Ten presente que algunos datos debemos conservarlos por obligación
-          legal o para resolver reclamos en curso. Si crees que tus derechos no fueron respetados, puedes recurrir a la
-          autoridad de protección de datos personales que corresponda.
+          Si tratamos tus datos en base a tu consentimiento, puedes retirarlo cuando quieras y por un medio igual de
+          simple; el retiro no afecta lo tratado antes.
+        </P>
+        <P>
+          <B>Cómo ejercerlos:</B> usa el{" "}
+          <Link href={RIGHTS_FORM} className="font-semibold text-brand-600 hover:text-brand-700">
+            formulario de solicitudes sobre datos personales
+          </Link>
+          {CONTACT_EMAIL ? <> o escribe a <a href={`mailto:${CONTACT_EMAIL}`} className="font-semibold text-brand-600 hover:text-brand-700">{CONTACT_EMAIL}</a></> : null}
+          , desde el email de tu cuenta para que podamos verificar que eres tú. Indica qué derecho ejerces y sobre qué
+          datos; si pides rectificar, qué hay que corregir, y si pides suprimir u oponerte, el motivo. Es gratis (el acceso
+          y la portabilidad, al menos una vez por trimestre).
+        </P>
+        <UL
+          items={[
+            <>Te confirmaremos la recepción y responderemos por escrito <B>dentro de 30 días corridos</B>, prorrogables una sola vez por otros 30 si el caso lo requiere.</>,
+            <>Si junto con una rectificación, supresión u oposición pides el <B>bloqueo temporal</B> de tus datos, te responderemos sobre el bloqueo <B>dentro de 2 días hábiles</B> y no los trataremos mientras tanto.</>,
+            <>Si rechazamos tu solicitud, total o parcialmente, te explicaremos el motivo. Algunos datos debemos conservarlos por obligación legal, por un contrato en curso o para defender un reclamo.</>,
+          ]}
+        />
+        <P>
+          Si rechazamos tu solicitud o no respondemos a tiempo, puedes reclamar ante la{" "}
+          <B>Agencia de Protección de Datos Personales</B> dentro de 30 días hábiles.
         </P>
       </>
     ),
@@ -187,10 +241,25 @@ const sections: LegalSection[] = [
     id: "transferencias",
     title: "Servidores fuera de Chile",
     body: (
-      <P>
-        Algunos de nuestros proveedores tecnológicos pueden almacenar o procesar datos en servidores ubicados fuera de
-        Chile. Trabajamos con proveedores que aplican medidas de seguridad adecuadas para proteger tu información.
-      </P>
+      <>
+        <P>Para operar el sitio, tus datos se almacenan o procesan fuera de Chile:</P>
+        <Table
+          head={["Proveedor", "Para qué", "País"]}
+          rows={[
+            ["Vercel", "Alojamiento del sitio y ejecución del servidor", "Estados Unidos (Portland, Oregón)"],
+            ["Supabase", "Base de datos y archivos subidos", "Estados Unidos (Oregón)"],
+            ["Resend", "Envío de correos del servicio, cuando está configurado", "Estados Unidos"],
+            ["Google", "Ingreso con Google, solo si lo eliges", "Estados Unidos"],
+          ]}
+        />
+        <P>
+          A la fecha, la Agencia de Protección de Datos Personales no ha publicado un listado de países con nivel adecuado
+          de protección, por lo que no podemos afirmar que Estados Unidos lo tenga. Estas transferencias son necesarias
+          para prestarte el servicio que contratas y se amparan en los acuerdos de tratamiento de datos de cada proveedor,
+          que incluyen cláusulas contractuales tipo y obligaciones de seguridad y confidencialidad. Puedes pedirnos más
+          información sobre estas garantías por los canales de contacto.
+        </P>
+      </>
     ),
   },
   {

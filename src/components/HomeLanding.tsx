@@ -6,7 +6,6 @@ import { ListingCard, type ListingCardData } from "@/components/ListingCard";
 import { HomeShowcase } from "@/components/HomeShowcase";
 import { CampaignMotion } from "@/components/CampaignMotion";
 import { HeroHand } from "@/components/HeroHand";
-import { HeroGoblin } from "@/components/HeroGoblin";
 import { publicListingType } from "@/lib/listing-kind";
 import { GameBrand } from "@/components/GameBrand";
 import { StoreShowcase } from "@/components/store/StoreShowcase";
@@ -61,7 +60,6 @@ export function HomeLanding({latest,byGame,sellers,news,paymentWindowHours,unava
           <div><Link href="/cartas" className="btn btn-gold btn-lg">Explorar cartas</Link><Link href="/explorar" className="campaign-stores-link">Ver tiendas por región</Link></div>
         </div>
         <HeroHand cards={hand}/>
-        <HeroGoblin/>
       </div>:      <CampaignMotion>
         <Image src="/cardeck-tabletop.webp" alt="" fill priority sizes="(max-width:1440px) 100vw, 1440px" className="cardeck-campaign-art"/>
         <div className="cardeck-campaign-shade"/>
@@ -70,7 +68,6 @@ export function HomeLanding({latest,byGame,sellers,news,paymentWindowHours,unava
           <p>Compra, vende y colecciona cartas TCG en Chile.<br className="hidden sm:block"/> Encuentra tu juego, tu vendedor y las cartas que te faltan.</p>
           <div><Link href="/cartas" className="btn btn-gold btn-lg">Explorar cartas <ArrowRight size={18}/></Link><Link href="/explorar" className="campaign-stores-link">Conocer las tiendas</Link></div>
         </div>
-        <HeroGoblin/>
       </CampaignMotion>}
       <nav className="cardeck-category-index" aria-label="Qué puedes comprar en TCG Cardeck">
         {CATEGORIES.map(category=><Link key={category.href} href={category.href}><strong>{category.title}<ArrowRight size={17} aria-hidden="true"/></strong><span>{category.description}</span></Link>)}

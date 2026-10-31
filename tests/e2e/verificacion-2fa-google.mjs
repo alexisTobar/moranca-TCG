@@ -224,7 +224,7 @@ const gc = mkClaims({ email: `nuevo-${stamp}@gmail.test`, sub: `sub-${stamp}` })
 g = await googleLogin(gc);
 check("cuenta nueva con Google: entra a Mi cuenta con sesion", g.cb.status === 307 && g.cb.location?.endsWith("/cuenta") && g.C0.hasSession(), `${g.cb.status} ${g.cb.location}`);
 [row] = (await db.query(`SELECT id, role, "emailVerifiedAt" v, "termsAcceptedAt" t, "termsVersion" tv FROM "User" WHERE email=$1`, [gc.email])).rows;
-check("se crea como COMPRADOR, email verificado y terminos aceptados", row.role === "BUYER" && row.v && row.t && row.tv === "2026-10-17", JSON.stringify(row));
+check("se crea como COMPRADOR, email verificado y terminos aceptados", row.role === "BUYER" && row.v && row.t && row.tv === "2026-10-31", JSON.stringify(row));
 check("queda vinculada la cuenta de Google", (await db.query(`SELECT count(*) n FROM "OAuthAccount" WHERE "userId"=$1 AND provider='google' AND "providerAccountId"=$2`, [row.id, gc.sub])).rows[0].n === "1");
 check("puede comprar de inmediato (email ya verificado)", (await g.C0.req("/api/checkout", { method: "POST", json: cartJson })).status === 200);
 g = await googleLogin(gc);

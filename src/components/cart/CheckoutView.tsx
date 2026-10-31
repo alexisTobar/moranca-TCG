@@ -594,7 +594,7 @@ export function CheckoutView({
 
             <label className="mt-5 flex items-start gap-2 text-xs leading-relaxed text-ink-300">
               <input type="checkbox" required checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} className="mt-1" />
-              <span>Acepto los <Link href="/terminos-y-condiciones" target="_blank" className="underline">términos de compra</Link> y he leído las políticas de <Link href="/politica-de-privacidad" target="_blank" className="underline">privacidad</Link>, <Link href="/envios-y-pagos" target="_blank" className="underline">envíos y pagos</Link> y <Link href="/devoluciones" target="_blank" className="underline">devoluciones</Link>.</span>
+              <span>Declaro ser mayor de 18 años, acepto los <Link href="/terminos-y-condiciones" target="_blank" className="underline">términos de compra</Link> y he leído las políticas de <Link href="/politica-de-privacidad" target="_blank" className="underline">privacidad</Link>, <Link href="/envios-y-pagos" target="_blank" className="underline">envíos y pagos</Link> y <Link href="/devoluciones" target="_blank" className="underline">devoluciones</Link>.</span>
             </label>
             {!quote?.length && <p role="status" className="mt-3 text-xs text-ink-400">Esperando la cotización actualizada. Si no aparece, revisa tu conexión o recarga la página.</p>}
             <button disabled={loading || !acceptTerms || !quote?.length || !!couponError} className="btn btn-primary btn-lg mt-5 w-full">

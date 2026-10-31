@@ -79,7 +79,7 @@ export function RegisterForm() {
           className="mt-0.5 h-4 w-4 shrink-0 rounded border-ink-600 accent-[var(--color-brand-600)]"
         />
         <span>
-          Acepto los{" "}
+          Declaro ser mayor de 18 años y acepto los{" "}
           <Link href="/terminos-y-condiciones" target="_blank" className="font-semibold text-brand-600 hover:text-brand-700">
             Términos y condiciones
           </Link>{" "}

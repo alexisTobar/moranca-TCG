@@ -1176,20 +1176,6 @@ img,svg { max-width:100%; }
 }
 @media(prefers-reduced-motion:reduce){.hero-hand li{animation:none}.hero-hand-card,.hero-hand-tag{transition:none}}
 
-/* ===== Duende del inicio ===== */
-.hero-goblin {position:absolute;z-index:3;left:calc(42% - 62px);bottom:-34px;width:124px;pointer-events:none;--gx:0px;--gy:0px;--gr:0deg;animation:goblin-peek 1.1s cubic-bezier(.2,1.3,.4,1) .5s both;}
-.hero-goblin-body {display:block;width:100%;pointer-events:auto;cursor:pointer;background:none;border:0;padding:0;transform:translate(var(--gx),var(--gy)) rotate(calc(var(--gr) + var(--wob,0deg)));transition:transform .25s ease-out;filter:drop-shadow(0 10px 14px #0008);transform-origin:50% 100%;animation:goblin-bob 4.2s ease-in-out 1.7s infinite;}
-.hero-goblin-body img {width:100%;height:auto;display:block;}
-.hero-goblin:hover .hero-goblin-body,.hero-goblin[data-talking=true] .hero-goblin-body {animation:goblin-wave .9s ease-in-out 1;}
-.hero-goblin-bubble {position:absolute;left:50%;bottom:calc(100% - 26px);transform:translate(-50%,10px) scale(.85);opacity:0;white-space:nowrap;background:#fff;color:#171c26;font-weight:700;font-size:13px;padding:9px 14px;border-radius:14px;box-shadow:0 8px 24px #0006;text-decoration:none;pointer-events:none;transition:opacity .25s,transform .35s cubic-bezier(.2,1.4,.4,1);}
-.hero-goblin-bubble::after {content:"";position:absolute;left:50%;bottom:-6px;width:12px;height:12px;background:#fff;transform:translateX(-50%) rotate(45deg);border-radius:2px;}
-.hero-goblin[data-talking=true] .hero-goblin-bubble {opacity:1;transform:translate(-50%,0) scale(1);pointer-events:auto;}
-@keyframes goblin-peek {from{transform:translateY(130%) rotate(-12deg)}to{transform:none}}
-@keyframes goblin-bob {0%,100%{translate:0 0}50%{translate:0 -7px}}
-@keyframes goblin-wave {0%,100%{rotate:0deg}20%{rotate:-9deg}45%{rotate:8deg}70%{rotate:-5deg}}
-@media(max-width:899px){.hero-goblin{left:auto;right:14px;width:84px;bottom:-24px}.hero-goblin-bubble{font-size:12px;left:auto;right:0;transform:translate(0,10px) scale(.85)}.hero-goblin[data-talking=true] .hero-goblin-bubble{transform:translate(0,0) scale(1)}}
-@media(prefers-reduced-motion:reduce){.hero-goblin,.hero-goblin-body{animation:none!important}}
-
 /* =====================================================================
    Capa moderna (misma identidad, más pulida). Va al final a propósito:
    unifica tienda, cuenta y panel con las mismas superficies, sombras y efectos.
@@ -1288,21 +1274,3 @@ main > * { animation: fx-fade-in .45s var(--fx-ease) both; }
   .listing-sheet:hover, .btn:hover, .nav-link:hover { transform: none !important; }
   @view-transition { navigation: none; }
 }
-.cardeck-campaign-stage .hero-goblin {left:auto;right:15%;}
-@media(max-width:899px){.cardeck-campaign-stage .hero-goblin{right:12px}}
-
-/* ===== Duende de cuerpo completo (SVG): brazo que saluda, parpadeo y cabeceo ===== */
-.hero-goblin {width:184px;bottom:-30px;left:calc(42% - 92px);}
-.hero-goblin-body svg {display:block;width:100%;height:auto;overflow:visible;}
-.gob-arm,.gob-head,.gob-eye {transform-box:view-box;}
-.gob-arm {animation:gob-wave 3.6s ease-in-out infinite;}
-.gob-head {animation:gob-head 5s ease-in-out infinite;}
-.gob-eye {animation:gob-blink 5.5s infinite;}
-.hero-goblin:hover .gob-arm,.hero-goblin[data-talking=true] .gob-arm {animation:gob-wave-fast .5s ease-in-out infinite;}
-@keyframes gob-wave {0%,100%{rotate:0deg}8%{rotate:-14deg}16%{rotate:10deg}24%{rotate:-12deg}32%{rotate:6deg}40%,90%{rotate:0deg}}
-@keyframes gob-wave-fast {0%,100%{rotate:-16deg}50%{rotate:14deg}}
-@keyframes gob-head {0%,100%{rotate:-1.5deg}50%{rotate:2deg}}
-@keyframes gob-blink {0%,94%,100%{scale:1 1}97%{scale:1 .08}}
-.cardeck-campaign-stage .hero-goblin {right:14%;left:auto;}
-@media(max-width:899px){.hero-goblin{width:104px;bottom:-18px;right:10px;left:auto}.cardeck-campaign-stage .hero-goblin{right:10px}}
-@media(prefers-reduced-motion:reduce){.gob-arm,.gob-head,.gob-eye{animation:none!important}}
