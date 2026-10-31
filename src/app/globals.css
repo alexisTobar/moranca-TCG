@@ -1175,3 +1175,118 @@ img,svg { max-width:100%; }
   .hero-table-copy p {font-size:15px;}
 }
 @media(prefers-reduced-motion:reduce){.hero-hand li{animation:none}.hero-hand-card,.hero-hand-tag{transition:none}}
+
+/* ===== Duende del inicio ===== */
+.hero-goblin {position:absolute;z-index:3;left:calc(42% - 62px);bottom:-34px;width:124px;pointer-events:none;--gx:0px;--gy:0px;--gr:0deg;animation:goblin-peek 1.1s cubic-bezier(.2,1.3,.4,1) .5s both;}
+.hero-goblin-body {display:block;width:100%;pointer-events:auto;cursor:pointer;background:none;border:0;padding:0;transform:translate(var(--gx),var(--gy)) rotate(calc(var(--gr) + var(--wob,0deg)));transition:transform .25s ease-out;filter:drop-shadow(0 10px 14px #0008);transform-origin:50% 100%;animation:goblin-bob 4.2s ease-in-out 1.7s infinite;}
+.hero-goblin-body img {width:100%;height:auto;display:block;}
+.hero-goblin:hover .hero-goblin-body,.hero-goblin[data-talking=true] .hero-goblin-body {animation:goblin-wave .9s ease-in-out 1;}
+.hero-goblin-bubble {position:absolute;left:50%;bottom:calc(100% - 26px);transform:translate(-50%,10px) scale(.85);opacity:0;white-space:nowrap;background:#fff;color:#171c26;font-weight:700;font-size:13px;padding:9px 14px;border-radius:14px;box-shadow:0 8px 24px #0006;text-decoration:none;pointer-events:none;transition:opacity .25s,transform .35s cubic-bezier(.2,1.4,.4,1);}
+.hero-goblin-bubble::after {content:"";position:absolute;left:50%;bottom:-6px;width:12px;height:12px;background:#fff;transform:translateX(-50%) rotate(45deg);border-radius:2px;}
+.hero-goblin[data-talking=true] .hero-goblin-bubble {opacity:1;transform:translate(-50%,0) scale(1);pointer-events:auto;}
+@keyframes goblin-peek {from{transform:translateY(130%) rotate(-12deg)}to{transform:none}}
+@keyframes goblin-bob {0%,100%{translate:0 0}50%{translate:0 -7px}}
+@keyframes goblin-wave {0%,100%{rotate:0deg}20%{rotate:-9deg}45%{rotate:8deg}70%{rotate:-5deg}}
+@media(max-width:899px){.hero-goblin{left:auto;right:14px;width:84px;bottom:-24px}.hero-goblin-bubble{font-size:12px;left:auto;right:0;transform:translate(0,10px) scale(.85)}.hero-goblin[data-talking=true] .hero-goblin-bubble{transform:translate(0,0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.hero-goblin,.hero-goblin-body{animation:none!important}}
+
+/* =====================================================================
+   Capa moderna (misma identidad, más pulida). Va al final a propósito:
+   unifica tienda, cuenta y panel con las mismas superficies, sombras y efectos.
+   ===================================================================== */
+:root {
+  --fx-radius: 16px;
+  --fx-border: #e2e6ef;
+  --fx-shadow: 0 1px 2px #0b122008, 0 6px 18px -8px #0b12201f;
+  --fx-shadow-hover: 0 2px 4px #0b122010, 0 22px 40px -16px #0b122040;
+  --fx-gold: #e6b94a;
+  --fx-ease: cubic-bezier(.16,1,.3,1);
+}
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: fx-fade-out .14s ease both; }
+::view-transition-new(root) { animation: fx-fade-in .22s var(--fx-ease) both; }
+@keyframes fx-fade-out { to { opacity: 0 } }
+@keyframes fx-fade-in { from { opacity: 0; transform: translateY(6px) } }
+
+body { background: linear-gradient(180deg, #f7f8fb 0, #f3f5f9 100%) fixed; }
+::selection { background: #e6b94a66; }
+
+/* --- Cartas: claras, con cuerpo propio y brillo al pasar el mouse --- */
+.listing-sheet {
+  position: relative; padding: 10px 10px 12px; border: 1px solid var(--fx-border); border-radius: var(--fx-radius);
+  background: #fff; box-shadow: var(--fx-shadow);
+  transition: transform .35s var(--fx-ease), box-shadow .35s var(--fx-ease), border-color .25s ease;
+}
+.listing-sheet > .btn, .listing-sheet > button { margin-top: auto; border-radius: 12px; }
+.listing-art { border-radius: 12px; background: radial-gradient(120% 90% at 50% 0, #fff 0, #eef0f6 100%); isolation: isolate; }
+.listing-art img { filter: saturate(1.06) contrast(1.02); }
+.listing-art::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0;
+  background: linear-gradient(115deg, transparent 30%, #ffffff8c 46%, #fff3c466 52%, transparent 68%) -140% 0 / 250% 100% no-repeat;
+}
+.listing-copy { padding: 12px 4px 10px; }
+.listing-price strong { color: #0d1220; font-size: 19px; }
+.listing-sold { border-radius: 0 0 12px 12px; background: #0b1020e6; }
+@media (hover: hover) {
+  .listing-sheet:hover { transform: translateY(-6px); box-shadow: var(--fx-shadow-hover); border-color: #e6b94a88; }
+  .listing-sheet:hover .listing-art::after { opacity: 1; animation: fx-shine .9s var(--fx-ease) both; }
+}
+@keyframes fx-shine { from { background-position: -140% 0 } to { background-position: 140% 0 } }
+
+/* --- Botones: relieve suave y respuesta al toque --- */
+.btn { transition: transform .2s var(--fx-ease), box-shadow .25s ease, background-color .2s ease, border-color .2s ease, color .2s ease, filter .2s ease; }
+@media (hover: hover) {
+  .btn:not(:disabled):hover { transform: translateY(-2px); }
+  .btn-primary:not(:disabled):hover, .btn-gold:not(:disabled):hover { box-shadow: 0 10px 22px -8px #b13a2566; filter: saturate(1.08); }
+  .btn-gold:not(:disabled):hover { box-shadow: 0 10px 22px -8px #e6b94a99; }
+}
+.btn:focus-visible, .input:focus-visible, a:focus-visible, button:focus-visible { outline: 2px solid var(--fx-gold); outline-offset: 2px; }
+
+/* --- Cabecera y navegación --- */
+.market-navigation { box-shadow: 0 8px 24px -14px #000a; position: sticky; }
+.market-navigation::after { content: ""; position: absolute; inset: auto 0 -1px 0; height: 1px; background: linear-gradient(90deg, transparent, #e6b94a99, transparent); pointer-events: none; }
+.nav-link { border-radius: 10px; transition: background-color .2s, color .2s, transform .2s var(--fx-ease); }
+@media (hover: hover) { .nav-link:hover { transform: translateY(-1px); } }
+
+/* --- Inicio: luz que se mueve sobre el tapete y secciones que aparecen --- */
+.hero-table::after {
+  content: ""; position: absolute; inset: -20%; z-index: -1; pointer-events: none; opacity: .55;
+  background: radial-gradient(40% 55% at 30% 40%, #e6b94a30, transparent 70%), radial-gradient(35% 50% at 75% 60%, #4aa3e630, transparent 70%);
+  animation: fx-aurora 16s ease-in-out infinite alternate;
+}
+@keyframes fx-aurora { from { transform: translate3d(-3%, -2%, 0) scale(1) } to { transform: translate3d(4%, 3%, 0) scale(1.12) } }
+.hero-table-copy h1 { background: linear-gradient(180deg, #fff 55%, #f1d27a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cardeck-category-index > a, .cardeck-seller-list > a, .cardeck-collection, .cardeck-news-grid article {
+  transition: transform .35s var(--fx-ease), box-shadow .35s var(--fx-ease), border-color .25s;
+}
+@media (hover: hover) {
+  .cardeck-category-index > a:hover, .cardeck-seller-list > a:hover, .cardeck-news-grid article:hover { transform: translateY(-5px); box-shadow: var(--fx-shadow-hover); }
+  .cardeck-collection:hover { box-shadow: var(--fx-shadow-hover); border-color: #e6b94a77; }
+}
+.cardeck-collection { border-radius: 20px; box-shadow: var(--fx-shadow); background: #fff; }
+@supports (animation-timeline: view()) {
+  .cardeck-home > section:not(.cardeck-campaign) { animation: fx-reveal both var(--fx-ease); animation-timeline: view(); animation-range: entry 0% entry 28%; }
+}
+@keyframes fx-reveal { from { opacity: 0; transform: translateY(28px) } to { opacity: 1; transform: none } }
+
+/* --- Cuenta, panel y formularios: mismas superficies que la tienda --- */
+.card-surface { border-radius: var(--fx-radius); border: 1px solid var(--fx-border); background: #fff; box-shadow: var(--fx-shadow); }
+@media (hover: hover) { .card-surface:hover { border-color: #cfd6e4; box-shadow: var(--fx-shadow-hover); } }
+.panel-shell { background: linear-gradient(180deg, #f6f7fa, #eef1f6); }
+.panel-shell > div > nav { border-radius: 20px; border-color: var(--fx-border); box-shadow: var(--fx-shadow); }
+.panel-shell table tbody tr { transition: background-color .15s; }
+.panel-shell table tbody tr:hover { background: #f5f7fb; }
+.panel-shell h1, main h1 { letter-spacing: -.02em; }
+.input { border-radius: 12px; transition: border-color .2s, box-shadow .2s; }
+.input:focus { border-color: var(--fx-gold); box-shadow: 0 0 0 4px #e6b94a30; outline: none; }
+
+/* --- Entrada suave de contenido en todas las páginas --- */
+main > * { animation: fx-fade-in .45s var(--fx-ease) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  .listing-sheet:hover, .btn:hover, .nav-link:hover { transform: none !important; }
+  @view-transition { navigation: none; }
+}
+.cardeck-campaign-stage .hero-goblin {left:auto;right:15%;}
+@media(max-width:899px){.cardeck-campaign-stage .hero-goblin{right:12px}}

@@ -35,11 +35,13 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.10",
+    "@electric-sql/pglite-socket": "^0.2.16",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.10.7",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
+    "pg": "^8.23.1",
     "prisma": "^6.19.3",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.3"
