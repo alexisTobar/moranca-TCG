@@ -1,3 +1,4 @@
+import { refreshPublic } from "@/lib/revalidate";
 import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -71,6 +72,7 @@ export async function POST(req: Request) {
     });
 
     await audit(admin, "discount.create", { type: "PaymentDiscount", detail: `${data.method} ${data.percent}%${data.active ? " (activo)" : ""}` });
+    refreshPublic();
     return NextResponse.json({ ok: true, discounts: await listAll() }, { status: 201 });
   } catch (error) {
     if (error instanceof AuthError) {

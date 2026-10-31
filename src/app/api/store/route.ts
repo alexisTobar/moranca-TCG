@@ -1,3 +1,4 @@
+import { refreshPublic } from "@/lib/revalidate";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { AuthError, requireUser } from "@/lib/auth";
@@ -99,6 +100,7 @@ export async function PUT(req: Request) {
       include: { plan: true },
     });
 
+    refreshPublic();
     return NextResponse.json({ ok: true, active: isStoreActive(updated), store: updated });
   } catch (error) {
     if (error instanceof AuthError) {

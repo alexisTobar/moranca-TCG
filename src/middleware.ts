@@ -9,9 +9,10 @@ const SESSION_COOKIE = "dreamdeck_session";
  * no lo conoce, así que el navegador lo bloquea. 'strict-dynamic' deja que esos scripts carguen los suyos.
  * unsafe-eval solo lo necesita el modo desarrollo de Next (recarga en caliente).
  */
-const csp = (nonce: string) => [
+const csp = (nonce: string | null) => [
   "default-src 'self'",
-  `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"}`,
+  // Sin nonce (páginas públicas) los scripts salen solo de este sitio; con nonce, únicamente los que lo traen.
+  (nonce ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'` : "script-src 'self' 'unsafe-inline'") + (process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"),
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://cards.scryfall.io https://images.pokemontcg.io https://images.scrydex.com https://static.dotgg.gg https://api.myl.cl https://assets.tcgdex.net https://*.supabase.co https://upload.wikimedia.org https://static.wikia.nocookie.net https://en.onepiece-cardgame.com https://play.pokemon.com https://assets.pokemon.com https://img.pokemondb.net https://i0.wp.com https://i1.wp.com https://i2.wp.com https://bleedingcool.com",
   "font-src 'self' data:",
@@ -23,7 +24,14 @@ const csp = (nonce: string) => [
   "object-src 'none'",
 ].join("; ");
 
-function securityHeaders(res: NextResponse, nonce: string) {
+/**
+ * Un nonce por petición obliga a Next a generar cada página en el momento: ninguna puede guardarse en caché.
+ * Solo las zonas con sesión, pagos o API (SENSITIVE) lo llevan; las páginas públicas usan la política sin nonce
+ * y se sirven desde caché. El resto de la defensa (object-src, base-uri, connect-src, frame-ancestors) es igual.
+ */
+const SENSITIVE = /^\/(panel|cuenta|checkout|ingresar|registro|recuperar|verificar|carrito|api)(\/|$)/;
+
+function securityHeaders(res: NextResponse, nonce: string | null) {
   res.headers.set("Content-Security-Policy", csp(nonce));
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("X-Frame-Options", "DENY");
@@ -92,11 +100,13 @@ function crossSiteMutation(req: NextRequest): boolean {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const nonce = btoa(crypto.randomUUID());
+  const nonce = SENSITIVE.test(pathname) ? btoa(crypto.randomUUID()) : null;
   // Next toma el nonce de la cabecera CSP de la petición y lo pone en sus propios scripts.
   const requestHeaders = new Headers(req.headers);
-  requestHeaders.set("x-nonce", nonce);
-  requestHeaders.set("Content-Security-Policy", csp(nonce));
+  if (nonce) {
+    requestHeaders.set("x-nonce", nonce);
+    requestHeaders.set("Content-Security-Policy", csp(nonce));
+  }
   const next = () => NextResponse.next({ request: { headers: requestHeaders } });
 
   // Un solo dominio para buscadores y sesiones: en producción, *.vercel.app redirige al dominio propio

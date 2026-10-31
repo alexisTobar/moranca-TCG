@@ -1,3 +1,4 @@
+import { refreshPublic } from "@/lib/revalidate";
 import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -64,6 +65,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     });
 
     await audit(admin, "discount.update", { type: "PaymentDiscount", id });
+    refreshPublic();
     return NextResponse.json({ ok: true, discounts: await listAll() });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -80,6 +82,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     const { id } = await params;
     await prisma.paymentDiscount.deleteMany({ where: { id } });
     await audit(admin, "discount.delete", { type: "PaymentDiscount", id });
+    refreshPublic();
     return NextResponse.json({ ok: true, discounts: await listAll() });
   } catch (error) {
     if (error instanceof AuthError) {

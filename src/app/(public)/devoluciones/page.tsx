@@ -1,3 +1,5 @@
+export const dynamic = "force-static";
+export const revalidate = 3600;
 import Link from "next/link";
 import type { Metadata } from "next";
 import { LegalLayout, type LegalSection } from "@/components/legal/LegalLayout";

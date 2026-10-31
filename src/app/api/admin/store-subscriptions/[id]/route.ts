@@ -1,3 +1,4 @@
+import { refreshPublic } from "@/lib/revalidate";
 import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -51,6 +52,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: "Esta solicitud ya fue revisada." }, { status: 409 });
     }
     await audit(admin, `subscription.${action}`, { type: "StoreSubscription", id, detail: note?.trim() || undefined });
+    refreshPublic();
     return NextResponse.json({ ok: true, ...result });
   } catch (error) {
     if (error instanceof AuthError) {

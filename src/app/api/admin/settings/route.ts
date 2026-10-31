@@ -1,3 +1,4 @@
+import { refreshPublic } from "@/lib/revalidate";
 import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -40,6 +41,7 @@ export async function PUT(req: Request) {
     });
 
     await audit(admin, "settings.update", { type: "SiteSetting", id: "site", detail: JSON.stringify(parsed.data) });
+    refreshPublic();
     return NextResponse.json({ ok: true, settings });
   } catch (error) {
     if (error instanceof AuthError) {

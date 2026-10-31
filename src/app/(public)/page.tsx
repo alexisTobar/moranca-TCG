@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 import type { Metadata } from "next";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";

@@ -198,12 +198,16 @@ for (const [name, value] of [["content-security-policy", /frame-ancestors 'none'
   check(`cabecera ${name}`, value.test(r.headers.get(name) ?? ""), r.headers.get(name));
 }
 check("no se anuncia la tecnología del servidor (x-powered-by)", !r.headers.get("x-powered-by"));
-const scriptSrc = (r.headers.get("content-security-policy") ?? "").match(/script-src ([^;]*)/)?.[1] ?? "";
+// Zonas con sesión y pagos: nonce estricto. Páginas públicas: sin nonce (así se sirven desde caché) pero solo scripts propios.
+const publicSrc = (r.headers.get("content-security-policy") ?? "").match(/script-src ([^;]*)/)?.[1] ?? "";
+check("páginas públicas: scripts solo de este sitio (sin dominios externos ni comodines)", /^'self'( 'unsafe-inline')?$/.test(publicSrc.trim()), publicSrc);
+const login = await anon.req("/ingresar");
+const scriptSrc = (login.headers.get("content-security-policy") ?? "").match(/script-src ([^;]*)/)?.[1] ?? "";
 const nonce = scriptSrc.match(/'nonce-([^']+)'/)?.[1];
-check("la política de scripts usa nonce y no permite scripts inyectados ('unsafe-inline')", !!nonce && !scriptSrc.includes("'unsafe-inline'"), scriptSrc);
-const execScripts = [...r.raw.matchAll(/<script(?![^>]*application\/ld\+json)[^>]*>/g)].map((m) => m[0]);
+check("login y panel: la política de scripts usa nonce y no permite scripts inyectados ('unsafe-inline')", !!nonce && !scriptSrc.includes("'unsafe-inline'"), scriptSrc);
+const execScripts = [...login.raw.matchAll(/<script(?![^>]*application\/ld\+json)[^>]*>/g)].map((m) => m[0]);
 check(`todos los scripts de la página llevan el nonce (${execScripts.length})`, execScripts.length > 0 && execScripts.every((tag) => tag.includes(`nonce="${nonce}"`)), execScripts.find((tag) => !tag.includes(`nonce="${nonce}"`)));
-const second = await anon.req("/");
+const second = await anon.req("/ingresar");
 check("el nonce cambia en cada visita", !!nonce && !(second.headers.get("content-security-policy") ?? "").includes(nonce));
 await db.query(`DELETE FROM "LoginAttempt"`);
 let last;

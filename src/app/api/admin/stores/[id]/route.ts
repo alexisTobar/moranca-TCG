@@ -1,3 +1,4 @@
+import { refreshPublic } from "@/lib/revalidate";
 import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -75,6 +76,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       id,
       detail: data.action === "grant" ? `plan ${data.planCode}, ${data.months} mes(es)` : data.action === "feature" ? String(data.value) : undefined,
     });
+    refreshPublic();
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (error instanceof AuthError) {
