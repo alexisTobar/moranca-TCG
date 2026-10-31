@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const config: NextConfig = {
   images: {
+    // El plan gratis de Vercel limita las imágenes optimizadas por mes y, al agotarse, responde 402 y las rompe.
+    // Las cartas ya vienen optimizadas desde sus proveedores, así que se cargan directo.
+    unoptimized: true,
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: "cards.scryfall.io" },

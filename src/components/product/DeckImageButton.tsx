@@ -14,14 +14,19 @@ const CARD_H = 352; // proporción 63:88 de una carta
 const GAP = 14;
 const PAD = 24;
 
-/** Carga la imagen por el optimizador de Next (mismo origen, reducida): así el canvas no queda bloqueado por CORS y baja rápido. */
-function loadCard(src: string): Promise<HTMLImageElement | null> {
+/** Carga una carta. Las propias (/api/...) van directo; las de proveedores pasan por nuestro dominio para que el lienzo pueda guardarlas. */
+function loadOne(url: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
-    img.src = `/_next/image?url=${encodeURIComponent(src)}&w=384&q=80`;
+    img.src = url;
   });
+}
+
+async function loadCard(src: string): Promise<HTMLImageElement | null> {
+  if (src.startsWith("/")) return loadOne(src);
+  return (await loadOne(`/api/image-proxy?u=${encodeURIComponent(src)}`)) ?? (await loadOne(`/_next/image?url=${encodeURIComponent(src)}&w=384&q=80`));
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {

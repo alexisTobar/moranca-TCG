@@ -47,7 +47,7 @@ export function HeroGoblin() {
     <div ref={root} className="hero-goblin" data-talking={shown} onPointerEnter={greet}>
       <Link href="/cartas" className="hero-goblin-bubble" tabIndex={shown ? 0 : -1} aria-hidden={!shown}>{LINES[line]}</Link>
       <button type="button" className="hero-goblin-body" onClick={greet} aria-label="El duende de TCG Cardeck te saluda">
-        <Image src="/goblin.png" alt="" width={151} height={210} priority={false} />
+        <Image src="/goblin.png" alt="" width={151} height={210} unoptimized />
       </button>
     </div>
   );
