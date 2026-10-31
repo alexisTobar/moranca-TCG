@@ -1290,3 +1290,19 @@ main > * { animation: fx-fade-in .45s var(--fx-ease) both; }
 }
 .cardeck-campaign-stage .hero-goblin {left:auto;right:15%;}
 @media(max-width:899px){.cardeck-campaign-stage .hero-goblin{right:12px}}
+
+/* ===== Duende de cuerpo completo (SVG): brazo que saluda, parpadeo y cabeceo ===== */
+.hero-goblin {width:184px;bottom:-30px;left:calc(42% - 92px);}
+.hero-goblin-body svg {display:block;width:100%;height:auto;overflow:visible;}
+.gob-arm,.gob-head,.gob-eye {transform-box:view-box;}
+.gob-arm {animation:gob-wave 3.6s ease-in-out infinite;}
+.gob-head {animation:gob-head 5s ease-in-out infinite;}
+.gob-eye {animation:gob-blink 5.5s infinite;}
+.hero-goblin:hover .gob-arm,.hero-goblin[data-talking=true] .gob-arm {animation:gob-wave-fast .5s ease-in-out infinite;}
+@keyframes gob-wave {0%,100%{rotate:0deg}8%{rotate:-14deg}16%{rotate:10deg}24%{rotate:-12deg}32%{rotate:6deg}40%,90%{rotate:0deg}}
+@keyframes gob-wave-fast {0%,100%{rotate:-16deg}50%{rotate:14deg}}
+@keyframes gob-head {0%,100%{rotate:-1.5deg}50%{rotate:2deg}}
+@keyframes gob-blink {0%,94%,100%{scale:1 1}97%{scale:1 .08}}
+.cardeck-campaign-stage .hero-goblin {right:14%;left:auto;}
+@media(max-width:899px){.hero-goblin{width:104px;bottom:-18px;right:10px;left:auto}.cardeck-campaign-stage .hero-goblin{right:10px}}
+@media(prefers-reduced-motion:reduce){.gob-arm,.gob-head,.gob-eye{animation:none!important}}
