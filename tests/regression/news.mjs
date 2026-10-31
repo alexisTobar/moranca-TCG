@@ -53,19 +53,23 @@ test('traducción fallida o sin traducir no publica el texto inglés', async () 
   } finally {global.fetch=original;}
 });
 
-test('noticias SQL: Chile primero, luego Pokémon/One Piece; excluye eventos pasados y noticias sin verificar', async () => {
+test('noticias SQL: Chile primero, luego Pokémon/One Piece; excluye eventos pasados y noticias sin verificar; agenda aparte', async () => {
   const db = new PGlite();
   try {
-    await db.exec(`CREATE TABLE "NewsItem"(id text,category text,title text,excerpt text,"imageUrl" text,"sourceName" text,"publishedAt" timestamptz,country text,kind text,"eventAt" timestamptz,"originalTitle" text);
+    await db.exec(`CREATE TABLE "NewsItem"(id text,category text,title text,excerpt text,"imageUrl" text,"sourceName" text,"publishedAt" timestamptz,country text,kind text,"eventAt" timestamptz,"originalTitle" text,"sourceUrl" text);
       INSERT INTO "NewsItem" VALUES
       ('chile','GENERAL','Local','','','Organizador',now()-interval '3 days','CL','TOURNAMENT',now()+interval '3 days','Local'),
       ('op','ONEPIECE','Lanzamiento','','','Bandai',now()-interval '2 days',null,'RELEASE',null,'Release'),
       ('magic','MAGIC','Otro','','','Fuente',now()-interval '1 day',null,'NEWS',null,'Other'),
       ('old','POKEMON','Pasado','','','Fuente',now()-interval '1 day','CL','TOURNAMENT',now()-interval '1 day','Past'),
-      ('legacy','MAGIC','Unverified English','','','Fuente',now()-interval '1 day',null,'NEWS',null,null);`);
+      ('legacy','MAGIC','Unverified English','','','Fuente',now()-interval '1 day',null,'NEWS',null,null),
+      ('far','GENERAL','Anunciado hace mucho','','','TCG Cardeck',now()-interval '120 days','CL','TOURNAMENT',now()+interval '10 days','Far');`);
     const {newsPage} = load('src/lib/news/query.ts',{'@prisma/client':{Prisma},'@/lib/db':{prisma:{$queryRaw:async query=>(await db.query(query.text,query.values)).rows}}});
-    const result=await newsPage();assert.deepEqual(result.items.map(x=>x.id),['chile','op','magic']);assert.equal(result.total,3);
-    assert.deepEqual((await newsPage({scope:'chile'})).items.map(x=>x.id),['chile']);
+    const result=await newsPage();assert.deepEqual(result.items.map(x=>x.id),['chile','far','op','magic']);assert.equal(result.total,4);
+    assert.deepEqual((await newsPage({scope:'chile'})).items.map(x=>x.id),['chile','far']);
+    // La agenda va por fecha del evento y la grilla de noticias no repite los eventos.
+    assert.deepEqual((await newsPage({events:'only'})).items.map(x=>x.id),['chile','far']);
+    assert.deepEqual((await newsPage({events:'exclude'})).items.map(x=>x.id),['op','magic']);
     assert.deepEqual((await newsPage({kind:'RELEASE'})).items.map(x=>x.id),['op']);
     assert.equal((await newsPage({category:"'; DROP TABLE"})).total,0);
   } finally {await db.close();}
@@ -82,8 +86,9 @@ test('enlaces antiguos no publican metadatos de noticias sin verificar, vencidas
     {id:'verified',title:'Noticia en español',excerpt:'Resumen',originalTitle:'Verified',publishedAt:new Date(now-1000),eventAt:null},
   ];
   const prisma={newsItem:{findFirst:async({where})=>{
-    assert.deepEqual(where.originalTitle,{not:null});assert.ok(where.publishedAt.gte);assert.ok(where.publishedAt.lte);assert.equal(where.OR[0].eventAt,null);
-    return rows.find(row=>row.id===where.id&&row.originalTitle!==null&&row.publishedAt>=where.publishedAt.gte&&row.publishedAt<=where.publishedAt.lte&&(!row.eventAt||row.eventAt>=where.OR[1].eventAt.gte))??null;
+    assert.deepEqual(where.originalTitle,{not:null});assert.ok(where.publishedAt.lte);assert.equal(where.OR[0].eventAt,null);assert.ok(where.OR[0].publishedAt.gte);
+    // Noticia: dentro de 90 días. Evento: hasta su fecha, aunque se haya anunciado hace más.
+    return rows.find(row=>row.id===where.id&&row.originalTitle!==null&&row.publishedAt<=where.publishedAt.lte&&(row.eventAt?row.eventAt>=where.OR[1].eventAt.gte:row.publishedAt>=where.OR[0].publishedAt.gte))??null;
   }}};
   const {generateMetadata}=load('src/app/(public)/noticias/[id]/page.tsx',{
     '@/lib/db':{prisma},'@/lib/news/query':{eligibleNewsWhere},'@/lib/catalog':{safeQuery:async(fn)=>fn()},

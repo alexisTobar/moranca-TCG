@@ -7,6 +7,7 @@ import { safeQuery } from "@/lib/catalog";
 import { clp, timeAgo } from "@/lib/format";
 import { GameChip } from "@/components/GameChip";
 import { DeleteListingButton } from "@/components/DeleteListingButton";
+import { StatTile } from "@/components/charts/Charts";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +102,17 @@ export default async function ListingsPage({
     return s ? `/panel/publicaciones?${s}` : "/panel/publicaciones";
   };
 
+  // Estado del catálogo completo del vendedor, independiente del filtro y la página actual.
+  const [catalog, stockValue, outOfStock, paused] = await Promise.all([
+    safeQuery(
+      () => prisma.listing.aggregate({ where: { sellerId: user.id, status: "ACTIVE" }, _count: { _all: true }, _sum: { stock: true, views: true } }),
+      { _count: { _all: 0 }, _sum: { stock: null, views: null } } as { _count: { _all: number }; _sum: { stock: number | null; views: number | null } }
+    ),
+    safeQuery(async () => (await prisma.$queryRaw<Array<{ v: number }>>`SELECT COALESCE(SUM(price * stock),0)::float8 v FROM "Listing" WHERE "sellerId" = ${user.id} AND status = 'ACTIVE'`)[0]?.v ?? 0, 0),
+    safeQuery(() => prisma.listing.count({ where: { sellerId: user.id, status: "ACTIVE", stock: { lte: 0 } } }), 0),
+    safeQuery(() => prisma.listing.count({ where: { sellerId: user.id, status: { in: ["PAUSED", "DRAFT"] } } }), 0),
+  ]);
+
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -117,6 +129,13 @@ export default async function ListingsPage({
           + Nueva
         </Link>
       </header>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatTile label="Activas" value={catalog._count._all.toLocaleString("es-CL")} hint={`${(catalog._sum.stock ?? 0).toLocaleString("es-CL")} unidades en stock`} href="/panel/publicaciones?status=ACTIVE" />
+        <StatTile label="Valor del inventario" value={clp(stockValue)} hint="precio × stock" />
+        <StatTile label="Vistas acumuladas" value={(catalog._sum.views ?? 0).toLocaleString("es-CL")} hint="en tus fichas activas" />
+        <StatTile label="Revisar" value={String(outOfStock + paused)} hint={`${outOfStock} sin stock · ${paused} pausadas o borrador`} href="/panel/publicaciones?status=PAUSED" />
+      </div>
 
       <form action="/panel/publicaciones" className="flex gap-2">
         {status && <input type="hidden" name="status" value={status} />}

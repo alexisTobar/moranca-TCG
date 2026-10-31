@@ -11,36 +11,52 @@ export interface NewsRow {
 export function eligibleNewsWhere(now = new Date()) {
   return {
     originalTitle: {not:null},
-    publishedAt: {gte:new Date(now.getTime()-NEWS_MAX_AGE_DAYS*86400000),lte:now},
-    OR: [{eventAt:null},{eventAt:{gte:now}}],
+    publishedAt: {lte:now},
+    // Un evento sigue visible hasta su fecha aunque se haya anunciado hace más de 90 días.
+    OR: [{eventAt:null,publishedAt:{gte:new Date(now.getTime()-NEWS_MAX_AGE_DAYS*86400000)}},{eventAt:{gte:now}}],
   } satisfies Prisma.NewsItemWhereInput;
 }
-export async function newsPage({ category, scope, kind, page = 1, take = 18 }: {
-  category?: string; scope?: string; kind?: string; page?: number; take?: number;
+
+/** events: "only" para la agenda, "exclude" para la grilla de noticias (los eventos tienen su propia lista). */
+export async function newsPage({ category, scope, kind, events, page = 1, take = 18 }: {
+  category?: string; scope?: string; kind?: string; events?: "only" | "exclude"; page?: number; take?: number;
 } = {}) {
   const now = new Date();
-  const clauses = [Prisma.sql`"originalTitle" IS NOT NULL AND "publishedAt" >= ${new Date(now.getTime() - NEWS_MAX_AGE_DAYS * 86400000)} AND "publishedAt" <= ${now} AND ("eventAt" IS NULL OR "eventAt" >= ${now})`];
+  const clauses = [Prisma.sql`"originalTitle" IS NOT NULL AND "publishedAt" <= ${now} AND (("eventAt" IS NULL AND "publishedAt" >= ${new Date(now.getTime() - NEWS_MAX_AGE_DAYS * 86400000)}) OR "eventAt" >= ${now})`];
   if (category) clauses.push(Prisma.sql`category::text = ${category}`);
   if (scope === "chile") clauses.push(Prisma.sql`country = 'CL'`);
   if (scope === "international") clauses.push(Prisma.sql`country IS DISTINCT FROM 'CL'`);
   if (kind) clauses.push(Prisma.sql`kind = ${kind}`);
+  if (events === "only") clauses.push(Prisma.sql`"eventAt" IS NOT NULL`);
+  if (events === "exclude") clauses.push(Prisma.sql`"eventAt" IS NULL`);
   const where = Prisma.join(clauses, " AND ");
   const [count] = await prisma.$queryRaw<{total:number}[]>(Prisma.sql`SELECT count(*)::int AS total FROM "NewsItem" WHERE ${where}`);
   const pages = Math.max(1, Math.ceil(count.total / take));
   const current = Math.min(Math.max(1, page), pages);
+  const order = events === "only"
+    ? Prisma.sql`"eventAt" ASC, id ASC`
+    : Prisma.sql`CASE WHEN country = 'CL' THEN 0 WHEN category::text IN ('POKEMON','ONEPIECE') THEN 1 ELSE 2 END, "publishedAt" DESC, id ASC`;
   const items = await prisma.$queryRaw<NewsRow[]>(Prisma.sql`
-    SELECT id, category::text, title, excerpt, "imageUrl", "sourceName", "publishedAt", country, kind, "eventAt"
+    SELECT id, category::text, title, excerpt, "imageUrl", "sourceName", "sourceUrl", "publishedAt", country, kind, "eventAt"
     FROM "NewsItem" WHERE ${where}
-    ORDER BY CASE WHEN country = 'CL' THEN 0 WHEN category::text IN ('POKEMON','ONEPIECE') THEN 1 ELSE 2 END,
-      "publishedAt" DESC, id ASC LIMIT ${take} OFFSET ${(current-1)*take}`);
+    ORDER BY ${order} LIMIT ${take} OFFSET ${(current-1)*take}`);
   return {items,total:count.total,pages,page:current};
+}
+
+/** Próximos eventos en Chile (torneos de PlayLatam y eventos que agrega el administrador), por fecha. */
+export async function upcomingChileEvents(take = 12): Promise<NewsRow[]> {
+  try {
+    return (await newsPage({scope:"chile",events:"only",take})).items;
+  } catch {
+    return [];
+  }
 }
 
 export async function homeNews(): Promise<NewsRow[]> {
   const results = await Promise.allSettled([
-    newsPage({scope:"chile",take:4}),
-    newsPage({category:"ONEPIECE",scope:"international",take:3}),
-    newsPage({category:"POKEMON",scope:"international",take:3}),
+    newsPage({scope:"chile",events:"exclude",take:4}),
+    newsPage({category:"ONEPIECE",scope:"international",events:"exclude",take:3}),
+    newsPage({category:"POKEMON",scope:"international",events:"exclude",take:3}),
   ]);
   const items=results.flatMap(result=>result.status==="fulfilled"?result.value.items:[]);
   if(items.length)return balanceHomeNews(items);
@@ -63,7 +79,8 @@ export async function publicNewsPage(filters:Parameters<typeof newsPage>[0]={}) 
   } catch { /* A missing first sync or an unavailable database must not hide source links. */ }
   const {liveSpanishNews}=await import("./live");
   const rows=await liveSpanishNews();
-  const items=rows.filter(item=>(!filters.category||item.category===filters.category)&&(!filters.scope||(filters.scope==="chile"?item.country==="CL":item.country!=="CL"))&&(!filters.kind||item.kind===filters.kind));
+  const items=rows.filter(item=>(!filters.category||item.category===filters.category)&&(!filters.scope||(filters.scope==="chile"?item.country==="CL":item.country!=="CL"))&&(!filters.kind||item.kind===filters.kind)
+    &&(filters.events!=="only"||!!item.eventAt)&&(filters.events!=="exclude"||!item.eventAt));
   const take=filters.take??18,pages=Math.max(1,Math.ceil(items.length/take)),page=Math.min(Math.max(1,filters.page??1),pages);
   return {items:items.slice((page-1)*take,page*take),total:items.length,pages,page,unavailable:!rows.length};
 }

@@ -5,7 +5,7 @@ import { parseFeed, excerptFrom, stripHtml } from "@/lib/news/feed-parser";
 import { parsePlayLatam, parsePokemonNews, parseOnePieceNews, type SourceItem } from "@/lib/news/page-parser";
 import { translateToSpanish } from "@/lib/news/translate";
 import { NEWS_SOURCES } from "@/lib/news/sources";
-import { NEWS_INTERVAL_MS, NEWS_MAX_AGE_DAYS, newsKind, newsImage, isChileNews } from "@/lib/news/policy";
+import { NEWS_INTERVAL_MS, NEWS_MAX_AGE_DAYS, newsKind, newsImage, isChileNews, isTcgNews, splitGoogleNewsTitle } from "@/lib/news/policy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,11 +24,16 @@ async function run() {
         : source.format === "pokemon" ? parsePokemonNews(body)
         : source.format === "onepiece" ? parseOnePieceNews(body) : parseFeed(body);
       if (!items.length && (source.format !== "playlatam" || !body.includes('id="tournament-list"'))) throw new Error("La fuente no entregó artículos reconocibles");
-      const eligible = items.filter(item => item.publishedAt >= minDate && item.publishedAt <= now && /^https?:\/\//i.test(item.link));
+      const eligible = items.filter(item => item.publishedAt >= minDate && item.publishedAt <= now && /^https?:\/\//i.test(item.link)
+        && (!source.onlyTcg || isTcgNews(stripHtml(item.title), source.format === "gnews" ? "" : stripHtml(item.excerptSource))));
       eligible.sort((a,b) => source.format === "playlatam" ? (a.eventAt!.getTime()-b.eventAt!.getTime()) : b.publishedAt.getTime()-a.publishedAt.getTime());
       for (const item of eligible.slice(0, source.limit)) {
-        const originalTitle = stripHtml(item.title);
-        const excerpt = excerptFrom(item.excerptSource) || `Anuncio de ${source.name}.`;
+        // Google Noticias repite el título como resumen y lo firma con " - Medio": se separa y se nombra al medio.
+        const gn = source.format === "gnews" ? splitGoogleNewsTitle(stripHtml(item.title)) : null;
+        const originalTitle = gn ? gn.title : stripHtml(item.title);
+        const sourceName = gn?.outlet ?? source.name;
+        const excerpt = gn ? `Nota publicada por ${sourceName}. Abre el enlace para leerla completa en el medio.`
+          : excerptFrom(item.excerptSource) || `Anuncio de ${source.name}.`;
         const existing = await prisma.newsItem.findUnique({where:{sourceUrl:item.link}});
         const unchanged = existing?.originalTitle === originalTitle;
         const title = unchanged ? existing.title : source.language === "es" ? originalTitle : await translateToSpanish(originalTitle);
@@ -39,7 +44,7 @@ async function run() {
         const data = {
           title:stripHtml(title), originalTitle, excerpt:stripHtml(excerptEs),
           category: /one piece/i.test(originalTitle) ? "ONEPIECE" as const : /pok[eé]mon/i.test(originalTitle) ? "POKEMON" as const : source.category,
-          sourceName:source.name, country:item.country ?? source.country ?? (isChileNews(originalTitle, excerpt) ? "CL" : null),
+          sourceName, country:item.country ?? source.country ?? (isChileNews(originalTitle, excerpt) ? "CL" : null),
           kind, eventAt:item.eventAt ?? null, imageUrl:newsImage(item.imageUrl),
         };
         await prisma.newsItem.upsert({
@@ -55,7 +60,12 @@ async function run() {
       return {source:source.name,saved,skipped,error:(error as Error).message};
     }
   }));
-  await prisma.newsItem.deleteMany({where:{OR:[{publishedAt:{lt:minDate}},{eventAt:{lt:now}}]}});
+  // Los eventos se conservan hasta su fecha aunque se hayan anunciado hace más de 90 días.
+  // Las búsquedas antiguas de Google Noticias traían notas ajenas a las cartas: se retiran.
+  await prisma.newsItem.deleteMany({where:{OR:[
+    {publishedAt:{lt:minDate},eventAt:null},{eventAt:{lt:now}},
+    {sourceName:{in:["Google Noticias · Cardfest y eventos de Chile","Pokémon oficial · vía Google Noticias"]}},
+  ]}});
   return summary;
 }
 

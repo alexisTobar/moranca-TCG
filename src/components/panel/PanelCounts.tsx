@@ -4,7 +4,7 @@ import Link from "next/link";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
-import { Bell, CheckCheck, CreditCard, Flag, LifeBuoy, Package, UserPlus } from "lucide-react";
+import { Bell, CheckCheck, CreditCard, Flag, LifeBuoy, Mail, Package, UserPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface Counts {
@@ -12,13 +12,14 @@ export interface Counts {
   tickets: number;
   sellerRequests: number;
   reports: number;
+  contact: number;
   orders: number;
 }
 
 const POLL_MS = 30_000;
 
 const Ctx = createContext<{ counts: Counts; refresh: () => void }>({
-  counts: { subscriptions: 0, tickets: 0, sellerRequests: 0, reports: 0, orders: 0 },
+  counts: { subscriptions: 0, tickets: 0, sellerRequests: 0, reports: 0, contact: 0, orders: 0 },
   refresh: () => {},
 });
 
@@ -38,6 +39,10 @@ export function PanelCountsProvider({ initial, children }: { initial: Counts; ch
         // Aviso emergente cuando llega algo nuevo (solicitud de vendedor o de tienda) con el panel abierto.
         if (next.sellerRequests > last.current.sellerRequests) toast.info("Nueva solicitud para ser vendedor", { description: "Revísala en Usuarios." });
         if (next.subscriptions > last.current.subscriptions) toast.info("Nueva solicitud de tienda", { description: "Revísala en Tiendas." });
+        if (next.contact > last.current.contact) toast.info("Nueva consulta de contacto", { description: "Revísala en Consultas de contacto." });
+        if (next.tickets > last.current.tickets) toast.info("Nuevo mensaje de soporte", { description: "Revísalo en Soporte." });
+        if (next.reports > last.current.reports) toast.info("Nuevo reporte", { description: "Revísalo en Reportes." });
+        if (next.orders > last.current.orders) toast.info("Un comprador subió su comprobante", { description: "Confirma el pago en Órdenes." });
         last.current = next;
         setCounts(next);
       }
@@ -134,13 +139,19 @@ export function PanelBell({ isAdmin }: { isAdmin: boolean }) {
       icon: Flag,
       text: `${plural(counts.reports, "reporte", "reportes")} por revisar`,
     });
+  if (counts.contact > 0)
+    entries.push({
+      href: "/panel/contacto",
+      icon: Mail,
+      text: `${plural(counts.contact, "consulta de contacto", "consultas de contacto")} sin responder`,
+    });
   if (counts.orders > 0)
     entries.push({
       href: "/panel/ordenes",
       icon: Package,
       text: `${plural(counts.orders, "orden", "órdenes")} con comprobante por confirmar`,
     });
-  const total = counts.subscriptions + counts.tickets + counts.sellerRequests + counts.reports + counts.orders;
+  const total = counts.subscriptions + counts.tickets + counts.sellerRequests + counts.reports + counts.contact + counts.orders;
 
   return (
     <div ref={ref} className="sm:relative">

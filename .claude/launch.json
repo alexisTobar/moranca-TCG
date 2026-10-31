@@ -10,6 +10,15 @@
       ],
       "port": 3010,
       "autoPort": true
+    },
+    {
+      "name": "dreamdeck-testdb",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "set DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54329/postgres&& set DIRECT_URL=postgresql://postgres:postgres@127.0.0.1:54329/postgres&& set CRON_SECRET=local-test&& npx next dev -p 3011"
+      ],
+      "port": 3011
     }
   ]
 }

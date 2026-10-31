@@ -7,6 +7,7 @@ import { OrderStatusActions } from "@/components/OrderStatusActions";
 import { ReviewReply } from "@/components/panel/ReviewReply";
 import { expireOverdueOrders } from "@/lib/order-payments";
 import { FileCheck2, Hash, Timer } from "lucide-react";
+import { StatTile } from "@/components/charts/Charts";
 
 export const dynamic = "force-dynamic";
 
@@ -96,6 +97,14 @@ export default async function OrdersPage() {
     }>
   );
 
+  // Resumen por estado de todas las órdenes del alcance (no solo las 100 que se listan).
+  const byStatus = await safeQuery(
+    () => prisma.order.groupBy({ by: ["status"], where: user.role === "ADMIN" ? {} : { sellerId: user.id }, _count: { _all: true }, _sum: { total: true } }),
+    [] as Array<{ status: string; _count: { _all: number }; _sum: { total: number | null } }>
+  );
+  const stat = (st: string) => byStatus.find((r) => r.status === st);
+  const withReceipt = orders.filter((o) => o.status === "PENDING" && o.receiptUploadedAt).length;
+
   return (
     <div className="space-y-6">
       <header>
@@ -104,6 +113,13 @@ export default async function OrdersPage() {
           Reservas y compras generadas desde la tienda.
         </p>
       </header>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatTile label="Esperando pago" value={String(stat("PENDING")?._count._all ?? 0)} hint={`${clp(stat("PENDING")?._sum.total ?? 0)} por cobrar${withReceipt ? ` · ${withReceipt} con comprobante` : ""}`} />
+        <StatTile label="Por despachar" value={String(stat("PAID")?._count._all ?? 0)} hint="pagadas sin enviar" />
+        <StatTile label="En camino" value={String(stat("SHIPPED")?._count._all ?? 0)} hint="enviadas, sin confirmar entrega" />
+        <StatTile label="Vendido en total" value={clp((stat("PAID")?._sum.total ?? 0) + (stat("SHIPPED")?._sum.total ?? 0) + (stat("DELIVERED")?._sum.total ?? 0))} hint={`${stat("DELIVERED")?._count._all ?? 0} entregadas · ${stat("CANCELLED")?._count._all ?? 0} canceladas`} />
+      </div>
 
       {orders.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-ink-700 p-16 text-center">

@@ -1,19 +1,17 @@
 import Link from "next/link";
 import { NewsImage } from "@/components/news/NewsImage";
-import { publicNewsPage } from "@/lib/news/query";
+import { publicNewsPage, upcomingChileEvents, type NewsRow } from "@/lib/news/query";
 import { CHILE_AGENDA } from "@/lib/news/sources";
+import { MANUAL_NEWS_SOURCE } from "@/lib/news/policy";
 import { catalogPage } from "@/lib/catalog-query";
 import type { Metadata } from "next";
-import type { Prisma } from "@prisma/client";
-import { Newspaper } from "lucide-react";
-import { prisma } from "@/lib/db";
-import { safeQuery } from "@/lib/catalog";
+import { CalendarDays, MapPin, Newspaper } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 import { newsCategoryLabel, NEWS_CATEGORIES } from "@/lib/news/category";
 
 export const metadata: Metadata = {
   title: "Noticias",
-  description: "Torneos y Cardfest en Chile, noticias internacionales y lanzamientos de Pokémon y One Piece en español.",
+  description: "Próximos torneos y eventos de cartas en Chile, novedades de Mitos y Leyendas, Pokémon, One Piece y Magic, actualizadas cada día.",
 };
 
 export const revalidate = 300;
@@ -31,7 +29,12 @@ export default async function NoticiasPage({
   const scope = sp.scope === "chile" ? "chile" : sp.scope === "international" ? "international" : undefined;
   const kind = sp.kind === "TOURNAMENT" || sp.kind === "RELEASE" ? sp.kind : undefined;
   const requestedPage = catalogPage(typeof sp.page === "string" ? sp.page : undefined);
-  const {items,pages,page,unavailable} = await publicNewsPage({category, scope, kind, page:requestedPage, take:PAGE_SIZE});
+  // Los torneos van en la agenda; la grilla queda para noticias, salvo que se pidan los eventos.
+  const showAgenda = !category && !kind && scope !== "international" && requestedPage === 1;
+  const [{items,pages,page,unavailable}, events] = await Promise.all([
+    publicNewsPage({category, scope, kind, events: kind === "TOURNAMENT" ? "only" : "exclude", page:requestedPage, take:PAGE_SIZE}),
+    showAgenda ? upcomingChileEvents(10) : Promise.resolve([] as NewsRow[]),
+  ]);
 
   const buildHref = (patch: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
@@ -46,17 +49,19 @@ export default async function NoticiasPage({
       <header>
         <h1 className="font-display text-3xl font-bold text-carbon">Noticias y torneos</h1>
         <p className="mt-1 text-[13px] text-ink-400">
-          Chile primero. Torneos, comunidad y lanzamientos de Pokémon y One Piece en español. Actualización cada 3 días.
+          Próximos eventos en Chile y novedades de Mitos y Leyendas, Pokémon, One Piece y Magic. Se actualiza cada día.
         </p>
       </header>
 
-      <section className="chile-agenda mt-6" aria-labelledby="chile-agenda-title">
-        <h2 id="chile-agenda-title" className="font-display text-lg font-bold">Agenda de Chile y organizadores</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {CHILE_AGENDA.map(source => <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" className="agenda-link"><strong>{source.name}</strong><span>{source.text}</span></a>)}
+      {events.length > 0 && <section className="event-agenda mt-6" aria-labelledby="events-title">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="events-title" className="font-display text-xl font-bold text-carbon">Próximos eventos en Chile</h2>
+          <Link href={buildHref({kind:"TOURNAMENT",page:undefined})} className="text-[13px] font-semibold text-brand-600 hover:text-brand-700">Ver todos los eventos</Link>
         </div>
-        <p className="mt-3 text-xs text-ink-400">Confirma fechas, sedes y cupos con el organizador. Cardfest publica sus novedades en su canal oficial.</p>
-      </section>
+        <ol className="mt-4 grid gap-2.5 md:grid-cols-2">
+          {events.map(event => <EventRow key={event.id} event={event} />)}
+        </ol>
+      </section>}
       <nav className="mt-7 flex flex-wrap gap-2" aria-label="Cobertura de noticias">
         {[{label:"Destacadas",value:undefined},{label:"Chile",value:"chile"},{label:"Internacionales",value:"international"}].map(option => <Link key={option.label} href={buildHref({scope:option.value,page:undefined})} className="pill" data-active={scope === option.value}>{option.label}</Link>)}
         <Link href={buildHref({kind:kind === "TOURNAMENT" ? undefined : "TOURNAMENT",page:undefined})} className="pill" data-active={kind === "TOURNAMENT"}>Torneos y eventos</Link>
@@ -98,7 +103,7 @@ export default async function NoticiasPage({
           {items.map((n) => (
             <Link
               key={n.id}
-              href={n.sourceUrl??`/noticias/${n.id}`}
+              href={n.id.startsWith("source-") && n.sourceUrl ? n.sourceUrl : `/noticias/${n.id}`}
               className="group overflow-hidden rounded-2xl card-surface transition hover:-translate-y-1 hover:border-carbon"
             >
               <div className="relative aspect-video overflow-hidden bg-ink-900">
@@ -144,6 +149,42 @@ export default async function NoticiasPage({
             ))}
         </div>
       )}
+
+      <section className="chile-agenda mt-12" aria-labelledby="chile-agenda-title">
+        <h2 id="chile-agenda-title" className="font-display text-lg font-bold">Sigue a los organizadores</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {CHILE_AGENDA.map(source => <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" className="agenda-link"><strong>{source.name}</strong><span>{source.text}</span></a>)}
+        </div>
+        <p className="mt-3 text-xs text-ink-400">Confirma fechas, sedes y cupos con el organizador antes de ir.</p>
+      </section>
     </div>
   );
+}
+
+const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
+/** Fila de la agenda: fecha grande, nombre del evento, lugar y organizador. */
+function EventRow({ event }: { event: NewsRow }) {
+  const date = event.eventAt ? new Date(event.eventAt) : null;
+  const local = date ? new Date(date.toLocaleString("en-US", { timeZone: "America/Santiago" })) : null;
+  const today = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Santiago" }));
+  const isToday = !!local && local.toDateString() === today.toDateString();
+  const featured = event.sourceName === MANUAL_NEWS_SOURCE;
+  const href = event.id.startsWith("source-") && event.sourceUrl ? event.sourceUrl : `/noticias/${event.id}`;
+  return <li>
+    <Link href={href} className="event-row" data-featured={featured}>
+      <span className="event-date" aria-hidden="true">
+        {local ? <><strong>{local.getDate()}</strong><small>{MONTHS[local.getMonth()]}</small></> : <CalendarDays size={20} />}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex flex-wrap items-center gap-1.5">
+          {isToday && <em className="event-tag event-tag-today">Hoy</em>}
+          {featured && <em className="event-tag">Destacado</em>}
+          <em className="event-tag event-tag-game">{newsCategoryLabel(event.category)}</em>
+        </span>
+        <strong className="mt-1 block truncate text-[14px] text-carbon">{event.title}</strong>
+        <span className="mt-0.5 flex items-center gap-1 truncate text-[12px] text-ink-400"><MapPin size={12} aria-hidden="true" />{event.excerpt.replace(/^Torneo en /, "").replace(/\. Consulta horario.*$/, "").replace(/ el \d{2}\/\d{2}\/\d{4}$/, "")} · {event.sourceName}</span>
+      </span>
+    </Link>
+  </li>;
 }

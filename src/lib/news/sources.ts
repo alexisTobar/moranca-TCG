@@ -6,19 +6,26 @@ export interface NewsSource {
   name: string;
   url: string;
   language: "es" | "en";
-  format: "rss" | "playlatam" | "pokemon" | "onepiece";
+  /** gnews: Google Noticias, cuyo título trae " - Medio" y cuyo resumen repite el título. */
+  format: "rss" | "gnews" | "playlatam" | "pokemon" | "onepiece";
   country?: "CL";
+  /** Descarta lo que no hable de cartas (las búsquedas amplias traen notas ajenas al TCG). */
+  onlyTcg?: boolean;
   limit: number;
 }
 
+const gnews = (query: string) => `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=es-419&gl=CL&ceid=CL%3Aes-419`;
+
 export const NEWS_SOURCES: NewsSource[] = [
-  { category: "POKEMON", name: "PlayLatam Chile", url: "https://www.playlatam.net/", language: "es", format: "playlatam", country: "CL", limit: 12 },
-  { category: "GENERAL", name: "Google Noticias · Cardfest y eventos de Chile", url: "https://news.google.com/rss/search?q=%28Cardfest%20OR%20%22TCG%20Family%20Fest%22%29%20Chile%20when%3A90d&hl=es-419&gl=CL&ceid=CL%3Aes-419", language: "es", format: "rss", country: "CL", limit: 4 },
+  { category: "POKEMON", name: "PlayLatam Chile", url: "https://www.playlatam.net/", language: "es", format: "playlatam", country: "CL", limit: 16 },
+  { category: "MYL", name: "Mitos y Leyendas", url: "https://blog.myl.cl/feed", language: "es", format: "rss", country: "CL", limit: 6 },
+  { category: "GENERAL", name: "Prensa chilena", url: gnews('(TCG OR "cartas coleccionables" OR "Mitos y Leyendas" OR "Pokémon TCG" OR "cartas Pokémon" OR "One Piece Card Game" OR "Yu-Gi-Oh" OR Cardfest OR "Trading Fest") Chile when:45d'), language: "es", format: "gnews", onlyTcg: true, limit: 8 },
   { category: "POKEMON", name: "Play! Pokémon", url: "https://play.pokemon.com/es-es/news/", language: "es", format: "pokemon", limit: 6 },
+  { category: "POKEMON", name: "CulturaGeek", url: "https://culturageek.com.ar/tag/pokemon-tcg/feed/", language: "es", format: "rss", onlyTcg: true, limit: 6 },
+  { category: "POKEMON", name: "Pokémon oficial", url: gnews("site:pokemon.com/es/ (JCC OR cartas) when:60d"), language: "es", format: "gnews", onlyTcg: true, limit: 4 },
   { category: "ONEPIECE", name: "Bandai · One Piece", url: "https://en.onepiece-cardgame.com/topics/", language: "en", format: "onepiece", limit: 4 },
   { category: "ONEPIECE", name: "OnePiece.gg", url: "https://onepiece.gg/news/feed/", language: "en", format: "rss", limit: 4 },
-  { category: "POKEMON", name: "Pokémon oficial · vía Google Noticias", url: "https://news.google.com/rss/search?q=site%3Apokemon.com%2Fes%2F%20%28JCC%20OR%20cartas%29%20%28expansi%C3%B3n%20OR%20lanzamiento%29%20when%3A90d&hl=es-419&gl=CL&ceid=CL%3Aes-419", language: "es", format: "rss", limit: 4 },
-  { category: "MAGIC", name: "MTGGoldfish", url: "https://www.mtggoldfish.com/feed.rss", language: "en", format: "rss", limit: 2 },
+  { category: "MAGIC", name: "MTGGoldfish", url: "https://www.mtggoldfish.com/feed.rss", language: "en", format: "rss", limit: 3 },
 ];
 
 /** Organizer links remain available even when their social network has no public feed. */
@@ -26,5 +33,5 @@ export const CHILE_AGENDA = [
   { name: "Cardfest Chile", text: "Anuncios y próximas ediciones del organizador.", url: "https://www.instagram.com/cardfestchile/" },
   { name: "Torneos en Chile", text: "Inscripciones, fechas y ciudades en PlayLatam.", url: "https://www.playlatam.net/" },
   { name: "Eventos Play! Pokémon", text: "Busca ligas y torneos cercanos en el localizador oficial.", url: "https://events.pokemon.com/es-es/" },
-  { name: "One Piece · Latinoamérica", text: "Regionales y eventos oficiales de Bandai.", url: "https://en.onepiece-cardgame.com/events/" },
+  { name: "Mitos y Leyendas", text: "Novedades, torneos y comunicados oficiales.", url: "https://blog.myl.cl/" },
 ];

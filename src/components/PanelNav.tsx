@@ -19,6 +19,7 @@ import {
   BarChart3,
   TrendingUp,
   Mail,
+  Newspaper,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { CountBadge, usePanelCounts, type Counts } from "@/components/panel/PanelCounts";
@@ -43,7 +44,8 @@ const ITEMS: Array<{
   { href: "/panel/usuarios", label: "Vendedores", icon: Users, adminOnly: true, badge: "sellerRequests" },
   { href: "/panel/directorio", label: "Directorio de usuarios", icon: Users, adminOnly: true },
   { href: "/panel/tiendas", label: "Tiendas premium", icon: Gem, adminOnly: true, badge: "subscriptions" },
-  { href: "/panel/contacto", label: "Consultas de contacto", icon: Mail, adminOnly: true },
+  { href: "/panel/contacto", label: "Consultas de contacto", icon: Mail, adminOnly: true, badge: "contact" },
+  { href: "/panel/noticias", label: "Noticias y eventos", icon: Newspaper, adminOnly: true },
   { href: "/panel/reportes", label: "Reportes", icon: Flag, adminOnly: true, badge: "reports" },
   { href: "/panel/auditoria", label: "Auditoría", icon: ClipboardList, adminOnly: true },
   { href: "/panel/consentimientos", label: "Consentimientos", icon: ShieldCheck, adminOnly: true },
@@ -75,7 +77,7 @@ export function PanelNav({ isAdmin }: { isAdmin: boolean }) {
                     : "text-ink-300 hover:bg-ink-850 hover:text-carbon"
                 }`}
               >
-                <Icon className="h-4 w-4" strokeWidth={2} />
+                <Icon className="h-4 w-4 shrink-0" strokeWidth={2} />
                 {item.label}
                 {item.badge && <CountBadge value={counts[item.badge]} className="ml-auto" />}
               </Link>
