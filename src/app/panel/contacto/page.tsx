@@ -18,7 +18,7 @@ const FILTERS = [
 /** Consultas del formulario público (/ayuda): personas sin cuenta o que no pueden ingresar. */
 export default async function ContactInboxPage({ searchParams }: { searchParams: Promise<{ estado?: string }> }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/ingresar");
+  if (!user) redirect("/ingresar?sesion=expirada");
   if (user.role !== "ADMIN") redirect("/panel");
   const requested = (await searchParams).estado;
   const filter = FILTERS.find((f) => f.key === requested) ?? FILTERS[0];

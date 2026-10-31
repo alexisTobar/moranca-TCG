@@ -6,6 +6,11 @@ import { getCurrentUser } from "@/lib/auth";
 import { timeAgo } from "@/lib/format";
 import { REQUESTER_LABEL, TICKET_STATUS_LABEL, categoryLabel } from "@/lib/support-shared";
 import { NewTicketForm } from "@/components/support/NewTicketForm";
+import { StatTile } from "@/components/charts/Charts";
+import { PageHeader, SearchBox } from "@/components/panel/PageKit";
+
+/** Un ticket sin respuesta por más de un día se marca como atrasado. */
+const LATE_MS = 24 * 60 * 60 * 1000;
 
 export const dynamic = "force-dynamic";
 
@@ -46,13 +51,20 @@ export default async function SupportPage({
   const sp = await searchParams;
   const filter = FILTERS.find((f) => f.key === sp.estado) ?? FILTERS[0];
   const kind = KINDS.find((k) => k.key === sp.tipo) ?? KINDS[0];
+  const q = (typeof sp.q === "string" ? sp.q : "").trim().slice(0, 80);
   const filterHref = (estado: string, tipo: string) =>
-    `/panel/soporte?estado=${estado}${tipo !== "todos" ? `&tipo=${tipo}` : ""}`;
+    `/panel/soporte?estado=${estado}${tipo !== "todos" ? `&tipo=${tipo}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
+  const search = q && isAdmin ? { OR: [
+    { code: { contains: q, mode: "insensitive" as const } },
+    { subject: { contains: q, mode: "insensitive" as const } },
+    { seller: { name: { contains: q, mode: "insensitive" as const } } },
+    { seller: { email: { contains: q, mode: "insensitive" as const } } },
+  ] } : {};
+  const now = new Date();
 
-
-  const [tickets, counts] = await Promise.all([
+  const [tickets, counts, late, closedRecent] = await Promise.all([
     prisma.supportTicket.findMany({
-      where: { ...(isAdmin ? {} : { sellerId: user.id }), ...(isAdmin ? { ...filter.where, ...kind.where } : {}) },
+      where: { ...(isAdmin ? {} : { sellerId: user.id }), ...(isAdmin ? { ...filter.where, ...kind.where, ...search } : {}) },
       orderBy: { lastMessageAt: "desc" },
       take: 100,
       select: {
@@ -69,27 +81,35 @@ export default async function SupportPage({
       },
     }),
     isAdmin
-      ? prisma.supportTicket.groupBy({ by: ["status"], where: kind.where, _count: { _all: true } })
+      ? prisma.supportTicket.groupBy({ by: ["status"], where: { ...kind.where, ...search }, _count: { _all: true } })
       : Promise.resolve([] as Array<{ status: string; _count: { _all: number } }>),
+    isAdmin ? prisma.supportTicket.count({ where: { status: "OPEN", lastMessageAt: { lt: new Date(now.getTime() - LATE_MS) } } }) : Promise.resolve(0),
+    isAdmin ? prisma.supportTicket.count({ where: { status: "CLOSED", updatedAt: { gte: new Date(now.getTime() - 30 * LATE_MS) } } }) : Promise.resolve(0),
   ]);
   const countOf = (s?: string) =>
     s ? counts.find((c) => c.status === s)?._count._all ?? 0 : counts.reduce((n, c) => n + c._count._all, 0);
 
   return (
     <div className="max-w-4xl space-y-6">
-      <header>
-        <h1 className="font-display text-3xl font-bold text-carbon">Soporte</h1>
-        <p className="mt-1 text-[13px] text-ink-400">
-          {isAdmin
-            ? "Tickets de vendedores y de compradores. Al responder, el usuario recibe el aviso por correo y en su panel o cuenta."
-            : "Canal directo con el administrador de TCG Cardeck. Escríbenos por pedidos, pagos, tu cuenta, tu tienda o tu plan."}
-        </p>
-      </header>
+      <PageHeader
+        title="Soporte"
+        description={isAdmin
+          ? "Tickets de vendedores y de compradores. Al responder, el usuario recibe el aviso por correo y en su panel o cuenta."
+          : "Canal directo con el administrador de TCG Cardeck. Escríbenos por pedidos, pagos, tu cuenta, tu tienda o tu plan. Respondemos normalmente dentro de 24 horas."}
+      />
+
+      {isAdmin && <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatTile label="Por responder" value={String(countOf("OPEN"))} hint="esperan tu respuesta" href={filterHref("pendientes", kind.key)} />
+        <StatTile label="Atrasados" value={String(late)} hint="más de 24 h sin respuesta" />
+        <StatTile label="Esperando al usuario" value={String(countOf("ANSWERED"))} hint="ya respondiste" href={filterHref("respondidos", kind.key)} />
+        <StatTile label="Cerrados" value={String(closedRecent)} hint="en los últimos 30 días" href={filterHref("cerrados", kind.key)} />
+      </div>}
 
       {!isAdmin && <NewTicketForm />}
 
       {isAdmin && (
         <div className="space-y-2">
+          <SearchBox action="/panel/soporte" defaultValue={q} placeholder="Buscar por código, asunto, nombre o correo" keep={{ estado: filter.key, tipo: kind.key !== "todos" ? kind.key : undefined }} />
           <div className="no-scrollbar flex gap-1.5 overflow-x-auto">
             {FILTERS.map((f) => {
               const n = f.key === "pendientes" ? countOf("OPEN") : f.key === "respondidos" ? countOf("ANSWERED") : f.key === "cerrados" ? countOf("CLOSED") : countOf();
@@ -162,6 +182,9 @@ export default async function SupportPage({
                       )}
                       {t.code} · {categoryLabel(t.category)} · {timeAgo(t.lastMessageAt)}
                     </span>
+                    {isAdmin && t.status === "OPEN" && <span className={`mt-1 inline-block rounded-full px-2 py-px text-[10.5px] font-bold ${now.getTime() - t.lastMessageAt.getTime() > LATE_MS ? "bg-rose-500/10 text-rose-700" : "bg-amber-500/10 text-amber-800"}`}>
+                      Esperando respuesta {timeAgo(t.lastMessageAt)}
+                    </span>}
                   </span>
                   <span className={`hidden shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold sm:inline ${STATUS_STYLE[t.status]}`}>
                     {TICKET_STATUS_LABEL[t.status]}

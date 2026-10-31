@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default async function BuyerTicketPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/ingresar?next=/cuenta/soporte");
+  if (!user) redirect("/ingresar?sesion=expirada&next=/cuenta/soporte");
   if (user.role !== "BUYER") redirect("/panel/soporte");
   const { id } = await params;
   const ticket = await prisma.supportTicket.findUnique({

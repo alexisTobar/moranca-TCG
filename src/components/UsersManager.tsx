@@ -1,7 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Search, Star } from "lucide-react";
+import { clp, timeAgo } from "@/lib/format";
+
+export interface SellerStats {
+  activeListings: number;
+  sales30: number;
+  orders30: number;
+  salesTotal: number;
+  rating: number | null;
+  reviews: number;
+  lastSaleAt: string | null;
+}
+
+const FILTERS = [
+  { key: "todos", label: "Todos" },
+  { key: "vendiendo", label: "Vendiendo (30 días)" },
+  { key: "sin-stock", label: "Sin publicaciones activas" },
+  { key: "inactivos", label: "Desactivados" },
+  { key: "admin", label: "Administradores" },
+] as const;
+const SORTS = [
+  { key: "ventas", label: "Más ventas (30 días)" },
+  { key: "total", label: "Más ventas (histórico)" },
+  { key: "recientes", label: "Más recientes" },
+  { key: "nombre", label: "Nombre" },
+] as const;
 
 export interface ManagedUser {
   id: string;
@@ -15,6 +41,7 @@ export interface ManagedUser {
   bio: string | null;
   createdAt: Date | string;
   _count: { listings: number };
+  stats?: SellerStats;
 }
 
 export function UsersManager({
@@ -29,6 +56,26 @@ export function UsersManager({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("todos");
+  const [sort, setSort] = useState<(typeof SORTS)[number]["key"]>("ventas");
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const list = users.filter((u) => {
+      if (q && ![u.name, u.email, u.city ?? ""].some((v) => v.toLowerCase().includes(q))) return false;
+      if (filter === "vendiendo") return (u.stats?.orders30 ?? 0) > 0;
+      if (filter === "sin-stock") return u.active && (u.stats?.activeListings ?? 0) === 0;
+      if (filter === "inactivos") return !u.active;
+      if (filter === "admin") return u.role === "ADMIN";
+      return true;
+    });
+    return list.sort((a, b) =>
+      sort === "nombre" ? a.name.localeCompare(b.name, "es")
+      : sort === "recientes" ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      : sort === "total" ? (b.stats?.salesTotal ?? 0) - (a.stats?.salesTotal ?? 0)
+      : (b.stats?.sales30 ?? 0) - (a.stats?.sales30 ?? 0));
+  }, [users, query, filter, sort]);
 
   async function createUser(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -163,8 +210,25 @@ export function UsersManager({
         </form>
       )}
 
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="relative w-full sm:w-72">
+          <span className="sr-only">Buscar vendedor</span>
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" aria-hidden="true" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar por nombre, correo o ciudad" className="w-full rounded-xl border border-ink-700 bg-white py-2.5 pl-9 pr-3 text-[13px] outline-none focus:border-brand-600" />
+        </label>
+        <select value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)} aria-label="Filtrar" className="rounded-xl border border-ink-700 bg-white px-3 py-2.5 text-[13px]">
+          {FILTERS.map((f) => <option key={f.key} value={f.key}>{f.label}</option>)}
+        </select>
+        <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} aria-label="Ordenar" className="rounded-xl border border-ink-700 bg-white px-3 py-2.5 text-[13px]">
+          {SORTS.map((s) => <option key={s.key} value={s.key}>Ordenar: {s.label}</option>)}
+        </select>
+        <span className="text-[12px] text-ink-400">{visible.length} de {users.length}</span>
+      </div>
+
+      {visible.length === 0 && <p className="rounded-2xl border border-dashed border-ink-700 p-8 text-center text-[13px] text-ink-400">Ningún vendedor coincide con la búsqueda o el filtro.</p>}
+
       <ul className="divide-y divide-ink-800 overflow-hidden rounded-2xl card-surface">
-        {users.map((u) => (
+        {visible.map((u) => (
           <li key={u.id} className="flex flex-wrap items-center gap-4 p-4">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-carbon font-display text-lg font-bold text-paper">
               {u.name.charAt(0).toUpperCase()}
@@ -191,9 +255,16 @@ export function UsersManager({
                 )}
               </div>
               <p className="truncate text-[11px] text-ink-400">
-                {u.email} · {u._count.listings} publicaciones
-                {u.city ? ` · ${u.city}` : ""}
+                {u.email}
+                {u.city ? ` · ${u.city}` : ""} · desde {new Date(u.createdAt).toLocaleDateString("es-CL", { month: "short", year: "numeric" })}
               </p>
+              {u.stats && <dl className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[12px]">
+                <div><dt className="inline text-ink-400">Activas </dt><dd className="inline font-semibold text-carbon">{u.stats.activeListings}<span className="font-normal text-ink-400"> / {u._count.listings}</span></dd></div>
+                <div><dt className="inline text-ink-400">Ventas 30 d </dt><dd className="inline font-semibold text-carbon">{clp(u.stats.sales30)}<span className="font-normal text-ink-400"> ({u.stats.orders30})</span></dd></div>
+                <div><dt className="inline text-ink-400">Histórico </dt><dd className="inline font-semibold text-carbon">{clp(u.stats.salesTotal)}</dd></div>
+                <div><dt className="sr-only">Calificación</dt><dd className="inline-flex items-center gap-1 font-semibold text-carbon">{u.stats.rating != null ? <><Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />{u.stats.rating.toFixed(1)}<span className="font-normal text-ink-400">({u.stats.reviews})</span></> : <span className="font-normal text-ink-400">Sin reseñas</span>}</dd></div>
+                <div><dt className="inline text-ink-400">Última venta </dt><dd className="inline text-carbon">{u.stats.lastSaleAt ? timeAgo(u.stats.lastSaleAt) : "nunca"}</dd></div>
+              </dl>}
             </div>
 
             <div className="flex shrink-0 flex-wrap items-center gap-1.5">

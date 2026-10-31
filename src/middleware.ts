@@ -148,6 +148,14 @@ export async function middleware(req: NextRequest) {
   // aprobó la solicitud de vendedor a alguien que no ha vuelto a iniciar
   // sesión, y este middleware no puede refrescarlo sin pegarle a la base.
 
+  // El servidor rechazó una sesión con firma válida (cuenta desactivada, clave cambiada o sesiones cerradas):
+  // se borra la cookie y se muestra el ingreso. Sin esto, /ingresar devolvería al panel y el panel a /ingresar, sin fin.
+  if (isLogin && session && req.nextUrl.searchParams.get("sesion") === "expirada") {
+    const response = securityHeaders(next(), nonce);
+    response.cookies.delete(SESSION_COOKIE);
+    return response;
+  }
+
   if (isLogin && session) {
     const url = req.nextUrl.clone();
     url.pathname = session.role === "BUYER" ? "/cuenta" : "/panel";

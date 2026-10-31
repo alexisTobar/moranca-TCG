@@ -41,7 +41,7 @@ export default async function AccountPage() {
       totpEnabledAt: true,
     },
   });
-  if (!user) redirect("/ingresar?next=/cuenta");
+  if (!user) redirect("/ingresar?sesion=expirada&next=/cuenta");
 
   // Así una orden vencida se ve cancelada en cuanto el comprador entra, sin
   // esperar al cron diario.

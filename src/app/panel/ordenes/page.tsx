@@ -6,7 +6,10 @@ import { OrderChatToggle } from "@/components/OrderChatToggle";
 import { OrderStatusActions } from "@/components/OrderStatusActions";
 import { ReviewReply } from "@/components/panel/ReviewReply";
 import { expireOverdueOrders } from "@/lib/order-payments";
-import { FileCheck2, Hash, Timer } from "lucide-react";
+import Link from "next/link";
+import type { Prisma } from "@prisma/client";
+import { FileCheck2, Hash, PackageOpen, Timer } from "lucide-react";
+import { EmptyState, FilterTabs, PageHeader, Pager, SearchBox } from "@/components/panel/PageKit";
 import { StatTile } from "@/components/charts/Charts";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +23,7 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 const STATUS_LABEL: Record<string, string> = {
-  PENDING: "Pendiente",
+  PENDING: "Esperando pago",
   PAID: "Pagada",
   CANCELLED: "Cancelada",
   SHIPPED: "Enviada",
@@ -33,27 +36,84 @@ const PAYMENT_LABEL: Record<string, string> = {
   CASH: "Efectivo",
 };
 
-export default async function OrdersPage() {
+const TAKE = 20;
+
+const units = (items: Array<{ quantity: number }>) => items.reduce((n, i) => n + i.quantity, 0);
+
+/** Qué le toca hacer al vendedor con cada orden; "alert" marca lo urgente. */
+function nextStep(o: { status: string; receiptUploadedAt: Date | null; paymentMethod: string; shipMethod: string; review: { sellerReply: string | null } | null }): { text: string; tone?: "alert" | "ok" } {
+  if (o.status === "PENDING") return o.receiptUploadedAt || o.paymentMethod === "CASH"
+    ? { text: o.paymentMethod === "CASH" ? "Confirma el pago al entregar" : "Revisa el comprobante y confirma el pago", tone: "alert" }
+    : { text: "Esperando que el comprador transfiera" };
+  if (o.status === "PAID") return { text: o.shipMethod === "PICKUP" ? "Coordina el retiro con el comprador" : "Despacha y agrega el seguimiento", tone: "alert" };
+  if (o.status === "SHIPPED") return { text: "En camino: espera la confirmación de entrega" };
+  if (o.status === "DELIVERED") return o.review && !o.review.sellerReply ? { text: "Responde la reseña del comprador", tone: "alert" } : { text: "Completada", tone: "ok" };
+  return { text: "Cancelada" };
+}
+
+function StepChip({ order }: { order: Parameters<typeof nextStep>[0] }) {
+  const step = nextStep(order);
+  return <span className={`order-step ${step.tone === "alert" ? "order-step-alert" : step.tone === "ok" ? "order-step-ok" : ""}`}>{step.text}</span>;
+}
+
+const TABS = [
+  { key: "accion", label: "Requieren acción", where: { OR: [{ status: "PENDING", receiptUploadedAt: { not: null } }, { status: "PENDING", paymentMethod: "CASH" }, { status: "PAID" }] } },
+  { key: "pendientes", label: "Esperando pago", where: { status: "PENDING" } },
+  { key: "despachar", label: "Por despachar", where: { status: "PAID" } },
+  { key: "enviadas", label: "Enviadas", where: { status: "SHIPPED" } },
+  { key: "entregadas", label: "Entregadas", where: { status: "DELIVERED" } },
+  { key: "canceladas", label: "Canceladas", where: { status: "CANCELLED" } },
+  { key: "todas", label: "Todas", where: {} },
+] as const satisfies ReadonlyArray<{ key: string; label: string; where: Prisma.OrderWhereInput }>;
+
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await getCurrentUser();
   if (!user) return null;
+  const isAdmin = user.role === "ADMIN";
 
   await safeQuery(() => expireOverdueOrders(), 0);
+
+  const sp = await searchParams;
+  const q = (typeof sp.q === "string" ? sp.q : "").trim().slice(0, 80);
+  const requestedPage = Math.max(1, Number(typeof sp.page === "string" ? sp.page : "1") || 1);
+  const scope: Prisma.OrderWhereInput = isAdmin ? {} : {
+    OR: [
+      { sellerId: user.id },
+      // Compatibilidad con órdenes de antes de vincular sellerId.
+      { items: { some: { listing: { sellerId: user.id } } } },
+    ],
+  };
+  const search: Prisma.OrderWhereInput = q ? { OR: [
+    { buyerName: { contains: q, mode: "insensitive" } },
+    { buyerEmail: { contains: q, mode: "insensitive" } },
+    { paymentReference: { contains: q, mode: "insensitive" } },
+    { id: { endsWith: q.replace(/^#/, "").toLowerCase() } },
+    { items: { some: { title: { contains: q, mode: "insensitive" } } } },
+  ] } : {};
+
+  // Conteo de cada pestaña con el mismo alcance y búsqueda, para que los números cuadren con la lista.
+  const tabCounts = await safeQuery(() => Promise.all(TABS.map((t) => prisma.order.count({ where: { AND: [scope, search, t.where] } }))), TABS.map(() => 0));
+  const requested = TABS.find((t) => t.key === sp.estado);
+  // Sin pestaña elegida: si hay algo urgente se abre ahí; si no, todas.
+  const tab = requested ?? (tabCounts[0] > 0 ? TABS[0] : TABS[TABS.length - 1]);
+  const total = tabCounts[TABS.indexOf(tab)];
+  const pages = Math.max(1, Math.ceil(total / TAKE));
+  const page = Math.min(requestedPage, pages);
+  const where: Prisma.OrderWhereInput = { AND: [scope, search, tab.where] };
+  const href = (patch: Record<string, string | undefined>) => {
+    const params = new URLSearchParams();
+    const current: Record<string, string | undefined> = { estado: tab.key, q: q || undefined, ...patch };
+    for (const [k, v] of Object.entries(current)) if (v) params.set(k, v);
+    return `/panel/ordenes?${params}`;
+  };
 
   const orders = await safeQuery(
     () =>
       prisma.order.findMany({
-        where:
-          user.role === "ADMIN"
-            ? {}
-            : {
-                OR: [
-                  { sellerId: user.id },
-                  // Compatibilidad con órdenes de antes de vincular sellerId.
-                  { items: { some: { listing: { sellerId: user.id } } } },
-                ],
-              },
+        where,
         orderBy: { createdAt: "desc" },
-        take: 100,
+        skip: (page - 1) * TAKE,
+        take: TAKE,
         include: {
           items: {
             include: { listing: { select: { slug: true, seller: { select: { name: true } } } } },
@@ -97,34 +157,40 @@ export default async function OrdersPage() {
     }>
   );
 
-  // Resumen por estado de todas las órdenes del alcance (no solo las 100 que se listan).
+  // Resumen por estado de todas las órdenes del alcance.
   const byStatus = await safeQuery(
-    () => prisma.order.groupBy({ by: ["status"], where: user.role === "ADMIN" ? {} : { sellerId: user.id }, _count: { _all: true }, _sum: { total: true } }),
+    () => prisma.order.groupBy({ by: ["status"], where: isAdmin ? {} : { sellerId: user.id }, _count: { _all: true }, _sum: { total: true } }),
     [] as Array<{ status: string; _count: { _all: number }; _sum: { total: number | null } }>
   );
   const stat = (st: string) => byStatus.find((r) => r.status === st);
-  const withReceipt = orders.filter((o) => o.status === "PENDING" && o.receiptUploadedAt).length;
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="font-display text-3xl font-bold text-carbon">Órdenes</h1>
-        <p className="mt-1 text-[13px] text-ink-400">
-          Reservas y compras generadas desde la tienda.
-        </p>
-      </header>
+      <PageHeader
+        title="Órdenes"
+        description={isAdmin
+          ? "Todas las compras del marketplace. Cada orden indica el próximo paso; las urgentes están en “Requieren acción”."
+          : "Tus ventas. Cada orden te indica el próximo paso: confirmar el pago, despachar o responder la reseña."}
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Esperando pago" value={String(stat("PENDING")?._count._all ?? 0)} hint={`${clp(stat("PENDING")?._sum.total ?? 0)} por cobrar${withReceipt ? ` · ${withReceipt} con comprobante` : ""}`} />
-        <StatTile label="Por despachar" value={String(stat("PAID")?._count._all ?? 0)} hint="pagadas sin enviar" />
-        <StatTile label="En camino" value={String(stat("SHIPPED")?._count._all ?? 0)} hint="enviadas, sin confirmar entrega" />
+        <StatTile label="Esperando pago" value={String(stat("PENDING")?._count._all ?? 0)} hint={`${clp(stat("PENDING")?._sum.total ?? 0)} por cobrar`} href={href({ estado: "pendientes", page: undefined })} />
+        <StatTile label="Por despachar" value={String(stat("PAID")?._count._all ?? 0)} hint="pagadas sin enviar" href={href({ estado: "despachar", page: undefined })} />
+        <StatTile label="En camino" value={String(stat("SHIPPED")?._count._all ?? 0)} hint="enviadas, sin confirmar entrega" href={href({ estado: "enviadas", page: undefined })} />
         <StatTile label="Vendido en total" value={clp((stat("PAID")?._sum.total ?? 0) + (stat("SHIPPED")?._sum.total ?? 0) + (stat("DELIVERED")?._sum.total ?? 0))} hint={`${stat("DELIVERED")?._count._all ?? 0} entregadas · ${stat("CANCELLED")?._count._all ?? 0} canceladas`} />
       </div>
 
-      {orders.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-ink-700 p-16 text-center">
-          <p className="text-sm text-ink-400">Todavía no hay órdenes.</p>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <FilterTabs label="Estado de la orden" active={tab.key} tabs={TABS.map((t, i) => ({ key: t.key, label: t.label, count: tabCounts[i], href: href({ estado: t.key, page: undefined }), tone: t.key === "accion" ? "alert" as const : undefined }))} />
+          <SearchBox action="/panel/ordenes" defaultValue={q} placeholder="Buscar comprador, correo, N° o producto" keep={{ estado: tab.key }} />
         </div>
+        {q && <p className="text-[12px] text-ink-400">Resultados para “{q}” · <Link href={href({ q: undefined, page: undefined })} className="font-semibold text-brand-600">Quitar búsqueda</Link></p>}
+      </div>
+
+      {orders.length === 0 ? (
+        <EmptyState icon={PackageOpen} title={q ? "Sin resultados" : tab.key === "accion" ? "Todo al día" : "No hay órdenes aquí"}
+          text={q ? "Prueba con otro nombre, correo o número de orden." : tab.key === "accion" ? "No tienes pagos por confirmar ni pedidos por despachar." : "Cuando haya órdenes en este estado aparecerán en esta lista."} />
       ) : (
         <div className="space-y-3">
           {orders.map((o) => (
@@ -140,7 +206,8 @@ export default async function OrdersPage() {
                 <span className="text-[13px] font-semibold text-ink-200">
                   #{o.id.slice(-6).toUpperCase()}
                 </span>
-                <span className="text-[12px] text-ink-400">{o.buyerName}</span>
+                <span className="text-[12px] text-ink-400">{o.buyerName}{isAdmin && o.items[0] ? ` → ${o.items[0].listing.seller.name}` : ""}</span>
+                <span className="text-[11px] text-ink-400">{units(o.items)} {units(o.items) === 1 ? "producto" : "productos"}</span>
                 <span className="rounded-full border border-ink-700 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-ink-400">
                   {PAYMENT_LABEL[o.paymentMethod] ?? o.paymentMethod}
                 </span>
@@ -148,6 +215,7 @@ export default async function OrdersPage() {
                   {clp(o.total)}
                 </span>
                 <span className="text-[11px] text-ink-400">{timeAgo(o.createdAt)}</span>
+                <StepChip order={o} />
               </summary>
 
               <div className="mt-4 grid gap-4 border-t border-ink-800 pt-4 sm:grid-cols-2">
@@ -299,6 +367,8 @@ export default async function OrdersPage() {
           ))}
         </div>
       )}
+
+      <Pager page={page} pages={pages} total={total} take={TAKE} href={(p) => href({ page: String(p) })} />
     </div>
   );
 }

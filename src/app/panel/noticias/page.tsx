@@ -14,7 +14,7 @@ export const metadata = { title: "Noticias y eventos", robots: { index: false } 
 /** Agenda de eventos de Chile cargados a mano y estado de las fuentes automáticas de noticias. */
 export default async function PanelNewsPage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/ingresar");
+  if (!user) redirect("/ingresar?sesion=expirada");
   if (user.role !== "ADMIN") redirect("/panel");
   const now = new Date();
   const [manual, bySource, sync] = await Promise.all([

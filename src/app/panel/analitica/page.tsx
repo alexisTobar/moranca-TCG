@@ -18,7 +18,7 @@ const PAGE_LABELS: Record<string, string> = {
 
 export default async function AnalyticsPage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/ingresar");
+  if (!user) redirect("/ingresar?sesion=expirada");
   if (user.role !== "ADMIN") redirect("/panel");
   const end = new Date(utcDay().getTime() + 86400000);
   const start = new Date(end.getTime() - 30 * 86400000);

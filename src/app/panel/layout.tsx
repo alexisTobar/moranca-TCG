@@ -20,7 +20,7 @@ export default async function PanelLayout({
   children: React.ReactNode;
 }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/ingresar?next=/panel");
+  if (!user) redirect("/ingresar?sesion=expirada&next=/panel");
   // Chequeo con el rol recién leído de la base (no el que quedó guardado en
   // la cookie), para que a alguien recién aprobado como vendedor no le quede
   // bloqueado el panel hasta que vuelva a iniciar sesión.

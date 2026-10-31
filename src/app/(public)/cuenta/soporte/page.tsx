@@ -20,7 +20,7 @@ const STATUS_STYLE: Record<string, string> = {
 /** Soporte del comprador: sus tickets y el formulario para abrir uno nuevo. */
 export default async function BuyerSupportPage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/ingresar?next=/cuenta/soporte");
+  if (!user) redirect("/ingresar?sesion=expirada&next=/cuenta/soporte");
   if (user.role !== "BUYER") redirect("/panel/soporte");
 
   const tickets = await prisma.supportTicket.findMany({

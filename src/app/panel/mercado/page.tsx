@@ -24,7 +24,7 @@ function Bars({ rows, label }: { rows: MarketRow[]; label: (value: string) => st
 
 export default async function MarketPage({ searchParams }: { searchParams: Promise<{ dias?: string }> }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/ingresar");
+  if (!user) redirect("/ingresar?sesion=expirada");
   if (user.role !== "ADMIN") redirect("/panel");
   const requested = Number((await searchParams).dias);
   const days = RANGES.includes(requested) ? requested : 30;
