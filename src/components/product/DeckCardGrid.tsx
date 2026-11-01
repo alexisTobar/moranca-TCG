@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, ImageOff, Languages, Loader2, X } from "lucide-react";
 import { CardArtwork } from "@/components/CardArtwork";
 
@@ -153,9 +154,9 @@ export function DeckCardGrid({ cards, game }: { cards: DeckGridCard[]; game: str
         ))}
       </div>
 
-      {card && open != null && (
+      {card && open != null && createPortal(
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-carbon/75 p-3 backdrop-blur-sm sm:p-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-carbon/75 p-3 backdrop-blur-sm sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={card.name}
@@ -255,7 +256,8 @@ export function DeckCardGrid({ cards, game }: { cards: DeckGridCard[]; game: str
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
