@@ -1,12 +1,11 @@
 import { publicListingType } from "@/lib/listing-kind";
-import { CardArtwork } from "@/components/CardArtwork";
+import { DeckCardGrid } from "./DeckCardGrid";
 import { DeckImageButton } from "./DeckImageButton";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ACCESSORY_CATEGORIES } from "@/lib/games";
 import { ReportButton } from "@/components/ReportButton";
 import Link from "next/link";
 import Image from "next/image";
-import { ImageOff } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { clp, timeAgo } from "@/lib/format";
 import { gameName, CONDITIONS, LANGUAGES } from "@/lib/games";
@@ -417,30 +416,10 @@ export async function ProductDetail({ listing, store }: { listing: ProductListin
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
-                {listing.deckCards.map((card) => (
-                  <div
-                    key={card.id}
-                    className="group relative overflow-hidden rounded-lg border border-ink-700 bg-ink-950"
-                  >
-                    <div className="relative aspect-[63/88]">
-                      {card.imageUrl ? (
-                        <CardArtwork src={card.imageUrl} alt={card.name} sizes="150px" className="object-cover transition group-hover:scale-105" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-ink-700">
-                          <ImageOff className="h-6 w-6" strokeWidth={1.5} />
-                        </div>
-                      )}
-                      <span className="deck-copy-badge">
-                        {card.quantity}<span className="sr-only"> {card.quantity===1?"copia":"copias"}</span>
-                      </span>
-                    </div>
-                    <p className="line-clamp-2 px-1.5 py-1 text-[10px] leading-tight text-ink-300">
-                      {card.name}
-                    </p>
-                  </div>
-                ))}
-              </div>
+              <DeckCardGrid
+                game={listing.game}
+                cards={listing.deckCards.map((c) => ({ id: c.id, name: c.name, imageUrl: c.imageUrl, quantity: c.quantity, externalId: c.externalId }))}
+              />
 
               <details className="mt-4 rounded-xl card-surface p-4">
                 <summary className="cursor-pointer text-[12px] font-semibold text-ink-300">

@@ -76,6 +76,47 @@ export async function onePieceByCodes(codes: string[]): Promise<Map<string, Card
   return found;
 }
 
+export interface OnePieceDetails {
+  name: string;
+  cardType?: string;
+  color?: string;
+  family?: string;
+  cost?: string;
+  power?: string;
+  counter?: string;
+  life?: string;
+  attribute?: string;
+  effect?: string;
+  trigger?: string;
+}
+
+/** Datos de juego de una carta (costo, poder, efecto, [Trigger]) para mostrarla en grande. */
+export async function onePieceDetails(code: string): Promise<OnePieceDetails | null> {
+  let cards: DotggCard[];
+  try {
+    cards = await allCards();
+  } catch {
+    return null;
+  }
+  const c = cards.find((x) => x.id.toLowerCase() === code.toLowerCase()) as
+    | (DotggCard & { Cost?: string; Power?: string; Counter?: string; Life?: string; Attribute?: string; Trigger?: string })
+    | undefined;
+  if (!c) return null;
+  return {
+    name: c.name,
+    cardType: c.cardType,
+    color: c.Color,
+    family: c.Type,
+    cost: c.Cost ?? undefined,
+    power: c.Power ?? undefined,
+    counter: c.Counter ?? undefined,
+    life: c.Life ?? undefined,
+    attribute: c.Attribute ?? undefined,
+    effect: cleanEffect(c.Effect ?? undefined)?.trim() || undefined,
+    trigger: cleanEffect(c.Trigger ?? undefined)?.trim() || undefined,
+  };
+}
+
 /**
  * One Piece Card Game — catálogo dotGG (público, sin API key).
  * Incluye el precio de mercado de TCGplayer por carta.
